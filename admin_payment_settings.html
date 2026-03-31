@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Payment Settings - Royal Plaza Hotel</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .settings-wrap {
+            max-width: 760px;
+            margin: 0 auto;
+        }
+        .settings-card {
+            background: #fffdf5;
+            border: 1px solid rgba(212, 175, 55, 0.25);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+        }
+        .settings-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .qr-preview {
+            margin-top: 12px;
+            text-align: center;
+            background: #fff;
+            border: 1px solid #d4c48a;
+            border-radius: 8px;
+            padding: 12px;
+        }
+        .qr-preview img {
+            width: 200px;
+            height: 200px;
+            object-fit: contain;
+            border-radius: 6px;
+        }
+        .small-note {
+            margin-top: 8px;
+            font-size: 0.88rem;
+            color: #7a6030;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <span class="logo-crown">&#x2756;</span>
+                <div class="logo-brand">
+                    <span class="logo-name">Royal Plaza</span>
+                    <span class="logo-tagline">&#10022; Hotel &#10022;</span>
+                </div>
+            </div>
+            <ul class="nav-links">
+                <li><a href="home.html">Home</a></li>
+                <li><a href="admin_dashboard.html">Dashboard</a></li>
+                <li><a href="admin_payment_settings.html">Payment Settings</a></li>
+                <li><a href="#" onclick="logout()">Logout</a></li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </nav>
+    </header>
+
+    <section class="booking">
+        <div class="container settings-wrap">
+            <h2>Admin Payment Settings</h2>
+            <div class="settings-card">
+                <form id="payment-settings-form">
+                    <div class="form-group">
+                        <label for="account-holder">Account Holder Name</label>
+                        <input type="text" id="account-holder" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="upi-id">UPI ID</label>
+                        <input type="text" id="upi-id" placeholder="example@upi" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="bank-name">Bank Name</label>
+                        <input type="text" id="bank-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="account-number">Bank Account Number</label>
+                        <input type="text" id="account-number" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="ifsc">IFSC Code</label>
+                        <input type="text" id="ifsc" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="support-phone">Support Phone</label>
+                        <input type="tel" id="support-phone" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="custom-qr">Custom QR Image (Optional)</label>
+                        <input type="file" id="custom-qr" accept="image/*">
+                    </div>
+
+                    <div class="qr-preview">
+                        <p style="font-weight:700;margin-bottom:8px;">Live UPI QR Preview</p>
+                        <img id="qr-preview-img" src="" alt="QR Preview">
+                        <p class="small-note">QR updates based on UPI ID and account holder name.</p>
+                    </div>
+
+                    <div class="settings-actions">
+                        <button type="submit" class="submit-btn">Save Settings</button>
+                        <button type="button" class="submit-btn" style="background:#5b4a2e;color:#f5e8c1;" onclick="resetDefaults()">Reset Default</button>
+                    </div>
+                </form>
+                <div id="settings-status" class="confirmation hidden" style="margin-top:12px;"></div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Contact Us</h3>
+                    <p>Axis Knowledge City, Hathipur,<br>Rooma, NH-2, Milestone - 478,<br>Kanpur - 209402,<br>Uttar Pradesh, India</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Follow Us</h3>
+                    <div class="social-links">
+                        <a href="#">Facebook</a>
+                        <a href="https://youtu.be/ZJsjGBiH3P8" target="_blank" rel="noopener noreferrer">YouTube</a>
+                        <a href="#">Twitter</a>
+                        <a href="#">Instagram</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/script.js"></script>
+    <script>
+        checkLogin();
+
+        const DEFAULT_PAYMENT_PROFILE = {
+            accountHolder: 'Royal Plaza Hotel',
+            upiId: 'royalplaza@upi',
+            bankName: 'State Bank of India',
+            accountNumber: '123456789012',
+            ifsc: 'SBIN0001234',
+            supportPhone: '1234567890',
+            customQrImage: ''
+        };
+
+        function ensureAdmin() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            if (currentUser.type !== 'admin') {
+                window.location.href = 'admin_dashboard.html';
+            }
+        }
+
+        function getPaymentProfile() {
+            return JSON.parse(localStorage.getItem('adminPaymentProfile') || 'null') || { ...DEFAULT_PAYMENT_PROFILE };
+        }
+
+        function savePaymentProfile(profile) {
+            localStorage.setItem('adminPaymentProfile', JSON.stringify(profile));
+        }
+
+        function buildUpiQrUrl(profile) {
+            const upiData = encodeURIComponent(`upi://pay?pa=${profile.upiId}&pn=${profile.accountHolder}&cu=INR`);
+            return `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${upiData}`;
+        }
+
+        function renderQrPreview(profile) {
+            const qrImg = document.getElementById('qr-preview-img');
+            qrImg.src = profile.customQrImage || buildUpiQrUrl(profile);
+        }
+
+        function fillForm(profile) {
+            document.getElementById('account-holder').value = profile.accountHolder || '';
+            document.getElementById('upi-id').value = profile.upiId || '';
+            document.getElementById('bank-name').value = profile.bankName || '';
+            document.getElementById('account-number').value = profile.accountNumber || '';
+            document.getElementById('ifsc').value = profile.ifsc || '';
+            document.getElementById('support-phone').value = profile.supportPhone || '';
+            renderQrPreview(profile);
+        }
+
+        function resetDefaults() {
+            savePaymentProfile({ ...DEFAULT_PAYMENT_PROFILE });
+            fillForm({ ...DEFAULT_PAYMENT_PROFILE });
+            const status = document.getElementById('settings-status');
+            status.classList.remove('hidden');
+            status.textContent = 'Payment settings reset to default.';
+            setTimeout(() => status.classList.add('hidden'), 2500);
+        }
+
+        const form = document.getElementById('payment-settings-form');
+        const qrInput = document.getElementById('custom-qr');
+        let tempCustomQr = '';
+
+        qrInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                tempCustomQr = ev.target.result;
+                const profile = getPaymentProfile();
+                profile.customQrImage = tempCustomQr;
+                renderQrPreview(profile);
+            };
+            reader.readAsDataURL(file);
+        });
+
+        document.getElementById('upi-id').addEventListener('input', function() {
+            const profile = {
+                accountHolder: document.getElementById('account-holder').value.trim() || DEFAULT_PAYMENT_PROFILE.accountHolder,
+                upiId: document.getElementById('upi-id').value.trim() || DEFAULT_PAYMENT_PROFILE.upiId,
+                customQrImage: tempCustomQr
+            };
+            renderQrPreview(profile);
+        });
+
+        document.getElementById('account-holder').addEventListener('input', function() {
+            const profile = {
+                accountHolder: document.getElementById('account-holder').value.trim() || DEFAULT_PAYMENT_PROFILE.accountHolder,
+                upiId: document.getElementById('upi-id').value.trim() || DEFAULT_PAYMENT_PROFILE.upiId,
+                customQrImage: tempCustomQr
+            };
+            renderQrPreview(profile);
+        });
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const oldProfile = getPaymentProfile();
+            const profile = {
+                accountHolder: document.getElementById('account-holder').value.trim(),
+                upiId: document.getElementById('upi-id').value.trim(),
+                bankName: document.getElementById('bank-name').value.trim(),
+                accountNumber: document.getElementById('account-number').value.trim(),
+                ifsc: document.getElementById('ifsc').value.trim().toUpperCase(),
+                supportPhone: document.getElementById('support-phone').value.trim(),
+                customQrImage: tempCustomQr || oldProfile.customQrImage || ''
+            };
+
+            if (!profile.upiId.includes('@')) {
+                alert('Please enter a valid UPI ID.');
+                return;
+            }
+
+            savePaymentProfile(profile);
+            fillForm(profile);
+            const status = document.getElementById('settings-status');
+            status.classList.remove('hidden');
+            status.textContent = 'Payment settings saved successfully.';
+            setTimeout(() => status.classList.add('hidden'), 2500);
+        });
+
+        ensureAdmin();
+        fillForm(getPaymentProfile());
+    </script>
+</body>
+</html>

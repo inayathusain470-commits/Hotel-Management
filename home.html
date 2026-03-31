@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Royal Plaza Hotel Management System - Home</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <span class="logo-crown">&#x2756;</span>
+                <div class="logo-brand">
+                    <span class="logo-name">Royal Plaza</span>
+                    <span class="logo-tagline">&#10022; Hotel &#10022;</span>
+                </div>
+            </div>
+            <ul class="nav-links">
+                <li><a href="home.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="rooms.html">Rooms & Bar</a></li>
+                <li><a href="food_menu.html">Food Menu</a></li>
+                <li><a href="booking.html">Booking</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="my_cart.html">My Cart</a></li>
+                <li><a href="#" onclick="logout()">Logout</a></li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Image Carousel Section -->
+    <section class="carousel-section">
+        <div class="carousel-container">
+            <!-- Admin Image Upload Button -->
+            <div id="admin-upload-btn" style="position: absolute; top: 10px; right: 10px; z-index: 20; display: none;">
+                <button onclick="openImageUploadModal(-1)" style="
+                    background: rgba(243, 156, 18, 0.9);
+                    color: white;
+                    padding: 8px 15px;
+                    border: none;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    font-weight: bold;
+                    font-size: 14px;
+                    transition: all 0.3s ease;
+                " onmouseover="this.style.background='#e67e22'" onmouseout="this.style.background='rgba(243, 156, 18, 0.9)'">
+                    ✏️ Add Carousel Image
+                </button>
+            </div>
+
+            <div class="carousel-wrapper">
+                <div id="home-carousel-track" class="carousel-track"></div>
+            </div>
+            <button class="carousel-arrow carousel-arrow-left" onclick="moveCarousel(-1)" aria-label="Previous slide">&#10094;</button>
+            <button class="carousel-arrow carousel-arrow-right" onclick="moveCarousel(1)" aria-label="Next slide">&#10095;</button>
+        </div>
+    </section>
+
+    <section style="background:#faf8f2;padding:2.5rem 0 1.5rem; text-align:center; border-top:1px solid rgba(212,175,55,0.25); border-bottom:1px solid rgba(212,175,55,0.2);">
+        <div class="container">
+            <h1 style="font-size:2.4rem; margin-bottom:0.7rem; color:#1a1208; font-family:'Georgia','Times New Roman',serif; letter-spacing:1px;">Welcome to Royal Plaza Hotel</h1>
+            <p style="font-size:1.1rem; margin-bottom:1.4rem; color:#3d2e18;">Experience luxury and comfort in the heart of the city</p>
+            <a href="booking.html" class="cta-button">Book Now</a>
+        </div>
+    </section>
+
+    <!-- Image Upload Modal -->
+    <div id="imageUploadModal" style="
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+    ">
+        <div style="
+            background-color: white;
+            margin: 10% auto;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        ">
+            <h2 id="imageUploadTitle" style="margin-bottom: 20px; color: #1a1208;">Upload Carousel Image</h2>
+            <input type="file" id="imageInput" accept="image/*" style="
+                display: block;
+                margin-bottom: 15px;
+                padding: 10px;
+                border: 2px solid #D4AF37;
+                border-radius: 5px;
+                width: 100%;
+            ">
+            <div class="gym-crop-tools">
+                <label for="imageZoomRange">Zoom</label>
+                <input type="range" id="imageZoomRange" min="1" max="3" step="0.01" value="1">
+            </div>
+            <p class="gym-crop-hint">Drag image inside crop box to adjust.</p>
+            <div class="gym-crop-wrap" style="margin-bottom:12px;">
+                <canvas id="imageCropCanvas" width="400" height="200"></canvas>
+            </div>
+            <img id="imagePreview" src="" alt="Preview" style="display:none;margin-bottom:20px;max-width:100%;max-height:220px;border-radius:5px;">
+            <div style="display:flex; gap:10px; justify-content:flex-end; position:sticky; bottom:0; background:#fffdf5; padding-top:10px; margin-top:6px; border-top:1px solid rgba(212,175,55,0.25); z-index:2;">
+                <button type="button" onclick="previewHeroCrop()" style="
+                    background: linear-gradient(135deg, #C89B2A, #D4AF37);
+                    color: #1a1208;
+                    padding: 10px 20px;
+                    border: none;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    font-weight: bold;
+                    letter-spacing: 0.5px;
+                ">Crop Preview</button>
+                <button onclick="closeImageUploadModal()" style="
+                    background: #3d2e18;
+                    color: #e8d9a0;
+                    padding: 10px 20px;
+                    border: none;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    font-weight: bold;
+                ">Cancel</button>
+                <button onclick="saveImage()" style="
+                    background: linear-gradient(135deg, #C89B2A 0%, #F5E678 50%, #D4AF37 100%);
+                    color: #1a1208;
+                    padding: 10px 20px;
+                    border: none;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    font-weight: bold;
+                    letter-spacing: 0.5px;
+                ">Save Image</button>
+            </div>
+        </div>
+    </div>
+
+
+    <section class="featured-rooms">
+        <div class="container">
+            <h2>Featured Rooms</h2>
+            <div class="rooms-grid">
+                <div class="room-card">
+                    <img id="home-single-room-img" src="https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=400" alt="Single Room">
+                    <button id="home-edit-single-room-img" class="edit-img-btn" style="display:none;margin-bottom:8px;" onclick="openHomeRoomImagePicker('single')">Add/Change Photo</button>
+                    <h3>Single Room</h3>
+                    <p>Perfect for solo travelers</p>
+                    <p class="price">₹1/night</p>
+                    <div class="quantity-controls">
+                        <button class="quantity-btn" onclick="changeQuantity('single', -1)">-</button>
+                        <span class="quantity-display" id="single-qty">0</span>
+                        <button class="quantity-btn" onclick="changeQuantity('single', 1)">+</button>
+                    </div>
+                    <a href="booking.html" class="book-btn" data-room="Single Room" data-price="1" onclick="setRoomQuantity('single')">Book Now</a>
+                </div>
+                <div class="room-card">
+                    <img id="home-double-room-img" src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400" alt="Double Room">
+                    <button id="home-edit-double-room-img" class="edit-img-btn" style="display:none;margin-bottom:8px;" onclick="openHomeRoomImagePicker('double')">Add/Change Photo</button>
+                    <h3>Double Room</h3>
+                    <p>Ideal for couples</p>
+                    <p class="price">₹1/night</p>
+                    <div class="quantity-controls">
+                        <button class="quantity-btn" onclick="changeQuantity('double', -1)">-</button>
+                        <span class="quantity-display" id="double-qty">0</span>
+                        <button class="quantity-btn" onclick="changeQuantity('double', 1)">+</button>
+                    </div>
+                    <a href="booking.html" class="book-btn" data-room="Double Room" data-price="1" onclick="setRoomQuantity('double')">Book Now</a>
+                </div>
+                <div class="room-card">
+                    <img id="home-deluxe-room-img" src="https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=400" alt="Deluxe Room">
+                    <button id="home-edit-deluxe-room-img" class="edit-img-btn" style="display:none;margin-bottom:8px;" onclick="openHomeRoomImagePicker('deluxe')">Add/Change Photo</button>
+                    <h3>Deluxe Room</h3>
+                    <p>Luxury with extra space</p>
+                    <p class="price">₹1/night</p>
+                    <div class="quantity-controls">
+                        <button class="quantity-btn" onclick="changeQuantity('deluxe', -1)">-</button>
+                        <span class="quantity-display" id="deluxe-qty">0</span>
+                        <button class="quantity-btn" onclick="changeQuantity('deluxe', 1)">+</button>
+                    </div>
+                    <a href="booking.html" class="book-btn" data-room="Deluxe Room" data-price="1" onclick="setRoomQuantity('deluxe')">Book Now</a>
+                </div>
+            </div>
+            <input id="home-room-image-input" type="file" accept="image/*" style="display:none;">
+        </div>
+    </section>
+
+    <section class="gym-feature">
+        <div class="container">
+            <div class="gym-header">
+                <a href="gym.html" class="gym-logo" aria-label="Gym Logo" title="Open Gym Page">GYM</a>
+                <h2>Hotel Gym</h2>
+            </div>
+            <p>Click the Gym logo to open the dedicated Gym page and view all equipment photos.</p>
+        </div>
+    </section>
+
+    <section class="pool-feature">
+        <div class="container">
+            <div class="pool-header">
+                <a href="swimming_pool.html" class="pool-logo" aria-label="Pool Logo" title="Open Pool Page">🏊</a>
+                <h2>Hotel Swimming Pool</h2>
+            </div>
+            <p>Click the Pool logo to explore our luxurious swimming pool photos.</p>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Contact Us</h3>
+                    <p>Axis Knowledge City, Hathipur,<br>Rooma, NH-2, Milestone - 478,<br>Kanpur - 209402,<br>Uttar Pradesh, India</p>
+                    <p>Phone: (123) 456-7890</p>
+                    <p>Email: info@luxuryhotel.com</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Follow Us</h3>
+                    <div class="social-links" style="flex-direction:column;align-items:flex-start;gap:0.45rem;">
+                        <a href="#">Facebook</a>
+                        <a href="https://youtu.be/ZJsjGBiH3P8" target="_blank" rel="noopener noreferrer">YouTube</a>
+                        <a href="#">Twitter</a>
+                        <a href="#">Instagram</a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <div style="border-left:2px solid rgba(255,215,0,0.4); padding-left:16px;">
+                        <div style="color:#D4AF37; font-size:0.8rem; letter-spacing:3px; text-transform:uppercase; margin-bottom:4px; font-family:'Georgia',serif;">&#x2605; 5-Star Luxury Hotel &#x2605;</div>
+                        <h3 style="color:#F5E678; font-size:1.25rem; font-weight:800; margin:0 0 6px 0; letter-spacing:2px; font-family:'Georgia',serif;">Royal Plaza Hotel</h3>
+                        <div style="height:1px; width:50px; background:linear-gradient(90deg,#C89B2A,#D4AF37); border-radius:2px; margin-bottom:8px;"></div>
+                        <p style="margin:0; line-height:1.7; font-size:0.9rem; color:#e8d9a0;">Axis Knowledge City, Hathipur,<br>Rooma, NH-2, Milestone - 478,<br>Kanpur - 209402, UP, India</p>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <div style="border-left:2px solid rgba(255,215,0,0.4); padding-left:16px;">
+                        <h3 style="margin-bottom:6px;">Customer Reviews</h3>
+                        <div id="footer-avg-stars" style="color:#FFD700; font-size:1.2rem; margin-bottom:4px;"></div>
+                        <p id="footer-review-count" style="font-size:0.85rem; margin:0 0 10px 0;"></p>
+                        <button onclick="openReviewModal()" style="background:linear-gradient(135deg,#C89B2A,#D4AF37); color:#1a1208; border:none; padding:8px 18px; border-radius:6px; font-weight:700; font-size:0.9rem; cursor:pointer; letter-spacing:0.5px;">&#x270D;&#xFE0F; Write a Review</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Review Modal -->
+    <div id="reviewModal" style="display:none; position:fixed; z-index:2000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.6);">
+        <div style="background:#fffdf5; margin:6% auto; padding:30px; border-radius:10px; width:90%; max-width:460px; box-shadow:0 8px 32px rgba(0,0,0,0.35); position:relative; border:1px solid rgba(212,175,55,0.25);">
+            <button onclick="closeReviewModal()" style="position:absolute; top:12px; right:16px; background:none; border:none; font-size:1.4rem; cursor:pointer; color:#C89B2A;">&#x2715;</button>
+            <h3 style="margin:0 0 16px 0; color:#1a1208; font-size:1.3rem; font-family:'Georgia',serif; letter-spacing:1px;">Leave a Review</h3>
+            <label style="font-size:0.9rem; color:#3d2e18; display:block; margin-bottom:4px;">Your Name</label>
+            <input id="review-name" type="text" placeholder="Enter your name" style="width:100%; padding:9px 12px; border:1.5px solid #d4c48a; border-radius:6px; margin-bottom:14px; font-size:0.95rem; box-sizing:border-box; background:#fffdf5; color:#2c2416;">
+            <label style="font-size:0.9rem; color:#3d2e18; display:block; margin-bottom:6px;">Rating</label>
+            <div id="review-stars" style="font-size:2rem; margin-bottom:14px; cursor:pointer; letter-spacing:4px;">
+                <span data-v="1">&#x2606;</span><span data-v="2">&#x2606;</span><span data-v="3">&#x2606;</span><span data-v="4">&#x2606;</span><span data-v="5">&#x2606;</span>
+            </div>
+            <label style="font-size:0.9rem; color:#3d2e18; display:block; margin-bottom:4px;">Your Review</label>
+            <textarea id="review-comment" rows="3" placeholder="Share your experience..." style="width:100%; padding:9px 12px; border:1.5px solid #d4c48a; border-radius:6px; font-size:0.95rem; resize:vertical; box-sizing:border-box; margin-bottom:16px; background:#fffdf5; color:#2c2416;"></textarea>
+            <button onclick="submitReview()" style="background:linear-gradient(135deg,#C89B2A,#D4AF37); color:#1a1208; border:none; padding:10px 28px; border-radius:6px; font-weight:700; font-size:1rem; cursor:pointer; width:100%; letter-spacing:1px;">Submit Review</button>
+        </div>
+    </div>
+
+    <!-- Reviews Display Section -->
+    <div id="reviews-section" style="background:#faf8f2; padding:36px 0; display:none; border-top:1px solid rgba(212,175,55,0.2);">
+        <div class="container">
+            <h2 style="text-align:center; color:#1a1208; margin-bottom:24px;">What Our Guests Say</h2>
+            <div id="reviews-list" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:18px;"></div>
+        </div>
+    </div>
+
+    <!-- AI Chatbot Widget (ChatGPT Style) -->
+    <div id="ai-chatbot" style="position:fixed;bottom:20px;right:20px;width:0;height:0;opacity:0;transition:all 0.3s ease;z-index:9999;box-shadow:0 5px 40px rgba(0,0,0,0.16),0 0 0 1px rgba(0,0,0,0.05);border-radius:12px;overflow:hidden;font-family:system-ui,-apple-system,sans-serif;">
+        <div style="width:360px;height:480px;background:white;display:flex;flex-direction:column;border-radius:12px;box-shadow:0 20px 25px rgba(0,0,0,0.1);">
+            <div style="background:linear-gradient(180deg, #0d47a1 0%, #1565c0 100%);color:white;padding:14px;display:flex;justify-content:space-between;align-items:center;cursor:default;border-radius:12px 12px 0 0;flex-shrink:0;">
+                <div style="min-width:0;flex:1;">
+                    <h3 style="margin:0;font-size:15px;font-weight:600;letter-spacing:0.5px;word-break:break-word;">🤖 AI Assistant</h3>
+                    <small style="opacity:0.85;font-size:11px;word-break:break-word;">Always here to help</small>
+                </div>
+                <button onclick="closeAIChat()" style="background:rgba(255,255,255,0.2);border:none;color:white;font-size:18px;cursor:pointer;width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;transition:background 0.2s;flex-shrink:0;margin-left:10px;">✕</button>
+            </div>
+            <div id="ai-chat-messages" style="flex:1;overflow-y:auto;padding:12px;background:#f5f5f5;display:flex;flex-direction:column;gap:10px;word-wrap:break-word;word-break:break-word;"></div>
+            <div style="padding:10px;border-top:1px solid #e5e5e5;display:flex;gap:8px;background:white;border-radius:0 0 12px 12px;flex-shrink:0;">
+                <input type="text" id="ai-question" placeholder="Ask..." style="flex:1;padding:8px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;outline:none;background:#f5f5f5;transition:border 0.2s;min-width:0;word-wrap:break-word;" onfocus="this.style.borderColor='#0d47a1';this.style.background='white'" onblur="this.style.borderColor='#ddd';this.style.background='#f5f5f5'">
+                <button onclick="askAI()" style="background:linear-gradient(135deg, #0d47a1 0%, #1565c0 100%);color:white;border:none;padding:8px 14px;border-radius:6px;cursor:pointer;font-weight:600;font-size:12px;transition:transform 0.2s;flex-shrink:0;white-space:nowrap;" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform='translateY(0)'">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Chat Button (ChatGPT Style) -->
+    <button id="ai-chat-toggle" onclick="openAIChat()" style="position:fixed;bottom:20px;right:20px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg, #0d47a1 0%, #1565c0 100%);color:white;border:none;font-size:24px;cursor:pointer;box-shadow:0 4px 12px rgba(13,71,161,0.4);transition:all 0.3s;z-index:9998;" onmouseover="this.style.transform='scale(1.1)';this.style.boxShadow='0 6px 20px rgba(13,71,161,0.5)'" onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 4px 12px rgba(13,71,161,0.4)'">
+        💬
+    </button>
+
+    <script src="js/script.js"></script>
+    <script>
+        checkLogin();
+
+        // Update navigation based on user type
+        function updateNavigation() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            const navLinks = document.querySelector('.nav-links');
+            
+            // Remove old dashboard link
+            const oldDashboardLink = navLinks.querySelector('li:nth-child(8)');
+            if (oldDashboardLink) {
+                oldDashboardLink.remove();
+            }
+
+            // Add appropriate dashboard link based on user type
+            let dashboardLink = '';
+            if (currentUser.type === 'customer') {
+                dashboardLink = '<li><a href="customer_dashboard.html">My Dashboard</a></li>';
+            } else if (currentUser.type === 'admin' || currentUser.type === 'staff') {
+                dashboardLink = '<li><a href="admin_dashboard.html">Dashboard</a></li>';
+            }
+
+            if (dashboardLink) {
+                // Insert before Logout link
+                const logoutLink = navLinks.querySelector('li:last-child');
+                logoutLink.insertAdjacentHTML('beforebegin', dashboardLink);
+            }
+
+            // Show upload button only for admin
+            const currentUser2 = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            const uploadBtn = document.getElementById('admin-upload-btn');
+            if (uploadBtn && currentUser2.type === 'admin') {
+                uploadBtn.style.display = 'block';
+            }
+        }
+
+        // Room Quantity Functions
+        function changeQuantity(roomType, change) {
+            const qtyElement = document.getElementById(roomType + '-qty');
+            let currentQty = parseInt(qtyElement.textContent);
+            let newQty = currentQty + change;
+
+            // Minimum 0, no maximum limit
+            if (newQty >= 0) {
+                qtyElement.textContent = newQty;
+            }
+        }
+
+        function setRoomQuantity(roomType) {
+            const qty = parseInt(document.getElementById(roomType + '-qty').textContent);
+            const safeQty = Number.isInteger(qty) && qty > 0 ? qty : 1;
+            localStorage.setItem('selectedRoomQuantity', safeQty);
+            localStorage.setItem('selectedRoomType', roomType);
+        }
+
+        const HOME_CAROUSEL_VERSION = 'video-v1';
+        const HOME_CAROUSEL_DEFAULTS = [
+            'https://images.unsplash.com/photo-1559329007-40790c9fdf4a?w=1200&h=600&fit=crop',
+            'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=1200&h=600&fit=crop',
+            'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=1200&h=600&fit=crop',
+            'https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=1200&h=600&fit=crop',
+            'https://images.unsplash.com/photo-1567521464027-f127ff144326?w=1200&h=600&fit=crop',
+            'https://images.unsplash.com/photo-1582719471384-894fbb16e074?w=1200&h=600&fit=crop',
+            'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1200&h=600&fit=crop'
+        ];
+        let homeCarouselImages = [];
+        let heroEditIndex = -1;
+        let heroCropImg = null;
+        let heroCropScale = 1;
+        let heroCropOffsetX = 0;
+        let heroCropOffsetY = 0;
+        let heroDragging = false;
+        let heroDragStartX = 0;
+        let heroDragStartY = 0;
+        let carouselAutoTimer = null;
+        let activeHomeRoomType = null;
+        const HOME_ROOM_IMAGE_DEFAULTS = {
+            single: 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=400',
+            double: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400',
+            deluxe: 'https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=400'
+        };
+
+        // Image Upload Functions
+        function isAdminUser() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            return currentUser.type === 'admin';
+        }
+
+        function loadHomeFeaturedRoomImages() {
+            ['single', 'double', 'deluxe'].forEach(type => {
+                const imgEl = document.getElementById(`home-${type}-room-img`);
+                if (!imgEl) return;
+                imgEl.src = localStorage.getItem(`${type}RoomImg`) || HOME_ROOM_IMAGE_DEFAULTS[type];
+            });
+        }
+
+        function toggleHomeRoomImageAdminButtons() {
+            const show = isAdminUser();
+            ['single', 'double', 'deluxe'].forEach(type => {
+                const btn = document.getElementById(`home-edit-${type}-room-img`);
+                if (btn) btn.style.display = show ? 'block' : 'none';
+            });
+        }
+
+        function openHomeRoomImagePicker(roomType) {
+            if (!isAdminUser()) return;
+            activeHomeRoomType = roomType;
+            const input = document.getElementById('home-room-image-input');
+            if (!input) return;
+            input.value = '';
+            input.click();
+        }
+
+        function compressImageForHomeRoom(file, maxBytes) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = 800;
+                        canvas.height = 400;
+                        const ctx = canvas.getContext('2d');
+                        ctx.fillStyle = '#f3f4f6';
+                        ctx.fillRect(0, 0, 800, 400);
+
+                        const scale = Math.max(canvas.width / img.width, canvas.height / img.height);
+                        const drawW = img.width * scale;
+                        const drawH = img.height * scale;
+                        const x = (canvas.width - drawW) / 2;
+                        const y = (canvas.height - drawH) / 2;
+                        ctx.drawImage(img, x, y, drawW, drawH);
+
+                        let quality = 0.9;
+                        let dataUrl = canvas.toDataURL('image/jpeg', quality);
+                        while (dataUrl.length > maxBytes && quality > 0.2) {
+                            quality -= 0.08;
+                            dataUrl = canvas.toDataURL('image/jpeg', quality);
+                        }
+                        resolve(dataUrl);
+                    };
+                    img.onerror = reject;
+                    img.src = ev.target.result;
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function isStaffOrCustomer() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            return currentUser.type === 'staff' || currentUser.type === 'customer';
+        }
+
+        function applyCarouselMode() {
+            const leftArrow = document.querySelector('.carousel-arrow-left');
+            const rightArrow = document.querySelector('.carousel-arrow-right');
+            const admin = isAdminUser();
+            const autoUser = isStaffOrCustomer();
+
+            if (leftArrow) leftArrow.style.display = admin ? 'flex' : 'none';
+            if (rightArrow) rightArrow.style.display = admin ? 'flex' : 'none';
+
+            if (carouselAutoTimer) {
+                clearInterval(carouselAutoTimer);
+                carouselAutoTimer = null;
+            }
+
+            if (autoUser) {
+                carouselAutoTimer = setInterval(() => {
+                    moveCarousel(1);
+                }, 3500);
+            }
+        }
+
+        function loadHomeCarouselImages() {
+            const version = localStorage.getItem('homeCarouselVersion');
+            const stored = JSON.parse(localStorage.getItem('homeCarouselImages') || 'null');
+            const legacyFirstImage = localStorage.getItem('firstSlideImage');
+
+            if (version !== HOME_CAROUSEL_VERSION) {
+                homeCarouselImages = [...HOME_CAROUSEL_DEFAULTS];
+                if (legacyFirstImage) {
+                    homeCarouselImages[0] = legacyFirstImage;
+                }
+                localStorage.setItem('homeCarouselImages', JSON.stringify(homeCarouselImages));
+                localStorage.setItem('homeCarouselVersion', HOME_CAROUSEL_VERSION);
+                return;
+            }
+
+            homeCarouselImages = Array.isArray(stored) && stored.length > 0 ? stored : [...HOME_CAROUSEL_DEFAULTS];
+        }
+
+        function saveHomeCarouselImages() {
+            localStorage.setItem('homeCarouselImages', JSON.stringify(homeCarouselImages));
+        }
+
+        function renderHomeCarousel() {
+            const track = document.getElementById('home-carousel-track');
+            if (!track) return;
+            const admin = isAdminUser();
+            const imageSlides = homeCarouselImages.map((src, index) => {
+                const actions = admin
+                    ? `<div class="home-carousel-actions">
+                            <button class="gallery-admin-btn home-carousel-change-btn" onclick="openImageUploadModal(${index})">Change</button>
+                            <button class="gallery-admin-btn home-carousel-delete-btn" onclick="deleteCarouselImage(${index})">Delete</button>
+                       </div>`
+                    : '';
+                const overlay = index === 0 ? `
+                        <div class="hotel-name-overlay">
+                            <h2>Royal Plaza Hotel</h2>
+                            <p>Your Perfect Stay Awaits</p>
+                        </div>` : '';
+                return `
+                    <div class="carousel-slide">
+                        <img src="${src}" alt="Royal Plaza Slide ${index + 1}">
+                        ${overlay}
+                        ${actions}
+                    </div>
+                `;
+            }).join('');
+
+            track.innerHTML = imageSlides;
+            const uploadBtn = document.getElementById('admin-upload-btn');
+            if (uploadBtn) uploadBtn.style.display = admin ? 'block' : 'none';
+            updateCarousel();
+            applyCarouselMode();
+        }
+
+        function openImageUploadModal(index) {
+            if (!isAdminUser()) return;
+            const parsedIndex = Number(index);
+            heroEditIndex = Number.isInteger(parsedIndex) && parsedIndex >= 0 ? parsedIndex : -1;
+            const title = document.getElementById('imageUploadTitle');
+            if (title) {
+                title.textContent = heroEditIndex >= 0 ? `Change Carousel Image #${heroEditIndex + 1}` : 'Add Carousel Image';
+            }
+            const zoom = document.getElementById('imageZoomRange');
+            if (zoom) zoom.value = '1';
+            heroCropImg = null;
+            heroCropScale = 1;
+            heroCropOffsetX = 0;
+            heroCropOffsetY = 0;
+            drawHeroCropCanvas();
+            const preview = document.getElementById('imagePreview');
+            preview.style.display = 'none';
+            preview.src = '';
+            document.getElementById('imageUploadModal').style.display = 'block';
+        }
+
+        function closeImageUploadModal() {
+            document.getElementById('imageUploadModal').style.display = 'none';
+            document.getElementById('imageInput').value = '';
+            document.getElementById('imagePreview').style.display = 'none';
+            document.getElementById('imagePreview').src = '';
+            heroEditIndex = -1;
+        }
+
+        function deleteCarouselImage(index) {
+            if (!isAdminUser()) return;
+            const parsedIndex = Number(index);
+            if (!Number.isInteger(parsedIndex) || parsedIndex < 0 || parsedIndex >= homeCarouselImages.length) return;
+            if (homeCarouselImages.length <= 1) {
+                alert('At least one image is required in carousel.');
+                return;
+            }
+            const ok = confirm(`Delete carousel image #${parsedIndex + 1}?`);
+            if (!ok) return;
+
+            homeCarouselImages.splice(parsedIndex, 1);
+            saveHomeCarouselImages();
+            const totalSlides = homeCarouselImages.length;
+            if (currentIndex >= totalSlides) currentIndex = totalSlides - 1;
+            renderHomeCarousel();
+        }
+
+        function getHeroCanvas() {
+            return document.getElementById('imageCropCanvas');
+        }
+
+        function drawHeroCropCanvas() {
+            const canvas = getHeroCanvas();
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#f3f4f6';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            if (!heroCropImg) {
+                ctx.fillStyle = '#6b7280';
+                ctx.font = '16px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('Select image, then drag/zoom to crop', canvas.width / 2, canvas.height / 2);
+                return;
+            }
+
+            const baseScale = Math.max(canvas.width / heroCropImg.width, canvas.height / heroCropImg.height);
+            const scale = baseScale * heroCropScale;
+            const drawW = heroCropImg.width * scale;
+            const drawH = heroCropImg.height * scale;
+            const x = (canvas.width - drawW) / 2 + heroCropOffsetX;
+            const y = (canvas.height - drawH) / 2 + heroCropOffsetY;
+            ctx.drawImage(heroCropImg, x, y, drawW, drawH);
+            ctx.strokeStyle = '#3498db';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(1, 1, canvas.width - 2, canvas.height - 2);
+        }
+
+        function loadHeroImageForCrop(file) {
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                const img = new Image();
+                img.onload = function() {
+                    heroCropImg = img;
+                    heroCropScale = 1;
+                    heroCropOffsetX = 0;
+                    heroCropOffsetY = 0;
+                    drawHeroCropCanvas();
+                    previewHeroCrop();
+                };
+                img.src = ev.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function getHeroCroppedData(maxBytes) {
+            if (!heroCropImg) return null;
+            const canvas = getHeroCanvas();
+            if (!canvas) return null;
+
+            const baseScale = Math.max(canvas.width / heroCropImg.width, canvas.height / heroCropImg.height);
+            const scale = baseScale * heroCropScale;
+            const drawW = heroCropImg.width * scale;
+            const drawH = heroCropImg.height * scale;
+            const x = (canvas.width - drawW) / 2 + heroCropOffsetX;
+            const y = (canvas.height - drawH) / 2 + heroCropOffsetY;
+
+            const out = document.createElement('canvas');
+            out.width = 1200;
+            out.height = 600;
+            const octx = out.getContext('2d');
+            const sx = (-x) / canvas.width * 1200;
+            const sy = (-y) / canvas.height * 600;
+            const sW = (drawW / canvas.width) * 1200;
+            const sH = (drawH / canvas.height) * 600;
+
+            octx.fillStyle = '#f3f4f6';
+            octx.fillRect(0, 0, 1200, 600);
+            octx.drawImage(heroCropImg, sx, sy, sW, sH);
+
+            let quality = 0.92;
+            let dataUrl = out.toDataURL('image/jpeg', quality);
+            while (dataUrl.length > maxBytes && quality > 0.45) {
+                quality -= 0.07;
+                dataUrl = out.toDataURL('image/jpeg', quality);
+            }
+            return dataUrl;
+        }
+
+        function previewHeroCrop() {
+            const preview = document.getElementById('imagePreview');
+            const data = getHeroCroppedData(3000000);
+            if (!data || !preview) return;
+            preview.src = data;
+            preview.style.display = 'block';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('imageUploadModal');
+            if (event.target === modal) {
+                closeImageUploadModal();
+            }
+        }
+
+        // Preview image before saving
+        document.getElementById('imageInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                loadHeroImageForCrop(file);
+            }
+        });
+
+        const homeRoomInput = document.getElementById('home-room-image-input');
+        if (homeRoomInput) {
+            homeRoomInput.addEventListener('change', async function(e) {
+                if (!isAdminUser()) return;
+                const file = e.target.files[0];
+                if (!file || !activeHomeRoomType) return;
+
+                try {
+                    const imageData = await compressImageForHomeRoom(file, 900000);
+                    localStorage.setItem(`${activeHomeRoomType}RoomImg`, imageData);
+                    loadHomeFeaturedRoomImages();
+                    alert('Room image updated successfully!');
+                } catch (err) {
+                    alert('Image save failed. Try with another photo.');
+                } finally {
+                    activeHomeRoomType = null;
+                }
+            });
+        }
+
+        document.getElementById('imageZoomRange').addEventListener('input', function() {
+            heroCropScale = parseFloat(this.value) || 1;
+            drawHeroCropCanvas();
+        });
+
+        const heroCanvas = getHeroCanvas();
+        if (heroCanvas) {
+            heroCanvas.addEventListener('mousedown', function(e) {
+                heroDragging = true;
+                heroDragStartX = e.clientX;
+                heroDragStartY = e.clientY;
+                heroCanvas.classList.add('dragging');
+            });
+
+            window.addEventListener('mousemove', function(e) {
+                if (!heroDragging) return;
+                heroCropOffsetX += e.clientX - heroDragStartX;
+                heroCropOffsetY += e.clientY - heroDragStartY;
+                heroDragStartX = e.clientX;
+                heroDragStartY = e.clientY;
+                drawHeroCropCanvas();
+            });
+
+            window.addEventListener('mouseup', function() {
+                heroDragging = false;
+                heroCanvas.classList.remove('dragging');
+            });
+        }
+
+        function saveImage() {
+            if (!heroCropImg) {
+                alert('Please select an image first!');
+                return;
+            }
+            const imageData = getHeroCroppedData(900000);
+            if (!imageData) {
+                alert('Image crop failed. Try again.');
+                return;
+            }
+            if (Number.isInteger(heroEditIndex) && heroEditIndex >= 0 && heroEditIndex < homeCarouselImages.length) {
+                homeCarouselImages[heroEditIndex] = imageData;
+            } else {
+                homeCarouselImages.push(imageData);
+            }
+            saveHomeCarouselImages();
+            renderHomeCarousel();
+            alert('Image saved successfully!');
+            closeImageUploadModal();
+        }
+        let currentIndex = 0;
+
+        function updateCarousel() {
+            const carouselTrack = document.getElementById('home-carousel-track');
+            const slides = document.querySelectorAll('#home-carousel-track .carousel-slide');
+            if (!carouselTrack || !slides.length) return;
+            currentIndex = (currentIndex + slides.length) % slides.length;
+            const offset = -currentIndex * 100;
+            carouselTrack.style.transform = `translateX(${offset}%)`;
+        }
+
+        function moveCarousel(direction) {
+            currentIndex += direction;
+            updateCarousel();
+        }
+
+        // Update navigation on page load
+        updateNavigation();
+        loadHomeFeaturedRoomImages();
+        toggleHomeRoomImageAdminButtons();
+        loadHomeCarouselImages();
+        renderHomeCarousel();
+
+        // ===== Customer Reviews =====
+        let selectedRating = 0;
+
+        function openReviewModal() {
+            selectedRating = 0;
+            document.getElementById('review-name').value = '';
+            document.getElementById('review-comment').value = '';
+            renderStarSelector(0);
+            document.getElementById('reviewModal').style.display = 'block';
+        }
+
+        function closeReviewModal() {
+            document.getElementById('reviewModal').style.display = 'none';
+        }
+
+        function renderStarSelector(val) {
+            const spans = document.querySelectorAll('#review-stars span');
+            spans.forEach(s => {
+                s.textContent = parseInt(s.dataset.v) <= val ? '★' : '☆';
+                s.style.color = parseInt(s.dataset.v) <= val ? '#FFD700' : '#aaa';
+            });
+        }
+
+        document.getElementById('review-stars').addEventListener('click', function(e) {
+            if (e.target.dataset.v) {
+                selectedRating = parseInt(e.target.dataset.v);
+                renderStarSelector(selectedRating);
+            }
+        });
+
+        document.getElementById('review-stars').addEventListener('mouseover', function(e) {
+            if (e.target.dataset.v) renderStarSelector(parseInt(e.target.dataset.v));
+        });
+
+        document.getElementById('review-stars').addEventListener('mouseleave', function() {
+            renderStarSelector(selectedRating);
+        });
+
+        function submitReview() {
+            const name = document.getElementById('review-name').value.trim();
+            const comment = document.getElementById('review-comment').value.trim();
+            if (!name) { alert('Please enter your name.'); return; }
+            if (selectedRating === 0) { alert('Please select a star rating.'); return; }
+            if (!comment) { alert('Please write a review.'); return; }
+            const reviews = JSON.parse(localStorage.getItem('hotelReviews') || '[]');
+            reviews.unshift({ name, rating: selectedRating, comment, date: new Date().toLocaleDateString('en-IN') });
+            localStorage.setItem('hotelReviews', JSON.stringify(reviews));
+            closeReviewModal();
+            loadReviews();
+            alert('Thank you for your review!');
+        }
+
+        function starsHtml(n) {
+            return '★'.repeat(n) + '☆'.repeat(5 - n);
+        }
+
+        function loadReviews() {
+            const reviews = JSON.parse(localStorage.getItem('hotelReviews') || '[]');
+            const section = document.getElementById('reviews-section');
+            const list = document.getElementById('reviews-list');
+            const countEl = document.getElementById('footer-review-count');
+            const avgEl = document.getElementById('footer-avg-stars');
+
+            if (reviews.length === 0) {
+                section.style.display = 'none';
+                avgEl.textContent = '☆☆☆☆☆';
+                countEl.textContent = 'No reviews yet';
+                return;
+            }
+
+            const avg = (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1);
+            const fullStars = Math.round(avg);
+            avgEl.textContent = starsHtml(fullStars) + ' ' + avg;
+            countEl.textContent = reviews.length + ' review' + (reviews.length > 1 ? 's' : '');
+
+            section.style.display = 'block';
+            list.innerHTML = reviews.slice(0, 6).map(r => `
+                <div style="background:#fffdf5; border-radius:8px; padding:18px; box-shadow:0 2px 12px rgba(212,175,55,0.12); border:1px solid rgba(212,175,55,0.2);">
+                    <div style="color:#D4AF37; font-size:1.2rem; margin-bottom:4px;">${starsHtml(r.rating)}</div>
+                    <p style="margin:0 0 8px 0; color:#2c2416; font-size:0.95rem; font-family:'Georgia',serif;">"${r.comment}"</p>
+                    <div style="font-size:0.82rem; color:#7a6030; font-family:'Georgia',serif;">— ${r.name} &nbsp;·&nbsp; ${r.date}</div>
+                </div>
+            `).join('');
+        }
+
+        window.addEventListener('click', function(e) {
+            const modal = document.getElementById('reviewModal');
+            if (e.target === modal) closeReviewModal();
+        });
+
+        loadReviews();
+
+        // Room Quantity Functions
+        function changeQuantity(roomType, change) {
+            const qtyElement = document.getElementById(roomType + '-qty');
+            let currentQty = parseInt(qtyElement.textContent);
+            let newQty = currentQty + change;
+
+            // Minimum 0, no maximum limit
+            if (newQty >= 0) {
+                qtyElement.textContent = newQty;
+            }
+        }
+
+        function setRoomQuantity(roomType) {
+            const qty = parseInt(document.getElementById(roomType + '-qty').textContent);
+            localStorage.setItem('selectedRoomQuantity', qty);
+        }
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - Royal Plaza Hotel</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <span class="logo-crown">&#x2756;</span>
+                <div class="logo-brand">
+                    <span class="logo-name">Royal Plaza</span>
+                    <span class="logo-tagline">&#10022; Hotel &#10022;</span>
+                </div>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="rooms.html">Rooms & Bar</a></li>
+                <li><a href="food_menu.html">Food Menu</a></li>
+                <li><a href="booking.html">Booking</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="my_cart.html">My Cart</a></li>
+                <li><a href="admin_dashboard.html">Dashboard</a></li>
+                <li><a href="admin_login.html">Admin Login</a></li>
+                <li><a href="staff_login.html">Staff Login</a></li>
+                <li><a href="customer_login.html">Customer Login</a></li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </nav>
+    </header>
+
+    <section class="login">
+        <div class="container">
+            <h2>Admin Login</h2>
+            <form id="admin-login-form">
+                <div class="form-group">
+                    <label for="admin-username">Username</label>
+                    <input type="text" id="admin-username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="admin-password">Password</label>
+                    <input type="password" id="admin-password" name="password" required>
+                </div>
+                <button type="submit" class="submit-btn">Login</button>
+            </form>
+            <div id="admin-panel" style="display: none;">
+                <h3>All Bookings</h3>
+                <div id="bookings-list"></div>
+                <h3>All Food Orders</h3>
+                <div id="food-orders-list"></div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        document.getElementById('admin-login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('admin-username').value;
+            const password = document.getElementById('admin-password').value;
+            if (username === 'inayat' && password === 'inayat786') {
+                // Hide form and show admin panel
+                document.getElementById('admin-login-form').style.display = 'none';
+                document.getElementById('admin-panel').style.display = 'block';
+                
+                // Display bookings
+                const bookings = JSON.parse(localStorage.getItem('bookings') || '[]');
+                const bookingsList = document.getElementById('bookings-list');
+                if (bookings.length === 0) {
+                    bookingsList.innerHTML = '<p>No bookings yet.</p>';
+                } else {
+                    let html = '<ul>';
+                    bookings.forEach((booking, index) => {
+                        html += `<li>
+                            <strong>Booking ${index + 1}:</strong><br>
+                            Name: ${booking.name}<br>
+                            Email: ${booking.email}<br>
+                            Phone: ${booking.phone}<br>
+                            Password: ${booking.password}<br>
+                            Check-in: ${booking.checkin}<br>
+                            Check-out: ${booking.checkout}<br>
+                            Room: ${booking.roomType}<br>
+                            Price: ₹${booking.priceInr} per night
+                        </li><br>`;
+                    });
+                    html += '</ul>';
+                    bookingsList.innerHTML = html;
+                }
+
+                // Display food orders
+                const foodOrders = JSON.parse(localStorage.getItem('foodOrders') || '[]');
+                const foodOrdersList = document.getElementById('food-orders-list');
+                if (foodOrders.length === 0) {
+                    foodOrdersList.innerHTML = '<p>No food orders yet.</p>';
+                } else {
+                    let html = '<ul>';
+                    foodOrders.forEach((order, index) => {
+                        html += `<li>
+                            <strong>Order ${index + 1}:</strong><br>
+                            Name: ${order.name}<br>
+                            Room: ${order.room}<br>
+                            Phone: ${order.phone}<br>
+                            Address: ${order.address}<br>
+                            Items: ${order.items.map(item => `${item.item} x ${item.quantity}`).join(', ')}<br>
+                            Total: ₹${order.total}<br>
+                            Time: ${new Date(order.timestamp).toLocaleString()}
+                        </li><br>`;
+                    });
+                    html += '</ul>';
+                    foodOrdersList.innerHTML = html;
+                }
+            } else {
+                alert('Invalid username or password');
+            }
+        });
+    </script>
+</body>
+</html>

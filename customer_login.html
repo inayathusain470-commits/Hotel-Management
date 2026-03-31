@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Login - Royal Plaza Hotel</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <span class="logo-crown">&#x2756;</span>
+                <div class="logo-brand">
+                    <span class="logo-name">Royal Plaza</span>
+                    <span class="logo-tagline">&#10022; Hotel &#10022;</span>
+                </div>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="rooms.html">Rooms & Bar</a></li>
+                <li><a href="food_menu.html">Food Menu</a></li>
+                <li><a href="booking.html">Booking</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="my_cart.html">My Cart</a></li>
+                <li><a href="admin_dashboard.html">Dashboard</a></li>
+                <li><a href="admin_login.html">Admin Login</a></li>
+                <li><a href="staff_login.html">Staff Login</a></li>
+                <li><a href="customer_login.html">Customer Login</a></li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </nav>
+    </header>
+
+    <section class="login">
+        <div class="container">
+            <h2>Customer Login</h2>
+            <div id="customer-login-error" class="error-msg" style="margin-bottom:10px;"></div>
+            <form id="customer-login-form">
+                <div class="form-group">
+                    <label for="customer-email">Email</label>
+                    <input type="email" id="customer-email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="customer-password">Password</label>
+                    <input type="password" id="customer-password" name="password" required>
+                </div>
+                <button type="submit" class="submit-btn">Login</button>
+            </form>
+        </div>
+    </section>
+
+    <script>
+        async function loginCustomerApi(email, password) {
+            const response = await fetch('http://localhost:5000/api/customers/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            const payload = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(payload.error || 'Login failed');
+            return payload.customer;
+        }
+
+        document.getElementById('customer-login-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const email = document.getElementById('customer-email').value.trim();
+            const password = document.getElementById('customer-password').value;
+
+            let user = null;
+            try {
+                user = await loginCustomerApi(email, password);
+            } catch (apiErr) {
+                const users = JSON.parse(localStorage.getItem('customers') || '[]');
+                user = users.find(u => u.email === email && u.password === password) || null;
+            }
+
+            if (!user) {
+                document.getElementById('customer-login-error').textContent = 'Invalid email or password';
+                return;
+            }
+
+            localStorage.setItem('currentUser', JSON.stringify({
+                type: 'customer',
+                name: user.name,
+                email: user.email,
+                phone: user.phone
+            }));
+            window.location.href = 'home.html';
+        });
+    </script>
+</body>
+</html>

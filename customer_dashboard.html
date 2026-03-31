@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Dashboard - Royal Plaza Hotel</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        .user-info {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        .user-info h3 {
+            margin: 0;
+            font-size: 18px;
+        }
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 18px rgba(0,0,0,0.18);
+        }
+        .stat-card.active {
+            outline: 2px solid rgba(245, 230, 120, 0.9);
+        }
+        .stat-card h3 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+        }
+        .stat-card .number {
+            font-size: 32px;
+            font-weight: bold;
+        }
+        .dashboard-section {
+            background: white;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: none;
+        }
+        .dashboard-section.active {
+            display: block;
+        }
+        .refresh-btn {
+            background: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .refresh-btn:hover {
+            background: #2980b9;
+        }
+        .auto-refresh-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-left: 20px;
+        }
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 24px;
+            background: #ccc;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .toggle-switch.active {
+            background: #27ae60;
+        }
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: left 0.3s;
+        }
+        .toggle-switch.active::after {
+            left: 28px;
+        }
+        .detail-item {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .detail-item:hover {
+            background: #f5f5f5 !important;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.12) !important;
+            border-left-color: #0d47a1 !important;
+        }
+        .detail-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .detail-modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .detail-modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .detail-modal-close {
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #aaa;
+        }
+        .detail-modal-close:hover {
+            color: #000;
+        }
+        .detail-row {
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        .detail-label {
+            font-weight: 600;
+            color: #0d47a1;
+            font-size: 14px;
+        }
+        .detail-value {
+            color: #333;
+            margin-top: 4px;
+        }
+        .booking-item {
+            background: #f9f9f9;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #27ae60;
+            border-radius: 4px;
+        }
+        .booking-item h4 {
+            margin: 0 0 10px 0;
+            color: #27ae60;
+        }
+        .booking-item p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        .cancel-btn {
+            background: #e74c3c;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .cancel-btn:hover {
+            background: #c0392b;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #95a5a6;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <span class="logo-crown">&#x2756;</span>
+                <div class="logo-brand">
+                    <span class="logo-name">Royal Plaza</span>
+                    <span class="logo-tagline">&#10022; Hotel &#10022;</span>
+                </div>
+            </div>
+            <ul class="nav-links">
+                <li><a href="home.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="rooms.html">Rooms & Bar</a></li>
+                <li><a href="food_menu.html">Food Menu</a></li>
+                <li><a href="booking.html">Booking</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="my_cart.html">My Cart</a></li>
+                <li><a href="#" onclick="logout()">Logout</a></li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </nav>
+    </header>
+
+    <section class="login">
+        <div class="container">
+            <div class="dashboard-header">
+                <h2>My Dashboard</h2>
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <button class="refresh-btn" onclick="refreshCustomerData()">🔄 Refresh Now</button>
+                    <div style="display:flex;flex-direction:column;gap:8px;">
+                        <div class="auto-refresh-toggle" style="margin-left:0;">
+                            <label>Auto Refresh:</label>
+                            <div class="toggle-switch" id="autoRefreshToggle" onclick="toggleAutoRefresh()" title="Auto-refresh every 5 seconds"></div>
+                        </div>
+                        <div class="auto-refresh-toggle dark-mode-toggle-wrap" style="margin-left:0;">
+                            <label>Dark Mode:</label>
+                            <div class="toggle-switch" id="darkModeToggle" onclick="toggleDarkMode()" title="Enable dark mode for full website"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Info -->
+            <div class="user-info">
+                <h3>Welcome, <span id="user-name"></span>! 🎉</h3>
+                <p id="user-email"></p>
+            </div>
+
+            <!-- Stats -->
+            <div class="dashboard-stats">
+                <div class="stat-card" data-target="bookings-section" onclick="showCustomerSection('bookings-section', this)">
+                    <h3>My Room Bookings</h3>
+                    <div class="number" id="totalBookings">0</div>
+                </div>
+                <div class="stat-card" data-target="bar-bookings-section" onclick="showCustomerSection('bar-bookings-section', this)">
+                    <h3>Bar Bookings</h3>
+                    <div class="number" id="totalBarBookings">0</div>
+                </div>
+                <div class="stat-card" data-target="food-orders-section" onclick="showCustomerSection('food-orders-section', this)">
+                    <h3>Food Orders</h3>
+                    <div class="number" id="totalFoodOrders">0</div>
+                </div>
+            </div>
+
+            <p style="text-align:center;margin:-10px 0 20px 0;color:#7a6030;font-size:0.95rem;">Click any card to view details. Click any item to see full information.</p>
+
+            <!-- Bookings Section -->
+            <div id="bookings-section" class="dashboard-section active">
+                <h3>📋 My Room Bookings</h3>
+                <div id="bookings-display"></div>
+            </div>
+
+            <!-- Bar Bookings Section -->
+            <div id="bar-bookings-section" class="dashboard-section">
+                <h3>🥂 My Bar Bookings</h3>
+                <div id="bar-bookings-display"></div>
+            </div>
+
+            <!-- Food Orders Section -->
+            <div id="food-orders-section" class="dashboard-section">
+                <h3>🍽️ My Food Orders</h3>
+                <div id="food-orders-display"></div>
+            </div>
+
+            <!-- Reviews Section -->
+            <div class="dashboard-section active">
+                <h3>⭐ My Reviews & Ratings</h3>
+                <div id="reviews-display"></div>
+                
+                <div style="margin-top:20px;padding:15px;background:#f0f7ff;border-radius:4px;">
+                    <h4>✏️ Submit a Review</h4>
+                    <div class="form-group">
+                        <label for="review-room-type">Room Type</label>
+                        <select id="review-room-type" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;">
+                            <option value="">Select room type</option>
+                            <option value="single">Single Room</option>
+                            <option value="double">Double Room</option>
+                            <option value="deluxe">Deluxe Room</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="review-rating">Rating (1-5 stars)</label>
+                        <div style="display:flex;gap:10px;margin-top:8px;">
+                            <input type="number" id="review-rating" min="1" max="5" value="5" style="width:80px;padding:8px;border:1px solid #ddd;border-radius:4px;">
+                            <span id="star-display" style="font-size:24px;">⭐⭐⭐⭐⭐</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="review-title">Review Title</label>
+                        <input type="text" id="review-title" placeholder="e.g., Amazing stay!" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;">
+                    </div>
+                    <div class="form-group">
+                        <label for="review-comment">Your Review</label>
+                        <textarea id="review-comment" placeholder="Share your experience..." style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;min-height:100px;resize:vertical;"></textarea>
+                    </div>
+                    <button type="button" onclick="submitReview()" class="submit-btn">Submit Review</button>
+                    <p id="review-message" style="margin-top:10px;display:none;"></p>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Detail Modals -->
+    <div id="detail-modal" class="detail-modal">
+        <div class="detail-modal-content">
+            <span class="detail-modal-close" onclick="closeDetailModal()">&times;</span>
+            <div id="detail-content"></div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Contact Us</h3>
+                    <p>Axis Knowledge City, Hathipur,<br>Rooma, NH-2, Milestone - 478,<br>Kanpur - 209402,<br>Uttar Pradesh, India</p>
+                    <p>Phone: (123) 456-7890</p>
+                    <p>Email: info@luxuryhotel.com</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Follow Us</h3>
+                    <div class="social-links">
+                        <a href="#">Facebook</a>
+                        <a href="https://youtu.be/ZJsjGBiH3P8" target="_blank" rel="noopener noreferrer">YouTube</a>
+                        <a href="#">Twitter</a>
+                        <a href="#">Instagram</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/script.js"></script>
+    <script>
+        checkLogin();
+
+        // Update navigation based on user type
+        function updateNavigation() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            const navLinks = document.querySelector('.nav-links');
+            
+            if (!navLinks) return;
+            
+            // Remove old dashboard link if exists
+            const oldDashboardLink = Array.from(navLinks.querySelectorAll('li')).find(li => 
+                li.textContent.includes('Dashboard') || li.textContent.includes('My Dashboard')
+            );
+            if (oldDashboardLink) {
+                oldDashboardLink.remove();
+            }
+
+            // Add appropriate dashboard link based on user type
+            let dashboardLink = '';
+            if (currentUser.type === 'customer') {
+                dashboardLink = '<li><a href="customer_dashboard.html">My Dashboard</a></li>';
+            } else if (currentUser.type === 'admin' || currentUser.type === 'staff') {
+                dashboardLink = '<li><a href="admin_dashboard.html">Dashboard</a></li>';
+            }
+
+            if (dashboardLink) {
+                // Insert before Logout link
+                const logoutLink = navLinks.querySelector('li:last-child');
+                if (logoutLink) {
+                    logoutLink.insertAdjacentHTML('beforebegin', dashboardLink);
+                }
+            }
+        }
+
+        async function fetchCustomerData() {
+            const [bookings, barBookings, foodOrders] = await Promise.all([
+                window.HMS_API.get('/bookings'),
+                window.HMS_API.get('/bar-bookings'),
+                window.HMS_API.get('/food-orders')
+            ]);
+            return { bookings, barBookings, foodOrders };
+        }
+
+        async function updateDashboard() {
+            // Get current user
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            
+            // Only allow customers
+            if (currentUser.type !== 'customer') {
+                window.location.href = 'admin_dashboard.html';
+                return;
+            }
+
+            // Display user info
+            document.getElementById('user-name').textContent = currentUser.name;
+            document.getElementById('user-email').textContent = currentUser.email;
+
+            const { bookings: allBookings, barBookings: allBarBookings, foodOrders: allFoodOrders } = await fetchCustomerData();
+            // Get all bookings and filter by current user
+            const myBookings = allBookings.filter(b => b.email === currentUser.email);
+            
+            // Debug: Log for troubleshooting
+            console.log('Current User Email:', currentUser.email);
+            console.log('All Bookings:', allBookings);
+            console.log('Filtered My Bookings:', myBookings);
+
+            // Get bar bookings for current user
+            const myBarBookings = allBarBookings.filter(b => b.customerEmail === currentUser.email);
+
+            // Get food orders for current user
+            const myFoodOrders = allFoodOrders.filter(order => order.customerEmail === currentUser.email);
+
+            // Update stats
+            document.getElementById('totalBookings').textContent = myBookings.length;
+            document.getElementById('totalBarBookings').textContent = myBarBookings.length;
+            document.getElementById('totalFoodOrders').textContent = myFoodOrders.length;
+
+            // Display My Bookings
+            const bookingsDisplay = document.getElementById('bookings-display');
+            if (myBookings.length === 0) {
+                bookingsDisplay.innerHTML = '<div class="empty-state">No bookings yet. <a href="booking.html">Book a room now!</a></div>';
+            } else {
+                let html = '';
+                myBookings.forEach((booking, index) => {
+                    const nights = calculateNights(booking.checkin, booking.checkout);
+                    const roomQuantity = booking.roomQuantity || 1;
+                    const pricePerNightUsd = Number(booking.pricePerNight || booking.priceInr || 0);
+                    const totalPriceUsd = booking.totalPrice ? Number(booking.totalPrice) * nights : (pricePerNightUsd * roomQuantity * nights);
+                    const pricePerNightInr = usdToInr(pricePerNightUsd);
+                    const totalPriceInr = usdToInr(totalPriceUsd);
+                    
+                    const canCancel = booking.status !== 'cancelled';
+                    html += `<div class="booking-item detail-item" onclick="showBookingDetail(${index}, '${booking.id}', '${booking.roomType}', ${roomQuantity}, '${booking.checkin}', '${booking.checkout}', ${nights}, ${pricePerNightInr}, ${totalPriceInr}, '${Array.isArray(booking.roomNumbers) ? booking.roomNumbers.join(', ') : 'N/A'}', '${booking.status}')">
+                        <h4>Booking #${index + 1} <span class="status-badge status-active">${booking.status === 'cancelled' ? '❌ Cancelled' : 'Confirmed'}</span></h4>
+                        <p><strong>Room Type:</strong> ${booking.roomType} (${roomQuantity} room${roomQuantity > 1 ? 's' : ''})</p>
+                        <p><strong>Room Numbers:</strong> ${Array.isArray(booking.roomNumbers) ? booking.roomNumbers.join(', ') : 'N/A'}</p>
+                        <p><strong>Check-in:</strong> ${booking.checkin}</p>
+                        <p><strong>Check-out:</strong> ${booking.checkout}</p>
+                        <p><strong>Duration:</strong> ${nights} nights</p>
+                        <p><strong>Price per night:</strong> ₹${pricePerNightInr} per room</p>
+                        <p><strong>Total Amount:</strong> ₹${totalPriceInr}</p>
+                        ${canCancel ? `<button class="cancel-btn" onclick="event.stopPropagation(); cancelBooking('${booking.id}')">❌ Cancel Booking</button>` : ''}
+                    </div>`;
+                });
+                bookingsDisplay.innerHTML = html;
+            }
+
+            // Display My Food Orders
+            const foodOrdersDisplay = document.getElementById('food-orders-display');
+            if (myFoodOrders.length === 0) {
+                foodOrdersDisplay.innerHTML = '<div class="empty-state">No food orders yet. <a href="food_menu.html">Order food now!</a></div>';
+            } else {
+                let html = '';
+                myFoodOrders.forEach((order, index) => {
+                    const isDelivered = order.status === 'delivered';
+                    const badgeClass = isDelivered ? 'status-confirmed' : 'status-pending';
+                    const badgeText = isDelivered ? '✅ Delivered' : '🕐 Pending';
+                    const canCancelOrder = order.status === 'pending';
+                    const itemsText = order.items.map(item => `${item.item} (x${item.quantity})`).join(', ');
+                    const orderTime = new Date(order.timestamp).toLocaleString();
+                    html += `<div class="booking-item detail-item" onclick="showFoodOrderDetail(${index}, ${order.room}, '${itemsText}', ${order.total}, '${orderTime}', '${order.status}')">
+                        <h4>Order #${index + 1} <span class="status-badge ${badgeClass}">${badgeText}</span></h4>
+                        <p><strong>Room Number:</strong> ${order.room}</p>
+                        <p><strong>Items:</strong> ${itemsText}</p>
+                        <p><strong>Total Amount:</strong> ₹${order.total}</p>
+                        <p><strong>Order Time:</strong> ${orderTime}</p>
+                        ${canCancelOrder ? `<button class="cancel-btn" onclick="event.stopPropagation(); cancelFoodOrder('${order.id}')">❌ Cancel Order</button>` : ''}
+                    </div>`;
+                });
+                foodOrdersDisplay.innerHTML = html;
+            }
+
+            // Display My Bar Bookings
+            const barBookingsDisplay = document.getElementById('bar-bookings-display');
+            if (myBarBookings.length === 0) {
+                barBookingsDisplay.innerHTML = '<div class="empty-state">No bar bookings yet. <a href="rooms.html">Book now!</a></div>';
+            } else {
+                let html = '';
+                myBarBookings.forEach((booking, index) => {
+                    const canCancelBar = booking.status !== 'cancelled';
+                    html += `<div class="booking-item detail-item" onclick="showBarBookingDetail(${index}, '${booking.packageName}', '${booking.date}', '${booking.time}', ${booking.guests}, ${booking.total}, '${booking.status}')">
+                        <h4>Booking #${index + 1} <span class="status-badge status-active">${booking.status === 'cancelled' ? '❌ Cancelled' : 'Confirmed'}</span></h4>
+                        <p><strong>Package:</strong> ${booking.packageName}</p>
+                        <p><strong>Date:</strong> ${booking.date}</p>
+                        <p><strong>Time:</strong> ${booking.time}</p>
+                        <p><strong>Guests:</strong> ${booking.guests}</p>
+                        <p><strong>Total Amount:</strong> ₹${booking.total}</p>
+                        ${canCancelBar ? `<button class="cancel-btn" onclick="event.stopPropagation(); cancelBarBooking('${booking.id}')">❌ Cancel Booking</button>` : ''}
+                    </div>`;
+                });
+                barBookingsDisplay.innerHTML = html;
+            }
+
+            // Load reviews
+            loadReviews();
+        }
+
+        function calculateNights(checkin, checkout) {
+            const checkInDate = new Date(checkin);
+            const checkOutDate = new Date(checkout);
+            const nights = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
+            return nights;
+        }
+
+        // Cancel Booking Function
+        async function cancelBooking(bookingId) {
+            if (!confirm('Are you sure you want to cancel this booking? This action cannot be undone.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://localhost:5000/api/bookings/${bookingId}/cancel`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: 'cancelled' })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to cancel booking');
+                }
+
+                alert('✅ Booking cancelled successfully!');
+                updateDashboard();
+            } catch (err) {
+                alert('❌ Error cancelling booking: ' + err.message);
+                console.error('Cancel booking error:', err);
+            }
+        }
+
+        // Cancel Food Order Function
+        async function cancelFoodOrder(orderId) {
+            if (!confirm('Are you sure you want to cancel this order?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://localhost:5000/api/food-orders/${orderId}/cancel`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: 'cancelled' })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to cancel order');
+                }
+
+                alert('✅ Order cancelled successfully!');
+                updateDashboard();
+            } catch (err) {
+                alert('❌ Error cancelling order: ' + err.message);
+                console.error('Cancel order error:', err);
+            }
+        }
+
+        // Cancel Bar Booking Function
+        async function cancelBarBooking(bookingId) {
+            if (!confirm('Are you sure you want to cancel this bar booking?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://localhost:5000/api/bar-bookings/${bookingId}/cancel`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: 'cancelled' })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to cancel bar booking');
+                }
+
+                alert('✅ Bar booking cancelled successfully!');
+                updateDashboard();
+            } catch (err) {
+                alert('❌ Error cancelling bar booking: ' + err.message);
+                console.error('Cancel bar booking error:', err);
+            }
+        }
+
+        // Show booking detail in modal
+        function showBookingDetail(index, bookingId, roomType, roomQty, checkin, checkout, nights, pricePerNight, total, roomNumbers, status) {
+            const details = [
+                { label: 'Booking #', value: `${index + 1}` },
+                { label: 'Room Type', value: `${roomType} (${roomQty} room${roomQty > 1 ? 's' : ''})` },
+                { label: 'Room Numbers', value: roomNumbers },
+                { label: 'Check-in', value: checkin },
+                { label: 'Check-out', value: checkout },
+                { label: 'Duration', value: `${nights} nights` },
+                { label: 'Price per Night', value: `₹${pricePerNight} per room` },
+                { label: 'Total Amount', value: `₹${total}` },
+                { label: 'Status', value: status === 'cancelled' ? '❌ Cancelled' : 'Confirmed' }
+            ];
+            showDetailModal(`📋 Room Booking Details`, details);
+        }
+
+        // Show food order detail in modal
+        function showFoodOrderDetail(index, room, items, total, orderTime, status) {
+            const details = [
+                { label: 'Order #', value: `${index + 1}` },
+                { label: 'Room Number', value: room },
+                { label: 'Items', value: items },
+                { label: 'Total Amount', value: `₹${total}` },
+                { label: 'Order Time', value: orderTime },
+                { label: 'Status', value: status === 'delivered' ? '✅ Delivered' : '🕐 Pending' }
+            ];
+            showDetailModal(`🍽️ Food Order Details`, details);
+        }
+
+        // Show bar booking detail in modal
+        function showBarBookingDetail(index, packageName, date, time, guests, total, status) {
+            const details = [
+                { label: 'Booking #', value: `${index + 1}` },
+                { label: 'Package', value: packageName },
+                { label: 'Date', value: date },
+                { label: 'Time', value: time },
+                { label: 'Guests', value: guests },
+                { label: 'Total Amount', value: `₹${total}` },
+                { label: 'Status', value: status === 'cancelled' ? '❌ Cancelled' : 'Confirmed' }
+            ];
+            showDetailModal(`🥂 Bar Booking Details`, details);
+        }
+
+        // Show customer dashboard section
+        function showCustomerSection(sectionId, cardEl) {
+            document.querySelectorAll('.dashboard-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.querySelectorAll('.stat-card[data-target]').forEach(card => {
+                card.classList.remove('active');
+            });
+
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.classList.add('active');
+                section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+            if (cardEl) {
+                cardEl.classList.add('active');
+            }
+        }
+
+        // Show detail modal for items
+        function showDetailModal(title, details) {
+            const modal = document.getElementById('detail-modal');
+            const content = document.getElementById('detail-content');
+            
+            let detailHtml = `<h3 style="color:#0d47a1;margin-top:0;">${title}</h3>`;
+            details.forEach(detail => {
+                detailHtml += `
+                    <div class="detail-row">
+                        <div class="detail-label">${detail.label}</div>
+                        <div class="detail-value">${detail.value}</div>
+                    </div>
+                `;
+            });
+            
+            content.innerHTML = detailHtml;
+            modal.classList.add('active');
+        }
+
+        function closeDetailModal() {
+            const modal = document.getElementById('detail-modal');
+            modal.classList.remove('active');
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('detail-modal');
+            if (event.target === modal) {
+                closeDetailModal();
+            }
+        }
+
+        // Refresh data manually
+        function refreshCustomerData() {
+            updateDashboard();
+        }
+
+        // Auto-refresh functionality
+        let autoRefreshInterval = null;
+
+        function toggleAutoRefresh() {
+            const toggle = document.getElementById('autoRefreshToggle');
+            toggle.classList.toggle('active');
+
+            if (toggle.classList.contains('active')) {
+                // Start auto-refresh every 5 seconds
+                autoRefreshInterval = setInterval(() => {
+                    updateDashboard();
+                }, 5000);
+            } else {
+                // Stop auto-refresh
+                clearInterval(autoRefreshInterval);
+                autoRefreshInterval = null;
+            }
+        }
+
+        // Initial load
+        applyDarkModePreference();
+        updateDashboard();
+        updateNavigation();
+
+        // Listen for storage changes
+        window.addEventListener('storage', function() {
+            updateDashboard();
+        });
+    </script>
+</body>
+</html>

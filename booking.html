@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Royal Plaza Hotel Management System - Booking</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <span class="logo-crown">&#x2756;</span>
+                <div class="logo-brand">
+                    <span class="logo-name">Royal Plaza</span>
+                    <span class="logo-tagline">&#10022; Hotel &#10022;</span>
+                </div>
+            </div>
+            <ul class="nav-links">
+                <li><a href="home.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="rooms.html">Rooms & Bar</a></li>
+                <li><a href="food_menu.html">Food Menu</a></li>
+                <li><a href="booking.html">Booking</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="my_cart.html">My Cart</a></li>
+                <li><a href="#" onclick="logout()">Logout</a></li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </nav>
+    </header>
+
+    <section class="booking">
+        <div class="container">
+            <h2>Book Your Stay</h2>
+            <form id="booking-form" data-inline-managed="true">
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone</label>
+                    <input type="tel" id="phone" name="phone" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <div class="form-group">
+                    <label for="checkin">Check-in Date</label>
+                    <input type="date" id="checkin" name="checkin" required>
+                </div>
+                <div class="form-group">
+                    <label for="checkout">Check-out Date</label>
+                    <input type="date" id="checkout" name="checkout" required>
+                </div>
+                <div class="form-group">
+                    <label for="room-type">Room Type</label>
+                    <select id="room-type" name="room-type" required>
+                        <option value="">Select Room Type</option>
+                        <option value="single" data-price="1">Single Room - ₹1/night</option>
+                        <option value="double" data-price="1">Double Room - ₹1/night</option>
+                        <option value="deluxe" data-price="1">Deluxe Room - ₹1/night</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="room-quantity">Number of Rooms</label>
+                    <input type="number" id="room-quantity" name="room-quantity" min="1" value="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="room-numbers">Room Number(s)</label>
+                    <input type="text" id="room-numbers" name="room-numbers" placeholder="Example: 1 or 1,2,3" required>
+                    <p id="available-room-numbers" style="margin-top:8px;font-size:0.92rem;color:#7a6030;">Select room type and dates to see available room numbers.</p>
+                </div>
+                <p id="price-display" class="price-display"></p>
+                
+                <!-- Coupon Code Section -->
+                <div class="form-group" style="margin-top:20px;padding:15px;background:#f9f9f9;border-left:4px solid #27ae60;border-radius:4px;">
+                    <label for="coupon-code" style="display:flex;justify-content:space-between;align-items:center;">
+                        <span>💳 Have a Coupon Code? (Optional)</span>
+                        <span id="coupon-discount" style="color:#27ae60;font-weight:bold;display:none;">Save: <span id="discount-amount">₹0</span></span>
+                    </label>
+                    <div style="display:flex;gap:10px;margin-top:10px;">
+                        <input type="text" id="coupon-code" name="coupon-code" placeholder="Enter coupon code" style="flex:1;">
+                        <button type="button" onclick="validateCoupon()" class="submit-btn" style="padding:8px 20px;">Apply</button>
+                    </div>
+                    <p id="coupon-message" style="margin-top:8px;font-size:0.9rem;display:none;"></p>
+                </div>
+                
+                <button type="submit" class="submit-btn">Book Now</button>
+            </form>
+            <div id="confirmation" class="confirmation hidden">
+                <h3>Booking Confirmed!</h3>
+                <p id="confirmation-text">Thank you for your booking. We will contact you shortly with confirmation details.</p>
+            </div>
+
+            <div id="roomPaymentModal" class="gallery-modal" style="display:none;">
+                <div class="gallery-modal-content" style="max-width:520px;">
+                    <h3 style="margin-bottom:10px;">Complete Payment</h3>
+                    <p id="room-payment-amount" style="margin-bottom:10px;font-weight:700;color:#3d2e18;"></p>
+                    <div class="form-group" style="margin-bottom:12px;">
+                        <label for="room-payment-method">Payment Method</label>
+                        <select id="room-payment-method">
+                            <option value="">Select payment method</option>
+                            <option value="upi">UPI</option>
+                            <option value="qr">QR Code</option>
+                            <option value="debit">Debit Card</option>
+                        </select>
+                    </div>
+                    <div id="room-payment-fields"></div>
+                    <div class="gallery-modal-actions">
+                        <button type="button" class="submit-btn" onclick="completeRoomPayment()">Pay Now</button>
+                        <button type="button" class="submit-btn" style="background:#5b4a2e;color:#f5e8c1;" onclick="closeRoomPaymentModal()">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Contact Us</h3>
+                    <p>Axis Knowledge City, Hathipur,<br>Rooma, NH-2, Milestone - 478,<br>Kanpur - 209402,<br>Uttar Pradesh, India</p>
+                    <p>Phone: (123) 456-7890</p>
+                    <p>Email: info@luxuryhotel.com</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Follow Us</h3>
+                    <div class="social-links">
+                        <a href="#">Facebook</a>
+                        <a href="https://youtu.be/ZJsjGBiH3P8" target="_blank" rel="noopener noreferrer">YouTube</a>
+                        <a href="#">Twitter</a>
+                        <a href="#">Instagram</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/script.js"></script>
+    <script>
+        checkLogin();
+        
+        // Update navigation based on user type
+        function updateNavigation() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            const navLinks = document.querySelector('.nav-links');
+            
+            if (!navLinks) return;
+            
+            // Remove old dashboard link if exists
+            const oldDashboardLink = Array.from(navLinks.querySelectorAll('li')).find(li => 
+                li.textContent.includes('Dashboard') || li.textContent.includes('My Dashboard')
+            );
+            if (oldDashboardLink) {
+                oldDashboardLink.remove();
+            }
+
+            // Add appropriate dashboard link based on user type
+            let dashboardLink = '';
+            if (currentUser.type === 'customer') {
+                dashboardLink = '<li><a href="customer_dashboard.html">My Dashboard</a></li>';
+            } else if (currentUser.type === 'admin' || currentUser.type === 'staff') {
+                dashboardLink = '<li><a href="admin_dashboard.html">Dashboard</a></li>';
+            }
+
+            if (dashboardLink) {
+                // Insert before Logout link
+                const logoutLink = navLinks.querySelector('li:last-child');
+                if (logoutLink) {
+                    logoutLink.insertAdjacentHTML('beforebegin', dashboardLink);
+                }
+            }
+        }
+        
+        // Update navigation on page load
+        updateNavigation();
+
+        // Initialize form with logged-in user's data
+        function initializeForm() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            
+            document.getElementById('name').value = currentUser.name || '';
+            document.getElementById('email').value = currentUser.email || '';
+            document.getElementById('phone').value = currentUser.phone || '';
+            
+            // Keep email editable unless we have a logged-in customer email
+            const emailInput = document.getElementById('email');
+            if (currentUser.type === 'customer' && currentUser.email) {
+                emailInput.setAttribute('readonly', true);
+                emailInput.style.backgroundColor = '#f0f0f0';
+            } else {
+                emailInput.removeAttribute('readonly');
+                emailInput.style.backgroundColor = '#fffdf5';
+            }
+            
+            // Load room quantity from localStorage if available
+            const selectedRoomQuantity = localStorage.getItem('selectedRoomQuantity');
+            const selectedRoomType = localStorage.getItem('selectedRoomType');
+            
+            if (selectedRoomQuantity !== null) {
+                const parsedQty = parseInt(selectedRoomQuantity, 10);
+                document.getElementById('room-quantity').value = Number.isInteger(parsedQty) && parsedQty > 0 ? parsedQty : 1;
+                // Also set the room type if available
+                if (selectedRoomType) {
+                    document.getElementById('room-type').value = selectedRoomType;
+                }
+            } else {
+                // Fallback to old format for backward compatibility
+                const roomQuantities = JSON.parse(localStorage.getItem('roomQuantities') || '{}');
+                const singleQty = roomQuantities.single || 1;
+                const doubleQty = roomQuantities.double || 1;
+                const deluxeQty = roomQuantities.deluxe || 1;
+                
+                // Set default quantity to the maximum selected (for backward compatibility)
+                const maxQty = Math.max(singleQty, doubleQty, deluxeQty);
+                document.getElementById('room-quantity').value = maxQty;
+            }
+            
+            // Update price display after setting quantity
+            updatePrice();
+        }
+
+        // Booking Form Handler
+        const bookingForm = document.getElementById('booking-form');
+        const roomTypeSelect = document.getElementById('room-type');
+        const roomQuantityInput = document.getElementById('room-quantity');
+        const roomNumbersInput = document.getElementById('room-numbers');
+        const availableRoomNumbersEl = document.getElementById('available-room-numbers');
+        const priceDisplay = document.getElementById('price-display');
+        const confirmation = document.getElementById('confirmation');
+        const roomPaymentModal = document.getElementById('roomPaymentModal');
+        const roomPaymentMethod = document.getElementById('room-payment-method');
+        const roomPaymentFields = document.getElementById('room-payment-fields');
+        const roomPaymentAmount = document.getElementById('room-payment-amount');
+        let pendingRoomBooking = null;
+        const DEFAULT_ADMIN_PAYMENT = {
+            accountHolder: 'Royal Plaza Hotel',
+            upiId: 'royalplaza@upi',
+            bankName: 'State Bank of India',
+            accountNumber: '123456789012',
+            ifsc: 'SBIN0001234',
+            supportPhone: '1234567890',
+            customQrImage: ''
+        };
+        const ROOM_INVENTORY = {
+            single: Array.from({ length: 100 }, (_, index) => index + 1),
+            double: Array.from({ length: 100 }, (_, index) => index + 1),
+            deluxe: Array.from({ length: 100 }, (_, index) => index + 1)
+        };
+
+        function getAdminPaymentProfile() {
+            return JSON.parse(localStorage.getItem('adminPaymentProfile') || 'null') || { ...DEFAULT_ADMIN_PAYMENT };
+        }
+
+        function maskAccount(acc) {
+            if (!acc || acc.length < 4) return '****';
+            return `${'*'.repeat(Math.max(0, acc.length - 4))}${acc.slice(-4)}`;
+        }
+
+        // Function to update price display
+        function updatePrice() {
+            const selectedOption = roomTypeSelect.options[roomTypeSelect.selectedIndex];
+            const price = selectedOption.getAttribute('data-price');
+            const quantity = parseInt(roomQuantityInput.value) || 1;
+            
+            if (price) {
+                const totalUsd = price * quantity;
+                const totalInr = usdToInr(totalUsd);
+                priceDisplay.textContent = 'Price: ₹' + totalInr + ' for ' + quantity + ' room(s) per night';
+            } else {
+                priceDisplay.textContent = '';
+            }
+
+            updateAvailableRoomNumbers();
+        }
+
+        function calculateNights(checkin, checkout) {
+            const checkInDate = new Date(checkin);
+            const checkOutDate = new Date(checkout);
+            return Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
+        }
+
+        function datesOverlap(checkinA, checkoutA, checkinB, checkoutB) {
+            const startA = new Date(checkinA);
+            const endA = new Date(checkoutA);
+            const startB = new Date(checkinB);
+            const endB = new Date(checkoutB);
+            return startA < endB && endA > startB;
+        }
+
+        function getAvailableRoomNumbers(roomType, checkin, checkout) {
+            if (!roomType || !checkin || !checkout || !ROOM_INVENTORY[roomType]) return [];
+
+            const bookings = JSON.parse(localStorage.getItem('bookings') || '[]');
+            const unavailable = new Set();
+
+            bookings.forEach(booking => {
+                if (booking.roomType !== roomType) return;
+                if (!Array.isArray(booking.roomNumbers)) return;
+                if (!datesOverlap(checkin, checkout, booking.checkin, booking.checkout)) return;
+                booking.roomNumbers.forEach(number => unavailable.add(Number(number)));
+            });
+
+            return ROOM_INVENTORY[roomType].filter(number => !unavailable.has(number));
+        }
+
+        function updateAvailableRoomNumbers() {
+            const roomType = roomTypeSelect.value;
+            const checkin = document.getElementById('checkin').value;
+            const checkout = document.getElementById('checkout').value;
+            if (!roomType || !checkin || !checkout) {
+                availableRoomNumbersEl.textContent = 'Select room type and dates to see available room numbers.';
+                return;
+            }
+
+            const available = getAvailableRoomNumbers(roomType, checkin, checkout);
+            availableRoomNumbersEl.textContent = available.length
+                ? `Available Room Numbers: ${available.join(', ')}`
+                : 'No room numbers available for selected dates.';
+        }
+
+        function parseRoomNumbers(value) {
+            return value
+                .split(',')
+                .map(item => Number(item.trim()))
+                .filter(number => Number.isInteger(number));
+        }
+
+        // Show price when room type or quantity changes
+        roomTypeSelect.addEventListener('change', updatePrice);
+        roomQuantityInput.addEventListener('input', updatePrice);
+        document.getElementById('checkin').addEventListener('change', updateAvailableRoomNumbers);
+        document.getElementById('checkout').addEventListener('change', updateAvailableRoomNumbers);
+
+        function buildRoomPaymentFields(method, amount) {
+            const profile = getAdminPaymentProfile();
+            if (method === 'upi') {
+                roomPaymentFields.innerHTML = `
+                    <p style="margin-bottom:8px;color:#3d2e18;"><strong>Pay To:</strong> ${profile.accountHolder}</p>
+                    <p style="margin-bottom:10px;color:#3d2e18;"><strong>UPI:</strong> ${profile.upiId}</p>
+                    <div class="form-group">
+                        <label for="room-upi-ref">UPI Transaction Reference</label>
+                        <input id="room-upi-ref" type="text" placeholder="Enter UPI ref no.">
+                    </div>
+                `;
+                return;
+            }
+            if (method === 'qr') {
+                const upiLink = encodeURIComponent(`upi://pay?pa=${profile.upiId}&pn=${profile.accountHolder}&am=${amount}&cu=INR`);
+                const qrSrc = profile.customQrImage || `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${upiLink}`;
+                roomPaymentFields.innerHTML = `
+                    <p style="margin-bottom:8px;color:#3d2e18;">Scan this QR to pay</p>
+                    <img src="${qrSrc}" alt="QR Code" style="display:block;margin:0 auto 12px;border:1px solid #d4c48a;border-radius:8px;width:220px;height:220px;object-fit:contain;">
+                    <p style="font-size:0.9rem;color:#7a6030;">After payment, enter UPI/QR ref and click Pay Now.</p>
+                    <div class="form-group" style="margin-top:8px;">
+                        <label for="room-qr-ref">QR Payment Reference</label>
+                        <input id="room-qr-ref" type="text" placeholder="Enter payment ref no.">
+                    </div>
+                `;
+                return;
+            }
+            if (method === 'debit') {
+                roomPaymentFields.innerHTML = `
+                    <p style="margin-bottom:8px;color:#3d2e18;"><strong>Payee:</strong> ${profile.accountHolder}</p>
+                    <p style="margin-bottom:8px;color:#3d2e18;"><strong>Bank:</strong> ${profile.bankName} | A/C ${maskAccount(profile.accountNumber)} | IFSC ${profile.ifsc}</p>
+                    <div class="form-group">
+                        <label for="room-card-name">Card Holder Name</label>
+                        <input id="room-card-name" type="text" placeholder="Name on card">
+                    </div>
+                    <div class="form-group">
+                        <label for="room-card-number">Debit Card Number</label>
+                        <input id="room-card-number" type="text" maxlength="19" placeholder="1234 5678 9012 3456">
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                        <div class="form-group">
+                            <label for="room-card-expiry">Expiry (MM/YY)</label>
+                            <input id="room-card-expiry" type="text" maxlength="5" placeholder="MM/YY">
+                        </div>
+                        <div class="form-group">
+                            <label for="room-card-cvv">CVV</label>
+                            <input id="room-card-cvv" type="password" maxlength="4" placeholder="***">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="room-debit-ref">Debit Transaction Reference</label>
+                        <input id="room-debit-ref" type="text" placeholder="Enter bank/card txn ref (min 6 chars)">
+                    </div>
+                `;
+                return;
+            }
+            roomPaymentFields.innerHTML = '';
+        }
+
+        function openRoomPaymentModal(amount, bookingDraft) {
+            pendingRoomBooking = bookingDraft;
+            roomPaymentAmount.textContent = `Amount to pay: INR ${amount}`;
+            roomPaymentMethod.value = '';
+            roomPaymentFields.innerHTML = '';
+            roomPaymentModal.style.display = 'flex';
+        }
+
+        function closeRoomPaymentModal() {
+            roomPaymentModal.style.display = 'none';
+            pendingRoomBooking = null;
+        }
+
+        function generateTransactionId(prefix) {
+            return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+        }
+
+        roomPaymentMethod.addEventListener('change', function() {
+            const amount = pendingRoomBooking ? pendingRoomBooking.totalAmountInr : 0;
+            buildRoomPaymentFields(this.value, amount);
+        });
+
+        async function completeRoomPayment() {
+            if (!pendingRoomBooking) return;
+            const method = roomPaymentMethod.value;
+            if (!method) {
+                alert('Please select payment method.');
+                return;
+            }
+
+            if (method === 'upi') {
+                const ref = (document.getElementById('room-upi-ref')?.value || '').trim();
+                if (!ref) {
+                    alert('Enter UPI transaction reference.');
+                    return;
+                }
+            }
+            if (method === 'qr') {
+                const ref = (document.getElementById('room-qr-ref')?.value || '').trim();
+                if (!ref) {
+                    alert('Enter QR payment reference.');
+                    return;
+                }
+            }
+            if (method === 'debit') {
+                const cardName = (document.getElementById('room-card-name')?.value || '').trim();
+                const cardNumberRaw = (document.getElementById('room-card-number')?.value || '').replace(/\s+/g, '');
+                const expiry = (document.getElementById('room-card-expiry')?.value || '').trim();
+                const cvv = (document.getElementById('room-card-cvv')?.value || '').trim();
+                const ref = (document.getElementById('room-debit-ref')?.value || '').trim();
+                if (!cardName || !/^\d{16}$/.test(cardNumberRaw) || !/^(0[1-9]|1[0-2])\/\d{2}$/.test(expiry) || !/^\d{3,4}$/.test(cvv) || !/^[A-Za-z0-9-]{6,}$/.test(ref)) {
+                    alert('Enter full valid debit card details and transaction reference.');
+                    return;
+                }
+            }
+
+            const profile = getAdminPaymentProfile();
+            const paymentRef =
+                method === 'upi' ? (document.getElementById('room-upi-ref')?.value || '').trim() :
+                method === 'qr' ? (document.getElementById('room-qr-ref')?.value || '').trim() :
+                (document.getElementById('room-debit-ref')?.value || '').trim();
+            if (!/^[A-Za-z0-9-]{6,}$/.test(paymentRef)) {
+                alert('Please enter a valid transaction reference (min 6 characters).');
+                return;
+            }
+
+            const bookingToSave = {
+                ...pendingRoomBooking,
+                payment: {
+                    method,
+                    status: 'paid',
+                    amountInr: pendingRoomBooking.totalAmountInr,
+                    transactionId: generateTransactionId('ROOMPAY'),
+                    paymentReference: paymentRef,
+                    debitCard: method === 'debit' ? {
+                        cardHolder: (document.getElementById('room-card-name')?.value || '').trim(),
+                        cardNumberMasked: maskAccount((document.getElementById('room-card-number')?.value || '').replace(/\s+/g, '')),
+                        expiry: (document.getElementById('room-card-expiry')?.value || '').trim()
+                    } : null,
+                    paidTo: {
+                        accountHolder: profile.accountHolder,
+                        upiId: profile.upiId,
+                        bankName: profile.bankName,
+                        accountNumberMasked: maskAccount(profile.accountNumber),
+                        ifsc: profile.ifsc
+                    },
+                    paidAt: new Date().toISOString()
+                }
+            };
+
+            await window.HMS_API.post('/bookings', {
+                name: bookingToSave.name,
+                email: bookingToSave.email,
+                phone: bookingToSave.phone,
+                checkin: bookingToSave.checkin,
+                checkout: bookingToSave.checkout,
+                room_type: bookingToSave.roomType,
+                room_quantity: bookingToSave.roomQuantity,
+                room_numbers: bookingToSave.roomNumbers || [],
+                total_amount_inr: bookingToSave.totalAmountInr,
+                payment_method: bookingToSave.payment?.method || null,
+                payment_txn_id: bookingToSave.payment?.transactionId || null,
+                payment_reference: bookingToSave.payment?.paymentReference || null,
+                payment: bookingToSave.payment || null,
+                status: 'booked'
+            });
+
+            closeRoomPaymentModal();
+
+            document.getElementById('confirmation-text').textContent =
+                `Payment successful. Booking confirmed for room number(s) ${bookingToSave.roomNumbers.join(', ')} from ${bookingToSave.checkin} to ${bookingToSave.checkout}.`;
+            confirmation.classList.remove('hidden');
+            bookingForm.reset();
+            priceDisplay.textContent = '';
+            availableRoomNumbersEl.textContent = 'Select room type and dates to see available room numbers.';
+
+            setTimeout(() => {
+                confirmation.classList.add('hidden');
+                window.location.href = 'customer_dashboard.html';
+            }, 3000);
+        }
+
+        // Handle booking form submission
+        bookingForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            const name = document.getElementById('name').value.trim();
+            const email = (currentUser.email || document.getElementById('email').value || '').trim();
+            const phone = document.getElementById('phone').value.trim();
+            const checkin = document.getElementById('checkin').value;
+            const checkout = document.getElementById('checkout').value;
+            const roomTypeSelect = document.getElementById('room-type');
+            const roomType = roomTypeSelect.value;
+            const roomQuantity = parseInt(document.getElementById('room-quantity').value) || 0;
+            let roomNumbers = parseRoomNumbers(roomNumbersInput.value);
+            const pricePerNight = roomTypeSelect.options[roomTypeSelect.selectedIndex].getAttribute('data-price');
+            const totalPrice = pricePerNight * roomQuantity;
+
+            // Validate fields
+            if (!name || !email || !phone || !checkin || !checkout || !roomType) {
+                alert('Please fill all fields!');
+                return;
+            }
+
+            // Validate room quantity
+            if (roomQuantity < 1) {
+                alert('Please book at least 1 room.');
+                return;
+            }
+
+            // Validate dates
+            if (new Date(checkin) >= new Date(checkout)) {
+                alert('Check-out date must be after check-in date!');
+                return;
+            }
+
+            const availableRoomNumbers = getAvailableRoomNumbers(roomType, checkin, checkout);
+            if (roomNumbers.length === 0) {
+                roomNumbers = availableRoomNumbers.slice(0, roomQuantity);
+                roomNumbersInput.value = roomNumbers.join(',');
+            }
+            if (roomNumbers.length !== roomQuantity) {
+                alert(`Please enter exactly ${roomQuantity} room number(s), separated by commas.`);
+                return;
+            }
+            if (new Set(roomNumbers).size !== roomNumbers.length) {
+                alert('Duplicate room numbers are not allowed.');
+                return;
+            }
+            const invalidRoomNumber = roomNumbers.find(number => number < 1 || number > 100);
+            if (invalidRoomNumber) {
+                alert('Room numbers must be between 1 and 100.');
+                return;
+            }
+            const unavailableRoom = roomNumbers.find(number => !availableRoomNumbers.includes(number));
+            if (unavailableRoom) {
+                alert(`Room number ${unavailableRoom} is not available for selected dates.`);
+                updateAvailableRoomNumbers();
+                return;
+            }
+
+            // Create booking object with customer email
+            const booking = {
+                name: name,
+                email: email,
+                phone: phone,
+                checkin: checkin,
+                checkout: checkout,
+                roomType: roomType,
+                roomQuantity: roomQuantity,
+                roomNumbers: roomNumbers,
+                pricePerNight: pricePerNight,
+                totalPrice: totalPrice,
+                totalAmountInr: usdToInr(totalPrice * calculateNights(checkin, checkout)),
+                timestamp: new Date().toLocaleString()
+            };
+
+            openRoomPaymentModal(booking.totalAmountInr, booking);
+        });
+
+        roomPaymentModal.addEventListener('click', function(e) {
+            if (e.target === roomPaymentModal) closeRoomPaymentModal();
+        });
+
+        // Initialize form on page load
+        initializeForm();
+    </script>
+</body>
+</html>

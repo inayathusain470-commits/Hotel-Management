@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Menu - Royal Plaza Hotel</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <span class="logo-crown">&#x2756;</span>
+                <div class="logo-brand">
+                    <span class="logo-name">Royal Plaza</span>
+                    <span class="logo-tagline">&#10022; Hotel &#10022;</span>
+                </div>
+            </div>
+            <ul class="nav-links">
+                <li><a href="home.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="rooms.html">Rooms & Bar</a></li>
+                <li><a href="food_menu.html">Food Menu</a></li>
+                <li><a href="booking.html">Booking</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="my_cart.html">My Cart</a></li>
+                <li><a href="#" onclick="logout()">Logout</a></li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </nav>
+    </header>
+
+    <section class="menu">
+        <div class="container">
+            <h2>Food Menu</h2>
+            <div id="menu-search-wrap" style="max-width:700px;margin:0 auto 18px auto;display:flex;flex-direction:column;gap:8px;">
+                <input type="text" id="menu-search" placeholder="Search menu items..." style="padding:12px 14px;border:1px solid #d4c48a;border-radius:8px;background:#fffdf5;color:#2c2416;font-weight:600;">
+                <p id="menu-search-empty" style="display:none;color:#b91c1c;font-weight:700;text-align:center;">Not Found</p>
+            </div>
+            
+            <!-- Guest Info Section -->
+            <div id="guest-info-section" style="background: #f5f5f5; padding: 20px; margin-bottom: 20px; border-radius: 8px;">
+                <h3>Guest Information</h3>
+                <div id="booking-options" style="display: none;">
+                    <p>Select your booking:</p>
+                    <select id="booking-select" style="width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 4px; border: 1px solid #ddd;">
+                        <option value="">-- Select your booking --</option>
+                    </select>
+                    <p id="selected-guest" style="color: #27ae60; font-weight: bold; margin: 10px 0;"></p>
+                </div>
+                <div id="guest-form" style="display: none;">
+                    <p>You don't have an active booking. Please enter your details:</p>
+                    <div style="display: flex; gap: 10px; margin: 10px 0; flex-wrap: wrap;">
+                        <input type="text" id="guest-name" placeholder="Your Name" style="flex: 1; min-width: 150px; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                        <input type="text" id="guest-room" placeholder="Room Number" style="flex: 1; min-width: 150px; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                        <button onclick="setGuestInfo()" style="padding: 10px 20px; background: #27ae60; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Continue</button>
+                    </div>
+                </div>
+            </div>
+
+            <h3>ROYAL SIGNATURE STARTERS</h3>
+            <h4>VEGETARIAN LUXURY BITES</h4>
+            <table>
+                <tr><td><img src="https://images.unsplash.com/photo-1544025162-d76694265947?w=100" alt="Truffle Paneer Medallions"></td><td>Truffle Paneer Medallions</td><td>₹1</td><td><button class="add-to-cart" data-item="Truffle Paneer Medallions" data-price="1">Add to Cart</button></td></tr>
+                <tr><td><img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=100" alt="Saffron Garden Canapes"></td><td>Saffron Garden Canapes</td><td>₹1</td><td><button class="add-to-cart" data-item="Saffron Garden Canapes" data-price="1">Add to Cart</button></td></tr>
+                <tr><td><img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=100" alt="Royal Lotus Stem Crisp"></td><td>Royal Lotus Stem Crisp</td><td>₹1</td><td><button class="add-to-cart" data-item="Royal Lotus Stem Crisp" data-price="1">Add to Cart</button></td></tr>
+                <tr><td><img src="https://images.unsplash.com/photo-1482049016688-2d3e1b311543?w=100" alt="Velvet Herb Crostini"></td><td>Velvet Herb Crostini</td><td>₹1</td><td><button class="add-to-cart" data-item="Velvet Herb Crostini" data-price="1">Add to Cart</button></td></tr>
+            </table>
+
+            <h4>NON-VEGETARIAN SIGNATURES</h4>
+            <table>
+                <tr><td><img src="https://images.unsplash.com/photo-1525351484163-7529414344d8?w=100" alt="Smoked Chicken Royale"></td><td>Smoked Chicken Royale</td><td>₹1</td><td><button class="add-to-cart" data-item="Smoked Chicken Royale" data-price="1">Add to Cart</button></td></tr>
+                <tr><td><img src="https://images.unsplash.com/photo-1559847844-5315695dadae?w=100" alt="Pepper Crusted Fish Bites"></td><td>Pepper Crusted Fish Bites</td><td>₹1</td><td><button class="add-to-cart" data-item="Pepper Crusted Fish Bites" data-price="1">Add to Cart</button></td></tr>
+                <tr><td><img src="https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=100" alt="Butter Garlic Prawns"></td><td>Butter Garlic Prawns</td><td>₹1</td><td><button class="add-to-cart" data-item="Butter Garlic Prawns" data-price="1">Add to Cart</button></td></tr>
+                <tr><td><img src="https://images.unsplash.com/photo-1600891964092-4316c288032e?w=100" alt="Lamb Seekh Supreme"></td><td>Lamb Seekh Supreme</td><td>₹1</td><td><button class="add-to-cart" data-item="Lamb Seekh Supreme" data-price="1">Add to Cart</button></td></tr>
+            </table>
+
+            <h3>CHEF'S LUXURY MAINS</h3>
+            <h4>ROYAL VEGETARIAN CURATIONS</h4>
+            <table>
+                <tr><td><img src="https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=100" alt="Nawabi Paneer Reserve"></td><td>Nawabi Paneer Reserve</td><td>₹1</td><td><button class="add-to-cart" data-item="Nawabi Paneer Reserve" data-price="1">Add to Cart</button></td></tr>
+                <tr><td><img src="https://images.unsplash.com/photo-1511690743698-d9d85f2fbf38?w=100" alt="Imperial Veg Kofta"></td><td>Imperial Veg Kofta</td><td>₹1</td><td><button class="add-to-cart" data-item="Imperial Veg Kofta" data-price="1">Add to Cart</button></td></tr>
+                <tr><td><img src="https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=100" alt="Saffron Dum Biryani Veg"></td><td>Saffron Dum Biryani Veg</td><td>₹1</td><td><button class="add-to-cart" data-item="Saffron Dum Biryani Veg" data-price="1">Add to Cart</button></td></tr>
+                <tr><td><img src="https://images.unsplash.com/photo-1547592180-85f173990554?w=100" alt="Truffle Dal Royale"></td><td>Truffle Dal Royale</td><td>₹1</td><td><button class="add-to-cart" data-item="Truffle Dal Royale" data-price="1">Add to Cart</button></td></tr>
+            </table>
+
+            <h4>PREMIUM NON-VEGETARIAN MAINS</h4>
+            <table>
+                <tr><td><img src="https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=100" alt="Royal Butter Chicken"></td><td>Royal Butter Chicken</td><td>₹1</td><td><button class="add-to-cart" data-item="Royal Butter Chicken" data-price="1">Add to Cart</button></td></tr>
+                <tr><td><img src="https://images.unsplash.com/photo-1631515243349-e0cb75fb8d3a?w=100" alt="Mughlai Mutton Reserve"></td><td>Mughlai Mutton Reserve</td><td>₹1</td><td><button class="add-to-cart" data-item="Mughlai Mutton Reserve" data-price="1">Add to Cart</button></td></tr>
+                <tr><td><img src="https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=100" alt="Seafood Saffron Curry"></td><td>Seafood Saffron Curry</td><td>₹1</td><td><button class="add-to-cart" data-item="Seafood Saffron Curry" data-price="1">Add to Cart</button></td></tr>
+                <tr><td><img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=100" alt="Charcoal Roast Chicken"></td><td>Charcoal Roast Chicken</td><td>₹1</td><td><button class="add-to-cart" data-item="Charcoal Roast Chicken" data-price="1">Add to Cart</button></td></tr>
+            </table>
+
+            <h3>ROYAL DESSERT LOUNGE</h3>
+            <h4>SWEET FINISHES</h4>
+            <table>
+                <tr><td><img src="https://images.unsplash.com/photo-1488477181946-6428a0291777?w=100" alt="Golden Pistachio Kulfi"></td><td>Golden Pistachio Kulfi</td><td>₹1</td><td><button class="add-to-cart" data-item="Golden Pistachio Kulfi" data-price="1">Add to Cart</button></td></tr>
+                <tr><td><img src="https://images.unsplash.com/photo-1551024601-bec78aea704b?w=100" alt="Royal Chocolate Opera"></td><td>Royal Chocolate Opera</td><td>₹1</td><td><button class="add-to-cart" data-item="Royal Chocolate Opera" data-price="1">Add to Cart</button></td></tr>
+                <tr><td><img src="https://images.unsplash.com/photo-1464306076886-da185f6a9d05?w=100" alt="Rose Milk Tres Leches"></td><td>Rose Milk Tres Leches</td><td>₹1</td><td><button class="add-to-cart" data-item="Rose Milk Tres Leches" data-price="1">Add to Cart</button></td></tr>
+                <tr><td><img src="https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=100" alt="Saffron Fruit Crown"></td><td>Saffron Fruit Crown</td><td>₹1</td><td><button class="add-to-cart" data-item="Saffron Fruit Crown" data-price="1">Add to Cart</button></td></tr>
+            </table>
+
+            <h3>LUXURY BEVERAGE BAR</h3>
+            <table>
+                <tr><td><img src="https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=100" alt="Velvet Cold Coffee"></td><td>Velvet Cold Coffee</td><td>₹1</td><td><button class="add-to-cart" data-item="Velvet Cold Coffee" data-price="1">Add to Cart</button></td></tr>
+                <tr><td><img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=100" alt="Royal Saffron Chai"></td><td>Royal Saffron Chai</td><td>₹1</td><td><button class="add-to-cart" data-item="Royal Saffron Chai" data-price="1">Add to Cart</button></td></tr>
+                <tr><td><img src="https://images.unsplash.com/photo-1512568400610-62da28bc8a13?w=100" alt="Blue Lagoon Mocktail"></td><td>Blue Lagoon Mocktail</td><td>₹1</td><td><button class="add-to-cart" data-item="Blue Lagoon Mocktail" data-price="1">Add to Cart</button></td></tr>
+                <tr><td><img src="https://images.unsplash.com/photo-1514996937319-344454492b37?w=100" alt="Emerald Mint Cooler"></td><td>Emerald Mint Cooler</td><td>₹1</td><td><button class="add-to-cart" data-item="Emerald Mint Cooler" data-price="1">Add to Cart</button></td></tr>
+            </table>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Contact Us</h3>
+                    <p>Axis Knowledge City, Hathipur,<br>Rooma, NH-2, Milestone - 478,<br>Kanpur - 209402,<br>Uttar Pradesh, India</p>
+                    <p>Phone: (123) 456-7890</p>
+                    <p>Email: info@luxuryhotel.com</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Follow Us</h3>
+                    <div class="social-links">
+                        <a href="#">Facebook</a>
+                        <a href="https://youtu.be/ZJsjGBiH3P8" target="_blank" rel="noopener noreferrer">YouTube</a>
+                        <a href="#">Twitter</a>
+                        <a href="#">Instagram</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/script.js"></script>
+    <script>
+        checkLogin();
+        
+        // Update navigation based on user type
+        function updateNavigation() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            const navLinks = document.querySelector('.nav-links');
+            
+            if (!navLinks) return;
+            
+            // Remove old dashboard link if exists
+            const oldDashboardLink = Array.from(navLinks.querySelectorAll('li')).find(li => 
+                li.textContent.includes('Dashboard') || li.textContent.includes('My Dashboard')
+            );
+            if (oldDashboardLink) {
+                oldDashboardLink.remove();
+            }
+
+            // Add appropriate dashboard link based on user type
+            let dashboardLink = '';
+            if (currentUser.type === 'customer') {
+                dashboardLink = '<li><a href="customer_dashboard.html">My Dashboard</a></li>';
+            } else if (currentUser.type === 'admin' || currentUser.type === 'staff') {
+                dashboardLink = '<li><a href="admin_dashboard.html">Dashboard</a></li>';
+            }
+
+            if (dashboardLink) {
+                // Insert before Logout link
+                const logoutLink = navLinks.querySelector('li:last-child');
+                if (logoutLink) {
+                    logoutLink.insertAdjacentHTML('beforebegin', dashboardLink);
+                }
+            }
+        }
+        
+        // Update navigation on page load
+        updateNavigation();
+        
+        let currentGuestInfo = null;
+
+        // Inject quantity controls for each food item (0 to Infinity)
+        function injectFoodQuantityControls() {
+            document.querySelectorAll('.add-to-cart').forEach(button => {
+                const quantityContainer = document.createElement('div');
+                quantityContainer.className = 'quantity-controls';
+
+                const minusBtn = document.createElement('button');
+                minusBtn.type = 'button';
+                minusBtn.className = 'quantity-btn';
+                minusBtn.textContent = '-';
+
+                const qtyDisplay = document.createElement('span');
+                qtyDisplay.className = 'quantity-display';
+                qtyDisplay.textContent = '0';
+
+                const plusBtn = document.createElement('button');
+                plusBtn.type = 'button';
+                plusBtn.className = 'quantity-btn';
+                plusBtn.textContent = '+';
+
+                minusBtn.addEventListener('click', () => {
+                    const value = parseInt(qtyDisplay.textContent, 10) || 0;
+                    if (value > 0) {
+                        qtyDisplay.textContent = value - 1;
+                    }
+                });
+
+                plusBtn.addEventListener('click', () => {
+                    const value = parseInt(qtyDisplay.textContent, 10) || 0;
+                    qtyDisplay.textContent = value + 1;
+                });
+
+                quantityContainer.appendChild(minusBtn);
+                quantityContainer.appendChild(qtyDisplay);
+                quantityContainer.appendChild(plusBtn);
+
+                // Place quantity controls before the Add to Cart button
+                button.parentNode.insertBefore(quantityContainer, button);
+                button.dataset.quantitySelector = true;
+            });
+        }
+
+        function normalizeFoodPricesToOne() {
+            document.querySelectorAll('.add-to-cart').forEach(button => {
+                button.dataset.price = '1';
+                const row = button.closest('tr');
+                if (!row) return;
+                const cells = row.querySelectorAll('td');
+                if (cells[2]) {
+                    cells[2].textContent = '₹1';
+                }
+            });
+        }
+
+        function setupMenuSearch() {
+            const searchInput = document.getElementById('menu-search');
+            const emptyState = document.getElementById('menu-search-empty');
+            const allRows = Array.from(document.querySelectorAll('.menu table tr'));
+            if (!searchInput || !allRows.length) return;
+
+            const runSearch = () => {
+                const query = searchInput.value.trim().toLowerCase();
+                let visibleCount = 0;
+
+                allRows.forEach(row => {
+                    const itemCell = row.querySelector('td:nth-child(2)');
+                    if (!itemCell) return;
+                    const itemName = itemCell.textContent.trim().toLowerCase();
+                    const match = !query || itemName.includes(query);
+                    row.style.display = match ? '' : 'none';
+                    if (match) visibleCount += 1;
+                });
+
+                emptyState.style.display = visibleCount === 0 ? 'block' : 'none';
+            };
+
+            searchInput.addEventListener('input', runSearch);
+            runSearch();
+        }
+
+        // Initialize guest info section on page load
+        function initializeGuestInfo() {
+            const bookings = JSON.parse(localStorage.getItem('bookings') || '[]');
+            const bookingOptions = document.getElementById('booking-options');
+            const guestForm = document.getElementById('guest-form');
+            const bookingSelect = document.getElementById('booking-select');
+
+            if (bookings.length > 0) {
+                // Show booking options dropdown
+                bookingOptions.style.display = 'block';
+                guestForm.style.display = 'none';
+
+                // Populate dropdown with bookings
+                bookings.forEach((booking, index) => {
+                    const option = document.createElement('option');
+                    option.value = index;
+                    option.textContent = `${booking.name} - Room ${booking.roomType}`;
+                    bookingSelect.appendChild(option);
+                });
+
+                // Handle booking selection
+                bookingSelect.addEventListener('change', function() {
+                    if (this.value !== '') {
+                        const booking = bookings[parseInt(this.value)];
+                        currentGuestInfo = {
+                            name: booking.name,
+                            room: booking.roomType,
+                            isBooking: true
+                        };
+                        document.getElementById('selected-guest').textContent = 
+                            `✓ Logged in as: ${booking.name} (${booking.roomType})`;
+                    } else {
+                        currentGuestInfo = null;
+                        document.getElementById('selected-guest').textContent = '';
+                    }
+                });
+            } else {
+                // Show guest form for non-booking guests
+                bookingOptions.style.display = 'none';
+                guestForm.style.display = 'block';
+            }
+
+            // Check if guest info already exists in session
+            const savedGuestInfo = sessionStorage.getItem('guestInfo');
+            if (savedGuestInfo) {
+                currentGuestInfo = JSON.parse(savedGuestInfo);
+                document.getElementById('selected-guest').textContent = 
+                    `✓ Guest: ${currentGuestInfo.name} (Room: ${currentGuestInfo.room})`;
+            }
+        }
+
+        // Set guest info for non-booking guests
+        function setGuestInfo() {
+            const name = document.getElementById('guest-name').value.trim();
+            const room = document.getElementById('guest-room').value.trim();
+
+            if (!name || !room) {
+                alert('Please enter both name and room number');
+                return;
+            }
+
+            currentGuestInfo = {
+                name: name,
+                room: room,
+                isBooking: false
+            };
+
+            // Save to session storage
+            sessionStorage.setItem('guestInfo', JSON.stringify(currentGuestInfo));
+
+            // Update UI
+            document.getElementById('guest-form').style.display = 'none';
+            document.getElementById('selected-guest').textContent = 
+                `✓ Guest: ${name} (Room: ${room})`;
+        }
+
+        // Add to cart functionality with guest info check
+        document.querySelectorAll('.add-to-cart').forEach(button => {
+            button.addEventListener('click', function() {
+                if (!currentGuestInfo) {
+                    alert('Please select your booking or enter your details first');
+                    return;
+                }
+
+                const item = this.dataset.item;
+                const price = parseFloat(this.dataset.price);
+                let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+
+                // pick quantity from associated controls, fallback to 1
+                const qtyControl = this.parentNode.querySelector('.quantity-display');
+                let quantity = qtyControl ? parseInt(qtyControl.textContent, 10) : 1;
+                if (isNaN(quantity) || quantity < 0) quantity = 0;
+
+                if (quantity === 0) {
+                    alert('Please choose quantity before adding to cart');
+                    return;
+                }
+
+                const existing = cart.find(i => i.item === item);
+                if (existing) {
+                    existing.quantity += quantity;
+                } else {
+                    cart.push({ item, price, quantity });
+                }
+
+                localStorage.setItem('cart', JSON.stringify(cart));
+
+                // Reset quantity for this item
+                if (qtyControl) qtyControl.textContent = '0';
+
+                alert(`${item} (x${quantity}) added to cart!`);
+            });
+        });
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            normalizeFoodPricesToOne();
+            initializeGuestInfo();
+            injectFoodQuantityControls();
+            setupMenuSearch();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Cart - Royal Plaza Hotel</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <span class="logo-crown">&#x2756;</span>
+                <div class="logo-brand">
+                    <span class="logo-name">Royal Plaza</span>
+                    <span class="logo-tagline">&#10022; Hotel &#10022;</span>
+                </div>
+            </div>
+            <ul class="nav-links">
+                <li><a href="home.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="rooms.html">Rooms & Bar</a></li>
+                <li><a href="food_menu.html">Food Menu</a></li>
+                <li><a href="booking.html">Booking</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="my_cart.html">My Cart</a></li>
+                <li><a href="#" onclick="logout()">Logout</a></li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </nav>
+    </header>
+
+    <section class="cart">
+        <div class="container">
+            <h2>My Cart</h2>
+            <div id="cart-items"></div>
+            <div id="cart-total"></div>
+            <div id="order-form" style="display: none;">
+                <h3>Place Order</h3>
+                <form id="place-order-form">
+                    <div class="form-group">
+                        <label for="order-name">Name</label>
+                        <input type="text" id="order-name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="order-room">Room Number</label>
+                        <input type="text" id="order-room" name="room" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="order-phone">Phone</label>
+                        <input type="tel" id="order-phone" name="phone" required>
+                    </div>
+                    <button type="submit" class="submit-btn">Place Order</button>
+                </form>
+            </div>
+            <div id="order-confirmation" style="display: none;">
+                <h3>Order Placed Successfully!</h3>
+                <p>Your food order has been placed. We will contact you shortly for delivery details.</p>
+            </div>
+
+            <div id="foodPaymentModal" class="gallery-modal" style="display:none;">
+                <div class="gallery-modal-content" style="max-width:520px;">
+                    <h3 style="margin-bottom:10px;">Complete Food Payment</h3>
+                    <p id="food-payment-amount" style="margin-bottom:10px;font-weight:700;color:#3d2e18;"></p>
+                    <div class="form-group" style="margin-bottom:12px;">
+                        <label for="food-payment-method">Payment Method</label>
+                        <select id="food-payment-method">
+                            <option value="">Select payment method</option>
+                            <option value="upi">UPI</option>
+                            <option value="qr">QR Code</option>
+                            <option value="debit">Debit Card</option>
+                        </select>
+                    </div>
+                    <div id="food-payment-fields"></div>
+                    <div class="gallery-modal-actions">
+                        <button type="button" class="submit-btn" onclick="completeFoodPayment()">Pay Now</button>
+                        <button type="button" class="submit-btn" style="background:#5b4a2e;color:#f5e8c1;" onclick="closeFoodPaymentModal()">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="js/script.js"></script>
+    <script>
+        checkLogin();
+        
+        // Update navigation based on user type
+        function updateNavigation() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            const navLinks = document.querySelector('.nav-links');
+            
+            if (!navLinks) return;
+            
+            // Remove old dashboard link if exists
+            const oldDashboardLink = Array.from(navLinks.querySelectorAll('li')).find(li => 
+                li.textContent.includes('Dashboard') || li.textContent.includes('My Dashboard')
+            );
+            if (oldDashboardLink) {
+                oldDashboardLink.remove();
+            }
+
+            // Add appropriate dashboard link based on user type
+            let dashboardLink = '';
+            if (currentUser.type === 'customer') {
+                dashboardLink = '<li><a href="customer_dashboard.html">My Dashboard</a></li>';
+            } else if (currentUser.type === 'admin' || currentUser.type === 'staff') {
+                dashboardLink = '<li><a href="admin_dashboard.html">Dashboard</a></li>';
+            }
+
+            if (dashboardLink) {
+                // Insert before Logout link
+                const logoutLink = navLinks.querySelector('li:last-child');
+                if (logoutLink) {
+                    logoutLink.insertAdjacentHTML('beforebegin', dashboardLink);
+                }
+            }
+        }
+        
+        // Update navigation on page load
+        updateNavigation();
+        
+        let guestInfo = null;
+        let pendingFoodOrder = null;
+        const DEFAULT_ADMIN_PAYMENT = {
+            accountHolder: 'Royal Plaza Hotel',
+            upiId: 'royalplaza@upi',
+            bankName: 'State Bank of India',
+            accountNumber: '123456789012',
+            ifsc: 'SBIN0001234',
+            supportPhone: '1234567890',
+            customQrImage: ''
+        };
+
+        function getAdminPaymentProfile() {
+            return JSON.parse(localStorage.getItem('adminPaymentProfile') || 'null') || { ...DEFAULT_ADMIN_PAYMENT };
+        }
+
+        function maskAccount(acc) {
+            if (!acc || acc.length < 4) return '****';
+            return `${'*'.repeat(Math.max(0, acc.length - 4))}${acc.slice(-4)}`;
+        }
+
+        function buildFoodPaymentFields(method, amount) {
+            const profile = getAdminPaymentProfile();
+            const fields = document.getElementById('food-payment-fields');
+            if (method === 'upi') {
+                fields.innerHTML = `
+                    <p style="margin-bottom:8px;color:#3d2e18;"><strong>Pay To:</strong> ${profile.accountHolder}</p>
+                    <p style="margin-bottom:10px;color:#3d2e18;"><strong>UPI:</strong> ${profile.upiId}</p>
+                    <div class="form-group">
+                        <label for="food-upi-ref">UPI Transaction Reference</label>
+                        <input id="food-upi-ref" type="text" placeholder="Enter UPI ref no.">
+                    </div>
+                `;
+                return;
+            }
+            if (method === 'qr') {
+                const upiLink = encodeURIComponent(`upi://pay?pa=${profile.upiId}&pn=${profile.accountHolder}&am=${amount}&cu=INR`);
+                const qrSrc = profile.customQrImage || `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${upiLink}`;
+                fields.innerHTML = `
+                    <p style="margin-bottom:8px;color:#3d2e18;">Scan this QR to pay</p>
+                    <img src="${qrSrc}" alt="QR Code" style="display:block;margin:0 auto 12px;border:1px solid #d4c48a;border-radius:8px;width:220px;height:220px;object-fit:contain;">
+                    <div class="form-group" style="margin-top:8px;">
+                        <label for="food-qr-ref">QR Payment Reference</label>
+                        <input id="food-qr-ref" type="text" placeholder="Enter payment ref no.">
+                    </div>
+                `;
+                return;
+            }
+            if (method === 'debit') {
+                fields.innerHTML = `
+                    <p style="margin-bottom:8px;color:#3d2e18;"><strong>Payee:</strong> ${profile.accountHolder}</p>
+                    <p style="margin-bottom:8px;color:#3d2e18;"><strong>Bank:</strong> ${profile.bankName} | A/C ${maskAccount(profile.accountNumber)} | IFSC ${profile.ifsc}</p>
+                    <div class="form-group">
+                        <label for="food-card-name">Card Holder Name</label>
+                        <input id="food-card-name" type="text" placeholder="Name on card">
+                    </div>
+                    <div class="form-group">
+                        <label for="food-card-number">Debit Card Number</label>
+                        <input id="food-card-number" type="text" maxlength="19" placeholder="1234 5678 9012 3456">
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                        <div class="form-group">
+                            <label for="food-card-expiry">Expiry (MM/YY)</label>
+                            <input id="food-card-expiry" type="text" maxlength="5" placeholder="MM/YY">
+                        </div>
+                        <div class="form-group">
+                            <label for="food-card-cvv">CVV</label>
+                            <input id="food-card-cvv" type="password" maxlength="4" placeholder="***">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="food-debit-ref">Debit Transaction Reference</label>
+                        <input id="food-debit-ref" type="text" placeholder="Enter bank/card txn ref (min 6 chars)">
+                    </div>
+                `;
+                return;
+            }
+            fields.innerHTML = '';
+        }
+
+        function openFoodPaymentModal(total, orderDraft) {
+            pendingFoodOrder = orderDraft;
+            document.getElementById('food-payment-amount').textContent = `Amount to pay: INR ${total}`;
+            document.getElementById('food-payment-method').value = '';
+            document.getElementById('food-payment-fields').innerHTML = '';
+            document.getElementById('foodPaymentModal').style.display = 'flex';
+        }
+
+        function closeFoodPaymentModal() {
+            document.getElementById('foodPaymentModal').style.display = 'none';
+            pendingFoodOrder = null;
+        }
+
+        function generateFoodTxn() {
+            return `FOODPAY-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+        }
+
+        document.getElementById('food-payment-method').addEventListener('change', function() {
+            const amount = pendingFoodOrder ? pendingFoodOrder.total : 0;
+            buildFoodPaymentFields(this.value, amount);
+        });
+
+        async function completeFoodPayment() {
+            if (!pendingFoodOrder) return;
+            const method = document.getElementById('food-payment-method').value;
+            if (!method) {
+                alert('Please select payment method.');
+                return;
+            }
+
+            let paymentRef = '';
+            if (method === 'upi') {
+                paymentRef = (document.getElementById('food-upi-ref')?.value || '').trim();
+                if (!paymentRef) return alert('Enter UPI transaction reference.');
+            }
+            if (method === 'qr') {
+                paymentRef = (document.getElementById('food-qr-ref')?.value || '').trim();
+                if (!paymentRef) return alert('Enter QR payment reference.');
+            }
+            if (method === 'debit') {
+                const cardName = (document.getElementById('food-card-name')?.value || '').trim();
+                const cardNumberRaw = (document.getElementById('food-card-number')?.value || '').replace(/\s+/g, '');
+                const expiry = (document.getElementById('food-card-expiry')?.value || '').trim();
+                const cvv = (document.getElementById('food-card-cvv')?.value || '').trim();
+                paymentRef = (document.getElementById('food-debit-ref')?.value || '').trim();
+                if (!cardName || !/^\d{16}$/.test(cardNumberRaw) || !/^(0[1-9]|1[0-2])\/\d{2}$/.test(expiry) || !/^\d{3,4}$/.test(cvv) || !/^[A-Za-z0-9-]{6,}$/.test(paymentRef)) {
+                    return alert('Enter full valid debit card details and transaction reference.');
+                }
+            }
+
+            if (!/^[A-Za-z0-9-]{6,}$/.test(paymentRef)) {
+                return alert('Please enter a valid transaction reference (min 6 characters).');
+            }
+
+            const profile = getAdminPaymentProfile();
+            const orderToSave = {
+                ...pendingFoodOrder,
+                payment: {
+                    method,
+                    status: 'paid',
+                    amountInr: pendingFoodOrder.total,
+                    transactionId: generateFoodTxn(),
+                    paymentReference: paymentRef,
+                    debitCard: method === 'debit' ? {
+                        cardHolder: (document.getElementById('food-card-name')?.value || '').trim(),
+                        cardNumberMasked: maskAccount((document.getElementById('food-card-number')?.value || '').replace(/\s+/g, '')),
+                        expiry: (document.getElementById('food-card-expiry')?.value || '').trim()
+                    } : null,
+                    paidTo: {
+                        accountHolder: profile.accountHolder,
+                        upiId: profile.upiId,
+                        bankName: profile.bankName,
+                        accountNumberMasked: maskAccount(profile.accountNumber),
+                        ifsc: profile.ifsc
+                    },
+                    paidAt: new Date().toISOString()
+                }
+            };
+
+            await window.HMS_API.post('/food-orders', {
+                name: orderToSave.name,
+                customer_email: orderToSave.customerEmail || '',
+                room: orderToSave.room,
+                phone: orderToSave.phone || '',
+                items: orderToSave.items || [],
+                total: orderToSave.total,
+                payment_method: orderToSave.payment?.method || null,
+                payment_txn_id: orderToSave.payment?.transactionId || null,
+                payment_reference: orderToSave.payment?.paymentReference || null,
+                payment: orderToSave.payment || null,
+                status: orderToSave.status || 'pending'
+            });
+
+            closeFoodPaymentModal();
+            localStorage.removeItem('cart');
+            sessionStorage.removeItem('guestInfo');
+            document.getElementById('order-form').style.display = 'none';
+            document.getElementById('order-confirmation').style.display = 'block';
+            document.getElementById('order-confirmation').innerHTML = '<h3>Payment Successful & Order Placed!</h3><p>Your food order is confirmed and visible in dashboard.</p>';
+        }
+
+        function loadCart() {
+            const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            const cartItems = document.getElementById('cart-items');
+            const cartTotal = document.getElementById('cart-total');
+            const orderForm = document.getElementById('order-form');
+
+            if (cart.length === 0) {
+                cartItems.innerHTML = '<p>Your cart is empty.</p>';
+                cartTotal.innerHTML = '';
+                orderForm.style.display = 'none';
+                return;
+            }
+
+            let html = '<ul>';
+            let total = 0;
+            cart.forEach((item, index) => {
+                const itemTotal = item.price * item.quantity;
+                total += itemTotal;
+                html += `<li>
+                    ${item.item} - ₹${item.price} x ${item.quantity} = ₹${itemTotal}
+                    <button onclick="removeFromCart(${index})">Remove</button>
+                </li>`;
+            });
+            html += '</ul>';
+            cartItems.innerHTML = html;
+            cartTotal.innerHTML = `<h3>Total: ₹${total}</h3>`;
+            orderForm.style.display = 'block';
+        }
+
+        function removeFromCart(index) {
+            let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            cart.splice(index, 1);
+            localStorage.setItem('cart', JSON.stringify(cart));
+            loadCart();
+        }
+
+        function loadGuestInfo() {
+            // First check sessionStorage for guest info
+            const savedGuestInfo = sessionStorage.getItem('guestInfo');
+            if (savedGuestInfo) {
+                guestInfo = JSON.parse(savedGuestInfo);
+                document.getElementById('order-name').value = guestInfo.name;
+                document.getElementById('order-room').value = guestInfo.room;
+                if (!guestInfo.isBooking) {
+                    document.getElementById('order-phone').focus();
+                }
+                return;
+            }
+
+            // Otherwise check if user has bookings and select first one
+            const bookings = JSON.parse(localStorage.getItem('bookings') || '[]');
+            if (bookings.length > 0) {
+                guestInfo = {
+                    name: bookings[0].name,
+                    room: bookings[0].roomType,
+                    isBooking: true
+                };
+                document.getElementById('order-name').value = guestInfo.name;
+                document.getElementById('order-room').value = guestInfo.room;
+            }
+        }
+
+        document.getElementById('place-order-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('order-name').value;
+            const room = document.getElementById('order-room').value;
+            const phone = document.getElementById('order-phone').value;
+            const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+
+            if (!name || !room) {
+                alert('Please enter your name and room number');
+                return;
+            }
+
+            // Build order draft first, save only after payment success
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            const order = {
+                name,
+                room,
+                phone,
+                items: cart,
+                total: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
+                timestamp: new Date().toISOString(),
+                customerEmail: currentUser.email || ''
+            };
+            openFoodPaymentModal(order.total, order);
+        });
+
+        document.getElementById('foodPaymentModal').addEventListener('click', function(e) {
+            if (e.target === this) closeFoodPaymentModal();
+        });
+
+        loadGuestInfo();
+        loadCart();
+    </script>
+</body>
+</html>

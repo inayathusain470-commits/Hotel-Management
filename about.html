@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Royal Plaza Hotel Management System - About</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <span class="logo-crown">&#x2756;</span>
+                <div class="logo-brand">
+                    <span class="logo-name">Royal Plaza</span>
+                    <span class="logo-tagline">&#10022; Hotel &#10022;</span>
+                </div>
+            </div>
+            <ul class="nav-links">
+                <li><a href="home.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="rooms.html">Rooms & Bar</a></li>
+                <li><a href="food_menu.html">Food Menu</a></li>
+                <li><a href="booking.html">Booking</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="my_cart.html">My Cart</a></li>
+                <li><a href="#" onclick="logout()">Logout</a></li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </nav>
+    </header>
+
+    <section class="about">
+        <div class="container">
+            <h2>About Our Hotel</h2>
+            <p>Welcome to Royal Plaza Hotel, where we blend elegance with exceptional service to provide an unforgettable stay. Our hotel is located in the heart of the city, making it the perfect base for both business travelers and vacationers alike.</p>
+            <p>Since opening our doors, we have focused on delivering a world-class experience through luxurious accommodations, gourmet dining, and personalized guest services. Each room is thoughtfully designed with comfort and style in mind, featuring modern amenities, plush bedding, and breathtaking views.</p>
+            <p>Our dedicated team is committed to making your stay seamless and memorable. Whether you're here for a weekend getaway or an extended business trip, you'll enjoy our state-of-the-art fitness center, relaxing spa, and elegant meeting spaces.</p>
+            <p>We invite you to discover the perfect blend of comfort and sophistication at Royal Plaza Hotel. Your satisfaction is our top priority, and we look forward to welcoming you soon!</p>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Contact Us</h3>
+                    <p>Axis Knowledge City, Hathipur,<br>Rooma, NH-2, Milestone - 478,<br>Kanpur - 209402,<br>Uttar Pradesh, India</p>
+                    <p>Phone: (123) 456-7890</p>
+                    <p>Email: info@luxuryhotel.com</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Follow Us</h3>
+                    <div class="social-links">
+                        <a href="#">Facebook</a>
+                        <a href="https://youtu.be/ZJsjGBiH3P8" target="_blank" rel="noopener noreferrer">YouTube</a>
+                        <a href="#">Twitter</a>
+                        <a href="#">Instagram</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/script.js"></script>
+    <script>
+        checkLogin();
+        
+        // Update navigation based on user type
+        function updateNavigation() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            const navLinks = document.querySelector('.nav-links');
+            
+            if (!navLinks) return;
+            
+            // Remove old dashboard link if exists
+            const oldDashboardLink = Array.from(navLinks.querySelectorAll('li')).find(li => 
+                li.textContent.includes('Dashboard') || li.textContent.includes('My Dashboard')
+            );
+            if (oldDashboardLink) {
+                oldDashboardLink.remove();
+            }
+
+            // Add appropriate dashboard link based on user type
+            let dashboardLink = '';
+            if (currentUser.type === 'customer') {
+                dashboardLink = '<li><a href="customer_dashboard.html">My Dashboard</a></li>';
+            } else if (currentUser.type === 'admin' || currentUser.type === 'staff') {
+                dashboardLink = '<li><a href="admin_dashboard.html">Dashboard</a></li>';
+            }
+
+            if (dashboardLink) {
+                // Insert before Logout link
+                const logoutLink = navLinks.querySelector('li:last-child');
+                if (logoutLink) {
+                    logoutLink.insertAdjacentHTML('beforebegin', dashboardLink);
+                }
+            }
+        }
+        
+        // Update navigation on page load
+        updateNavigation();
+    </script>
+</body>
+</html>

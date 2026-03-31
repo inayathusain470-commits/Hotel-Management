@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login & Register - Royal Plaza Hotel</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Georgia', 'Arial', sans-serif;
+            background: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .auth-container {
+            display: flex;
+            gap: 0;
+            background: #fffdf5;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            max-width: 900px;
+            width: 100%;
+        }
+        .auth-side {
+            flex: 1;
+            padding: 40px;
+            min-height: 500px;
+        }
+        .auth-welcome {
+            background: linear-gradient(135deg, #1a1208 0%, #3d2e18 100%);
+            color: #e8d9a0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        .welcome-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+        .welcome-logo-crown {
+            font-size: 2.2rem;
+            color: #D4AF37;
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.45);
+        }
+        .welcome-logo-name {
+            font-size: 1.7rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, #C89B2A 0%, #F5E678 40%, #D4AF37 65%, #C89B2A 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .welcome-logo-tagline {
+            font-size: 0.65rem;
+            letter-spacing: 4px;
+            color: #C9A227;
+            text-transform: uppercase;
+            text-align: center;
+            margin-top: 2px;
+        }
+        .auth-welcome p {
+            font-size: 16px;
+            margin-bottom: 10px;
+            line-height: 1.6;
+            color: #e8d9a0;
+        }
+        .form-title {
+            font-size: 28px;
+            color: #1a1208;
+            margin-bottom: 10px;
+        }
+        .form-subtitle {
+            color: #7a6030;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #3d2e18;
+            font-weight: bold;
+        }
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d4c48a;
+            background: #fffdf5;
+            color: #2c2416;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #D4AF37;
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15);
+        }
+        .submit-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #C89B2A 0%, #F5E678 50%, #D4AF37 100%);
+            color: #1a1208;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .submit-btn:hover {
+            transform: translateY(-2px);
+        }
+        .toggle-form {
+            text-align: center;
+            margin-top: 20px;
+            color: #7a6030;
+            font-size: 14px;
+        }
+        .toggle-form a {
+            color: #B8860B;
+            text-decoration: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .toggle-form a:hover {
+            text-decoration: underline;
+        }
+        .user-type-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        .user-type-btn {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #d4c48a;
+            background: #fffdf5;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #3d2e18;
+            transition: all 0.3s;
+        }
+        .user-type-btn.active {
+            background: linear-gradient(135deg, #C89B2A 0%, #F5E678 50%, #D4AF37 100%);
+            color: #1a1208;
+            border-color: #D4AF37;
+        }
+        .admin-section {
+            display: none;
+        }
+        .admin-section.active {
+            display: block;
+        }
+        .error-msg {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        .success-msg {
+            color: #27ae60;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        .form-section {
+            display: none;
+        }
+        .form-section.active {
+            display: block;
+        }
+        @media (max-width: 768px) {
+            .auth-container {
+                flex-direction: column;
+            }
+            .auth-side {
+                min-height: 400px;
+                padding: 30px;
+            }
+            .auth-welcome {
+                min-height: 300px;
+            }
+        }
+
+        body.dark-mode {
+            background: #0f1115;
+        }
+        body.dark-mode .auth-container {
+            background: #141820;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+        }
+        body.dark-mode .auth-side {
+            background: #141820;
+        }
+        body.dark-mode .auth-welcome {
+            background: linear-gradient(135deg, #0f131a 0%, #1f2734 100%);
+        }
+        body.dark-mode .form-title,
+        body.dark-mode .form-group label,
+        body.dark-mode .form-subtitle,
+        body.dark-mode .toggle-form,
+        body.dark-mode .user-type-btn,
+        body.dark-mode .toggle-form a {
+            color: #f0dfb0;
+        }
+        body.dark-mode .user-type-btn {
+            background: #1a202b;
+            border-color: rgba(212, 175, 55, 0.35);
+        }
+        body.dark-mode .form-group input,
+        body.dark-mode .form-group select {
+            background: #11161e;
+            color: #f5ecd0;
+            border-color: rgba(212, 175, 55, 0.35);
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <!-- Welcome Section -->
+        <div class="auth-side auth-welcome">
+            <div class="welcome-logo">
+                <span class="welcome-logo-crown">&#x2756;</span>
+                <div>
+                    <div class="welcome-logo-name">Royal Plaza</div>
+                    <div class="welcome-logo-tagline">&#10022; Hotel &#10022;</div>
+                </div>
+            </div>
+            <p>Welcome to our premium Royal Plaza Hotel</p>
+            <p>Book rooms, order food, and manage your stay</p>
+            <div style="margin-top: 40px; font-size: 48px;">
+                🛫🏖️🍽️🛏️
+            </div>
+        </div>
+
+        <!-- Auth Forms Section -->
+        <div class="auth-side">
+            <!-- User Type Selector -->
+            <div class="user-type-selector">
+                <button class="user-type-btn active" onclick="switchUserType('customer')">Customer</button>
+                <button class="user-type-btn" onclick="switchUserType('admin-staff')">Admin/Staff</button>
+            </div>
+
+            <!-- Customer Section -->
+            <div id="customer-section" class="form-section active">
+                <!-- Login Form -->
+                <div id="customer-login" class="form-section active">
+                    <h2 class="form-title">Customer Login</h2>
+                    <p class="form-subtitle">Sign in to your account</p>
+                    <div id="customer-login-error" class="error-msg"></div>
+                    <form id="customer-login-form">
+                        <div class="form-group">
+                            <label for="customer-email">Email</label>
+                            <input type="email" id="customer-email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="customer-password">Password</label>
+                            <input type="password" id="customer-password" name="password" required>
+                        </div>
+                        <button type="submit" class="submit-btn">Login</button>
+                    </form>
+                    <div class="toggle-form">
+                        Don't have an account? <a onclick="switchForm('customer-register')">Register here</a>
+                    </div>
+                </div>
+
+                <!-- Register Form -->
+                <div id="customer-register" class="form-section">
+                    <h2 class="form-title">Customer Register</h2>
+                    <p class="form-subtitle">Create your account</p>
+                    <div id="customer-register-error" class="error-msg"></div>
+                    <form id="customer-register-form">
+                        <div class="form-group">
+                            <label for="register-name">Full Name</label>
+                            <input type="text" id="register-name" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="register-email">Email</label>
+                            <input type="email" id="register-email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="register-phone">Phone</label>
+                            <input type="tel" id="register-phone" name="phone" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="register-password">Password</label>
+                            <input type="password" id="register-password" name="password" required>
+                        </div>
+                        <button type="submit" class="submit-btn">Register</button>
+                    </form>
+                    <div class="toggle-form">
+                        Already have an account? <a onclick="switchForm('customer-login')">Login here</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin/Staff Section -->
+            <div id="admin-staff-section" class="form-section">
+                <h2 class="form-title">Admin/Staff Login</h2>
+                <p class="form-subtitle">Management Portal</p>
+                <div id="admin-staff-error" class="error-msg"></div>
+                <form id="admin-staff-form">
+                    <div class="form-group">
+                        <label for="admin-role">Role</label>
+                        <select id="admin-role" name="role" required>
+                            <option value="">Select Role</option>
+                            <option value="admin">Admin</option>
+                            <option value="staff">Staff</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="admin-username">Username</label>
+                        <input type="text" id="admin-username" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="admin-password">Password</label>
+                        <input type="password" id="admin-password" name="password" required>
+                    </div>
+                    <button type="submit" class="submit-btn">Login</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.body.classList.toggle('dark-mode', localStorage.getItem('darkModeEnabled') === 'true');
+
+        let currentUserType = 'customer';
+
+        function switchUserType(type) {
+            currentUserType = type;
+            
+            // Update button styles
+            document.querySelectorAll('.user-type-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Show/hide sections
+            document.getElementById('customer-section').classList.remove('active');
+            document.getElementById('admin-staff-section').classList.remove('active');
+
+            if (type === 'customer') {
+                document.getElementById('customer-section').classList.add('active');
+            } else {
+                document.getElementById('admin-staff-section').classList.add('active');
+            }
+        }
+
+        function switchForm(formId) {
+            document.querySelectorAll('#customer-section .form-section').forEach(form => {
+                form.classList.remove('active');
+            });
+            document.getElementById(formId).classList.add('active');
+        }
+
+        async function authApi(path, body) {
+            const response = await fetch(`http://localhost:5000/api${path}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body || {})
+            });
+            const payload = await response.json().catch(() => ({}));
+            if (!response.ok) {
+                throw new Error(payload.error || 'Request failed');
+            }
+            return payload;
+        }
+
+        // Customer Login
+        document.getElementById('customer-login-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const email = document.getElementById('customer-email').value.trim();
+            const password = document.getElementById('customer-password').value;
+
+            try {
+                const result = await authApi('/customers/login', { email, password });
+                const user = result.customer;
+                localStorage.setItem('currentUser', JSON.stringify({
+                    type: 'customer',
+                    name: user.name,
+                    email: user.email,
+                    phone: user.phone
+                }));
+                window.location.href = 'home.html';
+            } catch (err) {
+                document.getElementById('customer-login-error').textContent = 'Invalid email or password';
+            }
+        });
+
+        // Customer Register
+        document.getElementById('customer-register-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const name = document.getElementById('register-name').value.trim();
+            const email = document.getElementById('register-email').value.trim();
+            const phone = document.getElementById('register-phone').value.trim();
+            const password = document.getElementById('register-password').value;
+
+            try {
+                await authApi('/customers/register', { name, email, phone, password });
+
+                localStorage.setItem('currentUser', JSON.stringify({
+                    type: 'customer',
+                    name: name,
+                    email: email,
+                    phone: phone
+                }));
+            } catch (err) {
+                document.getElementById('customer-register-error').textContent = err.message || 'Registration failed';
+                return;
+            }
+
+            window.location.href = 'home.html';
+        });
+
+        // Admin/Staff Login
+        document.getElementById('admin-staff-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const role = document.getElementById('admin-role').value;
+            const username = document.getElementById('admin-username').value;
+            const password = document.getElementById('admin-password').value;
+
+            // Admin credentials
+            if (role === 'admin' && username === 'inayat' && password === 'inayat786') {
+                localStorage.setItem('currentUser', JSON.stringify({
+                    type: 'admin',
+                    name: 'Admin'
+                }));
+                window.location.href = 'admin_dashboard.html';
+            }
+            // Staff credentials
+            else if (role === 'staff' && username === 'staff' && password === 'staff123') {
+                localStorage.setItem('currentUser', JSON.stringify({
+                    type: 'staff',
+                    name: 'Staff'
+                }));
+                window.location.href = 'admin_dashboard.html';
+            } else {
+                document.getElementById('admin-staff-error').textContent = 'Invalid credentials';
+            }
+        });
+
+        // Check if already logged in
+        window.addEventListener('load', function() {
+            const currentUser = localStorage.getItem('currentUser');
+            if (currentUser) {
+                const user = JSON.parse(currentUser);
+                if (user.type === 'customer') {
+                    window.location.href = 'home.html';
+                } else {
+                    window.location.href = 'admin_dashboard.html';
+                }
+            }
+        });
+    </script>
+</body>
+</html>

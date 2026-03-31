@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swimming Pool - Royal Plaza Hotel</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <span class="logo-crown">&#x2756;</span>
+                <div class="logo-brand">
+                    <span class="logo-name">Royal Plaza</span>
+                    <span class="logo-tagline">&#10022; Hotel &#10022;</span>
+                </div>
+            </div>
+            <ul class="nav-links">
+                <li><a href="home.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="rooms.html">Rooms & Bar</a></li>
+                <li><a href="food_menu.html">Food Menu</a></li>
+                <li><a href="booking.html">Booking</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="my_cart.html">My Cart</a></li>
+                <li><a href="#" onclick="logout()">Logout</a></li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </nav>
+    </header>
+
+    <section class="pool-feature">
+        <div class="container">
+            <div class="pool-header">
+                <div class="pool-logo" aria-label="Pool Logo">🏊</div>
+                <h2>Hotel Swimming Pool</h2>
+            </div>
+            <p>Explore our stunning swimming pool facility. Only admin can add/change photos.</p>
+            <a href="home.html" class="cta-button" style="display:inline-block;margin-bottom:1.25rem;">Exit to Home</a>
+
+            <div class="pool-gallery">
+                <div class="pool-admin-actions">
+                    <button id="pool-add-photo-btn" class="gallery-admin-btn" style="display:none;" onclick="openPoolPhotoModal(-1)">Add Pool Photo</button>
+                </div>
+                <div id="pool-grid" class="pool-grid"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pool Photo Modal -->
+    <div id="poolPhotoModal" class="gallery-modal">
+        <div class="gallery-modal-content">
+            <h3 id="poolPhotoModalTitle">Upload Pool Photo</h3>
+            <input type="file" id="poolPhotoInput" accept="image/*">
+            <p class="gym-crop-hint">Selected image will be saved as-is (no crop).</p>
+            <div style="margin-top:10px;">
+                <img id="poolPhotoPreview" src="" alt="Pool Preview" style="display:none;max-width:100%;max-height:320px;border-radius:8px;">
+            </div>
+            <div class="gallery-modal-actions">
+                <button id="pool-save-photo-btn" type="button" class="submit-btn" onclick="savePoolPhoto()">Save</button>
+                <button type="button" class="submit-btn" style="background:#e74c3c;" onclick="closePoolPhotoModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Contact Us</h3>
+                    <p>Axis Knowledge City, Hathipur,<br>Rooma, NH-2, Milestone - 478,<br>Kanpur - 209402,<br>Uttar Pradesh, India</p>
+                    <p>Phone: (123) 456-7890</p>
+                    <p>Email: info@luxuryhotel.com</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Follow Us</h3>
+                    <div class="social-links">
+                        <a href="#">Facebook</a>
+                        <a href="https://youtu.be/ZJsjGBiH3P8" target="_blank" rel="noopener noreferrer">YouTube</a>
+                        <a href="#">Twitter</a>
+                        <a href="#">Instagram</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/script.js"></script>
+    <script>
+        checkLogin();
+
+        function updateNavigation() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            const navLinks = document.querySelector('.nav-links');
+            if (!navLinks) return;
+
+            const oldDashboardLink = Array.from(navLinks.querySelectorAll('li')).find(li =>
+                li.textContent.includes('Dashboard') || li.textContent.includes('My Dashboard')
+            );
+            if (oldDashboardLink) oldDashboardLink.remove();
+
+            let dashboardLink = '';
+            if (currentUser.type === 'customer') {
+                dashboardLink = '<li><a href="customer_dashboard.html">My Dashboard</a></li>';
+            } else if (currentUser.type === 'admin' || currentUser.type === 'staff') {
+                dashboardLink = '<li><a href="admin_dashboard.html">Dashboard</a></li>';
+            }
+
+            if (dashboardLink) {
+                const logoutLink = navLinks.querySelector('li:last-child');
+                if (logoutLink) logoutLink.insertAdjacentHTML('beforebegin', dashboardLink);
+            }
+        }
+
+        const POOL_GALLERY_VERSION = 'luxury-v4';
+        const POOL_GALLERY_DEFAULTS = [
+            { src: 'https://images.unsplash.com/photo-1540541338287-41700207dee6?w=900&h=600&fit=crop', title: 'Luxury Infinity Pool' },
+            { src: 'https://images.unsplash.com/photo-1566669437685-c9fbe95b9f9b?w=900&h=600&fit=crop', title: 'Resort Pool Deck' },
+            { src: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=900&h=600&fit=crop', title: 'Ocean View Pool' },
+            { src: 'https://images.unsplash.com/photo-1576013551627-0cf7f5ad9281?w=900&h=600&fit=crop', title: 'Night Light Pool' },
+            { src: 'https://images.unsplash.com/photo-1582719478185-6d9e7f5f0f14?w=900&h=600&fit=crop', title: 'Private Pool Area' },
+            { src: 'https://images.unsplash.com/photo-1590490360182-c33d57733427?w=900&h=600&fit=crop', title: 'Poolside Lounge' },
+            { src: 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=900&h=600&fit=crop', title: 'Premium Pool Seats' },
+            { src: 'https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=900&h=600&fit=crop', title: 'Skyline Pool View' },
+            { src: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=900&h=600&fit=crop', title: 'Grand Poolside' },
+            { src: 'https://images.unsplash.com/photo-1576678927484-cc907957088c?w=900&h=600&fit=crop', title: 'Pool Training Lane' },
+            { src: 'https://images.unsplash.com/photo-1566843972142-a7fcb70de55a?w=900&h=600&fit=crop', title: 'Luxury Water Bar' },
+            { src: 'https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=900&h=600&fit=crop', title: 'Resort Waterfall Pool' },
+            { src: 'https://images.unsplash.com/photo-1468824357306-a439d58ccb1c?w=900&h=600&fit=crop', title: 'Palm Side Pool' },
+            { src: 'https://images.unsplash.com/photo-1501117716987-c8e1ecb210cf?w=900&h=600&fit=crop', title: 'Relaxing Pool Zone' },
+            { src: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=900&h=600&fit=crop', title: 'Executive Pool Suite' },
+            { src: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=900&h=600&fit=crop', title: 'Luxury Hotel Pool' },
+            { src: 'https://images.unsplash.com/photo-1519046904884-53103b34b206?w=900&h=600&fit=crop', title: 'Sunset Pool Escape' },
+            { src: 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=900&h=600&fit=crop', title: 'Blue Water Luxury Deck' },
+            { src: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=900&h=600&fit=crop', title: 'Premium Tropical Pool' },
+            { src: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=900&h=600&fit=crop', title: 'Luxury Sea Breeze Pool' },
+            { src: 'https://images.unsplash.com/photo-1584132967334-10e028bd69f7?w=900&h=600&fit=crop', title: 'Azure Pool Retreat' },
+            { src: 'https://images.unsplash.com/photo-1455587734955-081b22074882?w=900&h=600&fit=crop', title: 'Palm Shadow Pool' },
+            { src: 'https://images.unsplash.com/photo-1584132915807-fd1f5fbc078f?w=900&h=600&fit=crop', title: 'Luxury Pool Villa View' },
+            { src: 'https://images.unsplash.com/photo-1560185007-c5ca9d2c014d?w=900&h=600&fit=crop', title: 'Golden Hour Poolside' },
+            { src: 'https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?w=900&h=600&fit=crop', title: 'Marble Deck Infinity Edge' },
+            { src: 'https://images.unsplash.com/photo-1560448075-bb485b067938?w=900&h=600&fit=crop', title: 'Courtyard Luxury Pool' },
+            { src: 'https://images.unsplash.com/photo-1615874959474-d609969a20ed?w=900&h=600&fit=crop', title: 'Sky Reflection Pool' },
+            { src: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=900&h=600&fit=crop', title: 'Grand Resort Poolline' },
+            { src: 'https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=900&h=600&fit=crop', title: 'Luxury Skyline Dip' },
+            { src: 'https://images.unsplash.com/photo-1519821172141-b5d8d0d61d9e?w=900&h=600&fit=crop', title: 'Royal Cabana Poolside' },
+            { src: 'https://images.unsplash.com/photo-1560448075-cbc16bb4af8e?w=900&h=600&fit=crop', title: 'Blue Hour Pool Glow' },
+            { src: 'https://images.unsplash.com/photo-1472220625704-91e1462799b2?w=900&h=600&fit=crop', title: 'Luxury Aqua Courtyard' },
+            { src: 'https://images.unsplash.com/photo-1535827841776-24afc1e255ac?w=900&h=600&fit=crop', title: 'Crystal Waterline View' },
+            { src: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=900&h=600&fit=crop', title: 'Royal Blue Deck Escape' },
+            { src: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=900&h=600&fit=crop', title: 'Sunlit Infinity Edge' },
+            { src: 'https://images.unsplash.com/photo-1506015391300-4802dc74de2e?w=900&h=600&fit=crop', title: 'Luxury Evening Poolscape' },
+            { src: 'https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=900&h=600&fit=crop', title: 'Premium Private Pool Deck' },
+            { src: 'https://images.unsplash.com/photo-1505575967455-40e256f73376?w=900&h=600&fit=crop', title: 'Aqua Palm Retreat' },
+            { src: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=900&h=600&fit=crop', title: 'Golden Reflection Waters' },
+            { src: 'https://images.unsplash.com/photo-1473116763249-2faaef81ccda?w=900&h=600&fit=crop', title: 'Elite Poolside Panorama' }
+        ];
+        const POOL_DB_NAME = 'RoyalPlazaPoolMediaDB';
+        const POOL_STORE_NAME = 'poolGalleryPhotos';
+
+        let poolGalleryPhotos = [];
+        let poolEditIndex = -1;
+        let poolSaveInProgress = false;
+        let poolSelectedImageData = null;
+
+        function isAdminUser() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            return currentUser.type === 'admin';
+        }
+
+        function openPoolGalleryDb() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(POOL_DB_NAME, 1);
+                request.onupgradeneeded = function() {
+                    const db = request.result;
+                    if (!db.objectStoreNames.contains(POOL_STORE_NAME)) {
+                        db.createObjectStore(POOL_STORE_NAME);
+                    }
+                };
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        async function getPoolPhotosFromDb() {
+            const db = await openPoolGalleryDb();
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(POOL_STORE_NAME, 'readonly');
+                const store = tx.objectStore(POOL_STORE_NAME);
+                const request = store.get('photos');
+                request.onsuccess = () => resolve(request.result || null);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        async function loadPoolPhotos() {
+            const version = localStorage.getItem('poolGalleryVersion');
+            const stored = JSON.parse(localStorage.getItem('poolGalleryPhotos') || 'null');
+            const dbPhotos = await getPoolPhotosFromDb().catch(() => null);
+
+            if (Array.isArray(dbPhotos) && dbPhotos.length > 0) {
+                poolGalleryPhotos = [...dbPhotos];
+                if (poolGalleryPhotos.length < POOL_GALLERY_DEFAULTS.length) {
+                    poolGalleryPhotos = poolGalleryPhotos.concat(POOL_GALLERY_DEFAULTS.slice(poolGalleryPhotos.length));
+                    await savePoolPhotos();
+                }
+                if (version !== POOL_GALLERY_VERSION) {
+                    localStorage.setItem('poolGalleryVersion', POOL_GALLERY_VERSION);
+                }
+                return;
+            }
+
+            // one-time reset to load latest luxury default set
+            if (version !== POOL_GALLERY_VERSION) {
+                poolGalleryPhotos = [...POOL_GALLERY_DEFAULTS];
+                localStorage.setItem('poolGalleryVersion', POOL_GALLERY_VERSION);
+                await savePoolPhotos();
+                return;
+            }
+
+            if (Array.isArray(stored) && stored.length > 0) {
+                poolGalleryPhotos = [...stored];
+                if (poolGalleryPhotos.length < POOL_GALLERY_DEFAULTS.length) {
+                    poolGalleryPhotos = poolGalleryPhotos.concat(POOL_GALLERY_DEFAULTS.slice(poolGalleryPhotos.length));
+                }
+            } else {
+                poolGalleryPhotos = [...POOL_GALLERY_DEFAULTS];
+            }
+            await savePoolPhotos();
+        }
+
+        async function savePoolPhotos() {
+            const db = await openPoolGalleryDb();
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(POOL_STORE_NAME, 'readwrite');
+                const store = tx.objectStore(POOL_STORE_NAME);
+                store.put(poolGalleryPhotos, 'photos');
+                tx.oncomplete = () => resolve(true);
+                tx.onerror = () => reject(tx.error);
+            });
+        }
+
+        function renderPoolGallery() {
+            const grid = document.getElementById('pool-grid');
+            if (!grid) return;
+            const admin = isAdminUser();
+            grid.innerHTML = poolGalleryPhotos.map((photo, index) => {
+                const controls = admin ? `<div style="display:flex;gap:8px;justify-content:center;position:absolute;left:10px;right:10px;bottom:10px;"><button class="gallery-admin-btn pool-change-btn" onclick="openPoolPhotoModal(${index})">Change</button><button class="gallery-admin-btn" style="background:#b91c1c;" onclick="deletePoolPhoto(${index})">Delete</button></div>` : '';
+                return `
+                    <div class="pool-card">
+                        <div class="pool-card-image-wrap">
+                            <img src="${photo.src}" alt="${photo.title}">
+                            ${controls}
+                        </div>
+                        <p>${photo.title}</p>
+                    </div>
+                `;
+            }).join('');
+            const addBtn = document.getElementById('pool-add-photo-btn');
+            if (addBtn) addBtn.style.display = admin ? 'inline-block' : 'none';
+        }
+
+        function openPoolPhotoModal(index) {
+            if (!isAdminUser()) return;
+            poolEditIndex = index;
+            document.getElementById('poolPhotoModalTitle').textContent = index >= 0 ? `Change Pool Photo #${index + 1}` : 'Add Pool Photo';
+            document.getElementById('poolPhotoInput').value = '';
+            const preview = document.getElementById('poolPhotoPreview');
+            preview.style.display = 'none';
+            preview.src = '';
+            poolSelectedImageData = null;
+            document.getElementById('poolPhotoModal').style.display = 'flex';
+        }
+
+        function closePoolPhotoModal() {
+            document.getElementById('poolPhotoModal').style.display = 'none';
+        }
+
+        async function deletePoolPhoto(index) {
+            if (!isAdminUser()) return;
+            if (!confirm(`Delete pool photo #${index + 1}?`)) return;
+            poolGalleryPhotos.splice(index, 1);
+            await savePoolPhotos();
+            renderPoolGallery();
+        }
+
+        function loadPoolImageForPreview(file) {
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                poolSelectedImageData = ev.target.result;
+                const preview = document.getElementById('poolPhotoPreview');
+                if (preview) {
+                    preview.src = poolSelectedImageData;
+                    preview.style.display = 'block';
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function savePoolPhoto() {
+            if (!isAdminUser()) { alert('Only admin can save pool photos.'); return; }
+            if (poolSaveInProgress) return;
+            const file = document.getElementById('poolPhotoInput').files[0];
+            if (!file || !poolSelectedImageData) { alert('Please select an image first.'); return; }
+            poolSaveInProgress = true;
+            const saveBtn = document.getElementById('pool-save-photo-btn');
+            if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Saving...'; }
+            try {
+                const imageData = poolSelectedImageData;
+                if (!imageData) throw new Error('Crop image not ready');
+                if (poolEditIndex >= 0) {
+                    const existingTitle = poolGalleryPhotos[poolEditIndex]?.title || `Pool Photo ${poolEditIndex + 1}`;
+                    poolGalleryPhotos[poolEditIndex] = { src: imageData, title: existingTitle };
+                } else {
+                    poolGalleryPhotos.push({ src: imageData, title: `Pool Photo ${poolGalleryPhotos.length + 1}` });
+                }
+                await savePoolPhotos();
+                renderPoolGallery();
+                closePoolPhotoModal();
+                alert('Pool photo saved successfully!');
+            } catch (err) {
+                alert('Photo save failed. Try crop/zoom again or choose a clearer image.');
+            } finally {
+                poolSaveInProgress = false;
+                if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Save'; }
+            }
+        }
+
+        updateNavigation();
+        (async function initPoolGallery() {
+            await loadPoolPhotos();
+            renderPoolGallery();
+        })();
+
+        document.getElementById('poolPhotoInput').addEventListener('change', function(evt) {
+            const file = evt.target.files[0];
+            if (!file) return;
+            loadPoolImageForPreview(file);
+        });
+
+        const poolModal = document.getElementById('poolPhotoModal');
+        if (poolModal) {
+            poolModal.addEventListener('click', function(e) {
+                if (e.target === poolModal) closePoolPhotoModal();
+            });
+        }
+
+        const poolSaveBtn = document.getElementById('pool-save-photo-btn');
+        if (poolSaveBtn) {
+            poolSaveBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                savePoolPhoto();
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Royal Plaza Hotel Management System - Rooms & Bar</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .rooms-gallery {
+            margin-bottom: 2rem;
+            position: relative;
+        }
+        .rooms-gallery-wrapper {
+            overflow: hidden;
+            border-radius: 12px;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+        }
+        .rooms-gallery-track {
+            display: flex;
+            transition: transform 0.8s ease;
+        }
+        .rooms-gallery-slide {
+            min-width: 100%;
+            height: 360px;
+            position: relative;
+        }
+        .rooms-gallery-slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .rooms-gallery-admin-bar {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 20;
+            display: none;
+            gap: 10px;
+        }
+        .gallery-admin-btn {
+            background: rgba(44, 62, 80, 0.9);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .gallery-change-btn {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            z-index: 8;
+            display: none;
+        }
+        .gallery-modal {
+            display: none;
+            position: fixed;
+            z-index: 2500;
+            left: 0;
+            top: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.55);
+            align-items: center;
+            justify-content: center;
+        }
+        .gallery-modal-content {
+            background: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            max-width: 420px;
+            width: 92%;
+        }
+        .gallery-modal-content h3 {
+            margin-bottom: 10px;
+        }
+        .gallery-modal-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .luxury-bar {
+            margin-top: 2.5rem;
+            background: linear-gradient(135deg, #1a1026 0%, #2d1b3d 50%, #1f152e 100%);
+            color: #fff;
+            border-radius: 14px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
+        }
+        .luxury-bar h3 {
+            font-size: 1.8rem;
+            margin-bottom: 0.4rem;
+            color: #f9d976;
+        }
+        .luxury-bar p {
+            margin-bottom: 1rem;
+            color: #f3e9ff;
+        }
+        .bar-gallery {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+        .bar-gallery-admin-bar {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 10;
+            display: none;
+        }
+        .bar-gallery-wrapper {
+            overflow: hidden;
+            border-radius: 10px;
+            border: 1px solid rgba(249, 217, 118, 0.3);
+        }
+        .bar-gallery-track {
+            display: flex;
+            transition: transform 0.8s ease;
+        }
+        .bar-gallery-slide {
+            min-width: 100%;
+            height: 240px;
+            position: relative;
+        }
+        .bar-gallery-slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .bar-gallery-change-btn {
+            position: absolute;
+            right: 10px;
+            bottom: 10px;
+            z-index: 5;
+            display: none;
+        }
+        .bar-packages {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 10px;
+            margin-bottom: 1rem;
+        }
+        .bar-package-card {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(249, 217, 118, 0.28);
+            border-radius: 10px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .bar-package-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(249, 217, 118, 0.65);
+        }
+        .bar-package-card.active {
+            border-color: #ffd77a;
+            box-shadow: 0 0 0 2px rgba(255, 215, 122, 0.35);
+        }
+        .bar-package-card h4 {
+            margin: 0 0 5px 0;
+            color: #ffd77a;
+            font-size: 1rem;
+        }
+        .bar-package-card .bar-price {
+            font-weight: 800;
+            font-size: 1.05rem;
+            color: #fff;
+        }
+        .bar-booking-box {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(249, 217, 118, 0.28);
+            border-radius: 10px;
+            padding: 1rem;
+        }
+        .bar-booking-box label {
+            color: #f4ecff;
+            font-weight: 700;
+        }
+        .bar-booking-box input,
+        .bar-booking-box select {
+            background: #fff;
+            color: #1e293b;
+        }
+        .bar-book-btn {
+            width: 100%;
+            border: none;
+            border-radius: 8px;
+            padding: 0.9rem;
+            font-weight: 800;
+            color: #1f152e;
+            background: linear-gradient(90deg, #f9d976, #f39f86);
+            cursor: pointer;
+            margin-top: 8px;
+        }
+        .bar-book-btn:hover {
+            filter: brightness(1.03);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <span class="logo-crown">&#x2756;</span>
+                <div class="logo-brand">
+                    <span class="logo-name">Royal Plaza</span>
+                    <span class="logo-tagline">&#10022; Hotel &#10022;</span>
+                </div>
+            </div>
+            <ul class="nav-links">
+                <li><a href="home.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="rooms.html">Rooms & Bar</a></li>
+                <li><a href="food_menu.html">Food Menu</a></li>
+                <li><a href="booking.html">Booking</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="my_cart.html">My Cart</a></li>
+                <li><a href="#" onclick="logout()">Logout</a></li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </nav>
+    </header>
+
+    <section class="rooms">
+        <div class="container">
+            <h2>Our Rooms & Bar</h2>
+
+            <div class="rooms-gallery">
+                <div id="roomsGalleryAdminBar" class="rooms-gallery-admin-bar">
+                    <button class="gallery-admin-btn" onclick="openRoomsGalleryModal(-1)">Add New Photo</button>
+                </div>
+                <div class="rooms-gallery-wrapper">
+                    <div id="roomsGalleryTrack" class="rooms-gallery-track"></div>
+                </div>
+            </div>
+
+            <div class="rooms-grid">
+                <div class="room-card">
+                    <img id="single-room-img" src="https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=400" alt="Single Room">
+                    <button id="edit-single-room-img" class="edit-img-btn" style="display:none;margin-bottom:8px;" onclick="openRoomImageModal('single')">Edit/Add Photo</button>
+                    <h3>Single Room</h3>
+                    <p>Comfortable single room with all modern amenities including free Wi-Fi, air conditioning, and a work desk. Perfect for business travelers or solo adventurers.</p>
+                    <p class="price">₹1/night</p>
+                    <a href="booking.html" class="book-btn" data-room="Single Room" data-price="1">Book Now</a>
+                </div>
+                <div class="room-card">
+                    <img id="double-room-img" src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400" alt="Double Room">
+                    <button id="edit-double-room-img" class="edit-img-btn" style="display:none;margin-bottom:8px;" onclick="openRoomImageModal('double')">Edit/Add Photo</button>
+                    <h3>Double Room</h3>
+                    <p>Spacious double room ideal for couples or small families. Features a king-size bed, balcony with city views, and en-suite bathroom with premium toiletries.</p>
+                    <p class="price">₹1/night</p>
+                    <a href="booking.html" class="book-btn" data-room="Double Room" data-price="1">Book Now</a>
+                </div>
+                <div class="room-card">
+                    <img id="deluxe-room-img" src="https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=400" alt="Deluxe Room">
+                    <button id="edit-deluxe-room-img" class="edit-img-btn" style="display:none;margin-bottom:8px;" onclick="openRoomImageModal('deluxe')">Edit/Add Photo</button>
+                    <h3>Deluxe Room</h3>
+                    <p>Our premium deluxe room offers luxury living with separate living area, mini-bar, and stunning panoramic views. Includes complimentary breakfast and concierge service.</p>
+                    <p class="price">₹1/night</p>
+                    <a href="booking.html" class="book-btn" data-room="Deluxe Room" data-price="1">Book Now</a>
+                </div>
+            </div>
+
+            <section class="luxury-bar">
+                <h3>Luxury Night Bar</h3>
+                <p>Signature cocktails, live DJ nights, and premium lounge seating. Book your bar experience directly from here.</p>
+
+                <div class="bar-gallery">
+                    <div id="barGalleryAdminBar" class="bar-gallery-admin-bar">
+                        <button class="gallery-admin-btn" onclick="openBarGalleryModal(-1)">Add Bar Photo</button>
+                    </div>
+                    <div class="bar-gallery-wrapper">
+                        <div id="barGalleryTrack" class="bar-gallery-track"></div>
+                    </div>
+                </div>
+
+                <div class="bar-packages">
+                    <div class="bar-package-card" data-package="Classic Entry" data-price="1">
+                        <h4>Classic Entry</h4>
+                        <p class="bar-price">₹1 / person</p>
+                    </div>
+                    <div class="bar-package-card" data-package="Couple Vibe" data-price="1">
+                        <h4>Couple Vibe</h4>
+                        <p class="bar-price">₹1 / couple</p>
+                    </div>
+                    <div class="bar-package-card" data-package="VIP Lounge" data-price="1">
+                        <h4>VIP Lounge</h4>
+                        <p class="bar-price">₹1 / table</p>
+                    </div>
+                </div>
+
+                <p id="bar-select-note" style="margin:0 0 10px 0;color:#ffd77a;font-weight:700;">Choose a package above to start booking.</p>
+
+                <div class="bar-booking-box" id="bar-booking-box" style="display:none;">
+                    <h4 style="margin-bottom:10px;color:#ffd77a;">Book Luxury Night Bar</h4>
+                    <form id="bar-booking-form">
+                        <div class="form-group">
+                            <label for="bar-name">Name</label>
+                            <input type="text" id="bar-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="bar-phone">Phone</label>
+                            <input type="tel" id="bar-phone" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="bar-date">Date</label>
+                            <input type="date" id="bar-date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="bar-time">Time</label>
+                            <input type="time" id="bar-time" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="bar-guests">Guests</label>
+                            <input type="number" id="bar-guests" min="1" value="2" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="bar-package">Select Package</label>
+                            <select id="bar-package" required>
+                                <option value="">Choose package</option>
+                                <option value="Classic Entry" data-price="1">Classic Entry - ₹1 / person</option>
+                                <option value="Couple Vibe" data-price="1">Couple Vibe - ₹1 / couple</option>
+                                <option value="VIP Lounge" data-price="1">VIP Lounge - ₹1 / table</option>
+                            </select>
+                        </div>
+                        <p id="bar-total-display" style="font-weight:700;margin:8px 0;color:#fff;"></p>
+                        <button type="submit" class="bar-book-btn">Book Bar Now</button>
+                    </form>
+                    <p id="bar-booking-confirm" style="display:none;margin-top:10px;color:#9af7c4;font-weight:700;"></p>
+                </div>
+            </section>
+        </div>
+    </section>
+
+    <footer>
+    <!-- Image Upload Modal -->
+    <div id="roomImageModal" class="modal" style="display:none;position:fixed;z-index:2000;left:0;top:0;width:100vw;height:100vh;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;">
+        <div style="background:white;padding:30px 20px;border-radius:10px;max-width:350px;margin:auto;position:relative;">
+            <h3 id="modalRoomTitle">Upload Room Photo</h3>
+            <input type="file" id="roomImageInput" accept="image/*" style="margin:15px 0;">
+            <div class="gym-crop-tools">
+                <label for="roomZoomRange">Zoom</label>
+                <input type="range" id="roomZoomRange" min="1" max="3" step="0.01" value="1">
+            </div>
+            <p class="gym-crop-hint">Drag image inside crop box to adjust.</p>
+            <div class="gym-crop-wrap" style="margin-bottom:10px;">
+                <canvas id="roomCropCanvas" width="400" height="200"></canvas>
+            </div>
+            <div style="margin-bottom:10px;">
+                <img id="roomImagePreview" src="" alt="Preview" style="max-width:100%;max-height:180px;display:none;border-radius:6px;">
+            </div>
+            <button onclick="previewRoomCrop()" class="submit-btn" style="background:#374151;">Crop Preview</button>
+            <button onclick="saveRoomImage()" class="submit-btn">Save</button>
+            <button onclick="closeRoomImageModal()" class="submit-btn" style="background:#e74c3c;margin-left:10px;">Cancel</button>
+        </div>
+    </div>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Contact Us</h3>
+                    <p>Axis Knowledge City, Hathipur,<br>Rooma, NH-2, Milestone - 478,<br>Kanpur - 209402,<br>Uttar Pradesh, India</p>
+                    <p>Phone: (123) 456-7890</p>
+                    <p>Email: info@luxuryhotel.com</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Follow Us</h3>
+                    <div class="social-links">
+                        <a href="#">Facebook</a>
+                        <a href="https://youtu.be/ZJsjGBiH3P8" target="_blank" rel="noopener noreferrer">YouTube</a>
+                        <a href="#">Twitter</a>
+                        <a href="#">Instagram</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <div id="roomsGalleryModal" class="gallery-modal">
+        <div class="gallery-modal-content">
+            <h3 id="roomsGalleryModalTitle">Upload Room Gallery Photo</h3>
+            <input type="file" id="roomsGalleryFileInput" accept="image/*">
+            <div class="gym-crop-tools">
+                <label for="roomsGalleryZoomRange">Zoom</label>
+                <input type="range" id="roomsGalleryZoomRange" min="1" max="3" step="0.01" value="1">
+            </div>
+            <p class="gym-crop-hint">Drag image inside crop box to adjust.</p>
+            <div class="gym-crop-wrap">
+                <canvas id="roomsGalleryCropCanvas" width="480" height="200"></canvas>
+            </div>
+            <div style="margin-top:10px;">
+                <img id="roomsGalleryPreview" src="" alt="Preview" style="display:none;max-width:100%;max-height:200px;border-radius:8px;">
+            </div>
+            <div class="gallery-modal-actions">
+                <button class="submit-btn" style="background:#374151;" onclick="previewRoomsGalleryCrop()">Crop Preview</button>
+                <button class="submit-btn" onclick="saveRoomsGalleryPhoto()">Save</button>
+                <button class="submit-btn" style="background:#e74c3c;" onclick="closeRoomsGalleryModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="barGalleryModal" class="gallery-modal">
+        <div class="gallery-modal-content">
+            <h3 id="barGalleryModalTitle">Upload Bar Gallery Photo</h3>
+            <input type="file" id="barGalleryFileInput" accept="image/*">
+            <div class="gym-crop-tools">
+                <label for="barGalleryZoomRange">Zoom</label>
+                <input type="range" id="barGalleryZoomRange" min="1" max="3" step="0.01" value="1">
+            </div>
+            <p class="gym-crop-hint">Drag image inside crop box to adjust.</p>
+            <div class="gym-crop-wrap">
+                <canvas id="barGalleryCropCanvas" width="400" height="200"></canvas>
+            </div>
+            <div style="margin-top:10px;">
+                <img id="barGalleryPreview" src="" alt="Preview" style="display:none;max-width:100%;max-height:200px;border-radius:8px;">
+            </div>
+            <div class="gallery-modal-actions">
+                <button class="submit-btn" style="background:#374151;" onclick="previewBarGalleryCrop()">Crop Preview</button>
+                <button class="submit-btn" onclick="saveBarGalleryPhoto()">Save</button>
+                <button class="submit-btn" style="background:#e74c3c;" onclick="closeBarGalleryModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="barPaymentModal" class="gallery-modal">
+        <div class="gallery-modal-content" style="max-width:520px;">
+            <h3 style="margin-bottom:10px;">Complete Bar Payment</h3>
+            <p id="bar-payment-amount" style="margin-bottom:10px;font-weight:700;color:#3d2e18;"></p>
+            <div class="form-group" style="margin-bottom:12px;">
+                <label for="bar-payment-method">Payment Method</label>
+                <select id="bar-payment-method">
+                    <option value="">Select payment method</option>
+                    <option value="upi">UPI</option>
+                    <option value="qr">QR Code</option>
+                    <option value="debit">Debit Card</option>
+                </select>
+            </div>
+            <div id="bar-payment-fields"></div>
+            <div class="gallery-modal-actions">
+                <button type="button" class="submit-btn" onclick="completeBarPayment()">Pay Now</button>
+                <button type="button" class="submit-btn" style="background:#5b4a2e;color:#f5e8c1;" onclick="closeBarPaymentModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script>
+        checkLogin();
+
+        const ROOMS_GALLERY_VERSION = '2';
+        const roomsGalleryDefaults = [
+            'https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=1200&h=500&fit=crop',
+            'https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=1200&h=500&fit=crop',
+            'https://images.unsplash.com/photo-1591088398332-8a7791972843?w=1200&h=500&fit=crop',
+            'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=1200&h=500&fit=crop',
+            'https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=1200&h=500&fit=crop',
+            'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=1200&h=500&fit=crop'
+        ];
+        let roomsGalleryImages = [];
+        let roomsGalleryIndex = 0;
+        let roomsGalleryTimer = null;
+        let roomsGalleryEditIndex = -1;
+
+        function isAdmin() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            return currentUser.type === 'admin';
+        }
+
+        function loadRoomsGalleryImages() {
+            const version = localStorage.getItem('roomsGalleryVersion');
+            const stored = JSON.parse(localStorage.getItem('roomsGalleryImages') || 'null');
+
+            // One-time reset so old pre-added defaults are replaced with new set
+            if (version !== ROOMS_GALLERY_VERSION) {
+                roomsGalleryImages = [...roomsGalleryDefaults];
+                localStorage.setItem('roomsGalleryImages', JSON.stringify(roomsGalleryImages));
+                localStorage.setItem('roomsGalleryVersion', ROOMS_GALLERY_VERSION);
+                return;
+            }
+
+            if (Array.isArray(stored) && stored.length > 0) {
+                roomsGalleryImages = stored;
+            } else {
+                roomsGalleryImages = [...roomsGalleryDefaults];
+            }
+        }
+
+        function persistRoomsGalleryImages() {
+            localStorage.setItem('roomsGalleryImages', JSON.stringify(roomsGalleryImages));
+        }
+
+        function renderRoomsGallery() {
+            const track = document.getElementById('roomsGalleryTrack');
+            if (!track) return;
+
+            const admin = isAdmin();
+            track.innerHTML = roomsGalleryImages.map((src, idx) => {
+                const changeBtn = admin
+                    ? `<button class="gallery-admin-btn gallery-change-btn" style="display:block;" onclick="openRoomsGalleryModal(${idx})">Change Photo</button>`
+                    : '';
+                return `
+                    <div class="rooms-gallery-slide">
+                        <img src="${src}" alt="Room Gallery ${idx + 1}">
+                        ${changeBtn}
+                    </div>
+                `;
+            }).join('');
+
+            const adminBar = document.getElementById('roomsGalleryAdminBar');
+            if (adminBar) {
+                adminBar.style.display = admin ? 'flex' : 'none';
+            }
+
+            roomsGalleryIndex = Math.min(roomsGalleryIndex, Math.max(roomsGalleryImages.length - 1, 0));
+            updateRoomsGalleryTransform();
+        }
+
+        function updateRoomsGalleryTransform() {
+            const track = document.getElementById('roomsGalleryTrack');
+            if (!track) return;
+            track.style.transform = `translateX(${-roomsGalleryIndex * 100}%)`;
+        }
+
+        function startRoomsGalleryAutoScroll() {
+            if (roomsGalleryTimer) clearInterval(roomsGalleryTimer);
+            if (roomsGalleryImages.length <= 1) return;
+            roomsGalleryTimer = setInterval(() => {
+                roomsGalleryIndex = (roomsGalleryIndex + 1) % roomsGalleryImages.length;
+                updateRoomsGalleryTransform();
+            }, 4000);
+        }
+
+        function openRoomsGalleryModal(index) {
+            if (!isAdmin()) return;
+            roomsGalleryEditIndex = index;
+            document.getElementById('roomsGalleryModalTitle').textContent = index >= 0
+                ? `Change Photo #${index + 1}`
+                : 'Add New Gallery Photo';
+            document.getElementById('roomsGalleryFileInput').value = '';
+            resetModalCrop('rooms');
+            document.getElementById('roomsGalleryModal').style.display = 'flex';
+        }
+
+        function closeRoomsGalleryModal() {
+            document.getElementById('roomsGalleryModal').style.display = 'none';
+        }
+
+        function saveRoomsGalleryPhoto() {
+            if (!isAdmin()) return;
+            const imageData = getModalCroppedData('rooms', 900000);
+            if (!imageData) {
+                alert('Please select and crop an image.');
+                return;
+            }
+
+            if (roomsGalleryEditIndex >= 0) {
+                roomsGalleryImages[roomsGalleryEditIndex] = imageData;
+            } else {
+                roomsGalleryImages.push(imageData);
+            }
+            persistRoomsGalleryImages();
+            renderRoomsGallery();
+            startRoomsGalleryAutoScroll();
+            closeRoomsGalleryModal();
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const input = document.getElementById('roomsGalleryFileInput');
+            if (input) {
+                input.addEventListener('change', function(evt) {
+                    const file = evt.target.files[0];
+                    if (!file) return;
+                    loadModalImageForCrop('rooms', file);
+                });
+            }
+
+            const barInputForCrop = document.getElementById('barGalleryFileInput');
+            if (barInputForCrop) {
+                barInputForCrop.addEventListener('change', function(evt) {
+                    const file = evt.target.files[0];
+                    if (!file) return;
+                    loadModalImageForCrop('bar', file);
+                });
+            }
+
+            ['rooms', 'bar'].forEach(type => {
+                const state = getModalCropState(type);
+                const zoom = document.getElementById(state.zoomId);
+                const canvas = document.getElementById(state.canvasId);
+
+                if (zoom) {
+                    zoom.addEventListener('input', function() {
+                        state.scale = parseFloat(this.value) || 1;
+                        drawModalCropCanvas(type);
+                    });
+                }
+
+                if (canvas) {
+                    canvas.addEventListener('mousedown', function(e) {
+                        state.dragging = true;
+                        state.dragStartX = e.clientX;
+                        state.dragStartY = e.clientY;
+                        canvas.classList.add('dragging');
+                    });
+                    window.addEventListener('mousemove', function(e) {
+                        if (!state.dragging) return;
+                        state.offsetX += e.clientX - state.dragStartX;
+                        state.offsetY += e.clientY - state.dragStartY;
+                        state.dragStartX = e.clientX;
+                        state.dragStartY = e.clientY;
+                        drawModalCropCanvas(type);
+                    });
+                    window.addEventListener('mouseup', function() {
+                        state.dragging = false;
+                        canvas.classList.remove('dragging');
+                    });
+                }
+            });
+
+            const modal = document.getElementById('roomsGalleryModal');
+            if (modal) {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) closeRoomsGalleryModal();
+                });
+            }
+
+            loadRoomsGalleryImages();
+            renderRoomsGallery();
+            startRoomsGalleryAutoScroll();
+        });
+        
+        // Update navigation based on user type
+        function updateNavigation() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            const navLinks = document.querySelector('.nav-links');
+            
+            if (!navLinks) return;
+            
+            // Remove old dashboard link if exists
+            const oldDashboardLink = Array.from(navLinks.querySelectorAll('li')).find(li => 
+                li.textContent.includes('Dashboard') || li.textContent.includes('My Dashboard')
+            );
+            if (oldDashboardLink) {
+                oldDashboardLink.remove();
+            }
+
+            // Add appropriate dashboard link based on user type
+            let dashboardLink = '';
+            if (currentUser.type === 'customer') {
+                dashboardLink = '<li><a href="customer_dashboard.html">My Dashboard</a></li>';
+            } else if (currentUser.type === 'admin' || currentUser.type === 'staff') {
+                dashboardLink = '<li><a href="admin_dashboard.html">Dashboard</a></li>';
+            }
+
+            if (dashboardLink) {
+                // Insert before Logout link
+                const logoutLink = navLinks.querySelector('li:last-child');
+                if (logoutLink) {
+                    logoutLink.insertAdjacentHTML('beforebegin', dashboardLink);
+                }
+            }
+        }
+        
+        const barBookingForm = document.getElementById('bar-booking-form');
+        const barBookingBox = document.getElementById('bar-booking-box');
+        const barSelectNote = document.getElementById('bar-select-note');
+        const barPackageSelect = document.getElementById('bar-package');
+        const barGuestsInput = document.getElementById('bar-guests');
+        const barTotalDisplay = document.getElementById('bar-total-display');
+        const barPackageCards = document.querySelectorAll('.bar-package-card');
+        const barPaymentModal = document.getElementById('barPaymentModal');
+        const barPaymentAmount = document.getElementById('bar-payment-amount');
+        const barPaymentMethod = document.getElementById('bar-payment-method');
+        const barPaymentFields = document.getElementById('bar-payment-fields');
+        let pendingBarBooking = null;
+        const DEFAULT_ADMIN_PAYMENT = {
+            accountHolder: 'Royal Plaza Hotel',
+            upiId: 'royalplaza@upi',
+            bankName: 'State Bank of India',
+            accountNumber: '123456789012',
+            ifsc: 'SBIN0001234',
+            supportPhone: '1234567890',
+            customQrImage: ''
+        };
+
+        function getAdminPaymentProfile() {
+            return JSON.parse(localStorage.getItem('adminPaymentProfile') || 'null') || { ...DEFAULT_ADMIN_PAYMENT };
+        }
+
+        function maskAccount(acc) {
+            if (!acc || acc.length < 4) return '****';
+            return `${'*'.repeat(Math.max(0, acc.length - 4))}${acc.slice(-4)}`;
+        }
+
+        function activatePackageCard(packageName) {
+            barPackageCards.forEach(card => {
+                card.classList.toggle('active', card.getAttribute('data-package') === packageName);
+            });
+        }
+
+        barPackageCards.forEach(card => {
+            card.addEventListener('click', function() {
+                const packageName = this.getAttribute('data-package');
+                if (!packageName) return;
+
+                barPackageSelect.value = packageName;
+                activatePackageCard(packageName);
+                if (barBookingBox) barBookingBox.style.display = 'block';
+                if (barSelectNote) barSelectNote.style.display = 'none';
+                updateBarTotal();
+                barBookingBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            });
+        });
+
+        function updateBarTotal() {
+            const opt = barPackageSelect.options[barPackageSelect.selectedIndex];
+            const price = Number(opt?.getAttribute('data-price') || 0);
+            const guests = Number(barGuestsInput.value || 1);
+            if (!price) {
+                barTotalDisplay.textContent = '';
+                return;
+            }
+
+            let total = price;
+            if (opt.value === 'Classic Entry') {
+                total = price * guests;
+            }
+            barTotalDisplay.textContent = `Estimated Total: ₹${total}`;
+        }
+
+        if (barPackageSelect) barPackageSelect.addEventListener('change', updateBarTotal);
+        if (barGuestsInput) barGuestsInput.addEventListener('input', updateBarTotal);
+
+        function buildBarPaymentFields(method, amount) {
+            const profile = getAdminPaymentProfile();
+            if (method === 'upi') {
+                barPaymentFields.innerHTML = `
+                    <p style="margin-bottom:8px;color:#3d2e18;"><strong>Pay To:</strong> ${profile.accountHolder}</p>
+                    <p style="margin-bottom:10px;color:#3d2e18;"><strong>UPI:</strong> ${profile.upiId}</p>
+                    <div class="form-group">
+                        <label for="bar-upi-ref">UPI Transaction Reference</label>
+                        <input id="bar-upi-ref" type="text" placeholder="Enter UPI ref no.">
+                    </div>
+                `;
+                return;
+            }
+            if (method === 'qr') {
+                const upiLink = encodeURIComponent(`upi://pay?pa=${profile.upiId}&pn=${profile.accountHolder}&am=${amount}&cu=INR`);
+                const qrSrc = profile.customQrImage || `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${upiLink}`;
+                barPaymentFields.innerHTML = `
+                    <p style="margin-bottom:8px;color:#3d2e18;">Scan this QR to pay</p>
+                    <img src="${qrSrc}" alt="QR Code" style="display:block;margin:0 auto 12px;border:1px solid #d4c48a;border-radius:8px;width:220px;height:220px;object-fit:contain;">
+                    <p style="font-size:0.9rem;color:#7a6030;">After payment, enter UPI/QR ref and click Pay Now.</p>
+                    <div class="form-group" style="margin-top:8px;">
+                        <label for="bar-qr-ref">QR Payment Reference</label>
+                        <input id="bar-qr-ref" type="text" placeholder="Enter payment ref no.">
+                    </div>
+                `;
+                return;
+            }
+            if (method === 'debit') {
+                barPaymentFields.innerHTML = `
+                    <p style="margin-bottom:8px;color:#3d2e18;"><strong>Payee:</strong> ${profile.accountHolder}</p>
+                    <p style="margin-bottom:8px;color:#3d2e18;"><strong>Bank:</strong> ${profile.bankName} | A/C ${maskAccount(profile.accountNumber)} | IFSC ${profile.ifsc}</p>
+                    <div class="form-group">
+                        <label for="bar-card-name">Card Holder Name</label>
+                        <input id="bar-card-name" type="text" placeholder="Name on card">
+                    </div>
+                    <div class="form-group">
+                        <label for="bar-card-number">Debit Card Number</label>
+                        <input id="bar-card-number" type="text" maxlength="19" placeholder="1234 5678 9012 3456">
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                        <div class="form-group">
+                            <label for="bar-card-expiry">Expiry (MM/YY)</label>
+                            <input id="bar-card-expiry" type="text" maxlength="5" placeholder="MM/YY">
+                        </div>
+                        <div class="form-group">
+                            <label for="bar-card-cvv">CVV</label>
+                            <input id="bar-card-cvv" type="password" maxlength="4" placeholder="***">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="bar-debit-ref">Debit Transaction Reference</label>
+                        <input id="bar-debit-ref" type="text" placeholder="Enter bank/card txn ref (min 6 chars)">
+                    </div>
+                `;
+                return;
+            }
+            barPaymentFields.innerHTML = '';
+        }
+
+        function openBarPaymentModal(amount, bookingDraft) {
+            pendingBarBooking = bookingDraft;
+            barPaymentAmount.textContent = `Amount to pay: INR ${amount}`;
+            barPaymentMethod.value = '';
+            barPaymentFields.innerHTML = '';
+            barPaymentModal.style.display = 'flex';
+        }
+
+        function closeBarPaymentModal() {
+            barPaymentModal.style.display = 'none';
+            pendingBarBooking = null;
+        }
+
+        function generateBarTxn(prefix) {
+            return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+        }
+
+        barPaymentMethod.addEventListener('change', function() {
+            const amount = pendingBarBooking ? pendingBarBooking.total : 0;
+            buildBarPaymentFields(this.value, amount);
+        });
+
+        async function completeBarPayment() {
+            if (!pendingBarBooking) return;
+            const method = barPaymentMethod.value;
+            if (!method) {
+                alert('Please select payment method.');
+                return;
+            }
+
+            if (method === 'upi') {
+                const ref = (document.getElementById('bar-upi-ref')?.value || '').trim();
+                if (!ref) {
+                    alert('Enter UPI transaction reference.');
+                    return;
+                }
+            }
+            if (method === 'qr') {
+                const ref = (document.getElementById('bar-qr-ref')?.value || '').trim();
+                if (!ref) {
+                    alert('Enter QR payment reference.');
+                    return;
+                }
+            }
+            if (method === 'debit') {
+                const cardName = (document.getElementById('bar-card-name')?.value || '').trim();
+                const cardNumberRaw = (document.getElementById('bar-card-number')?.value || '').replace(/\s+/g, '');
+                const expiry = (document.getElementById('bar-card-expiry')?.value || '').trim();
+                const cvv = (document.getElementById('bar-card-cvv')?.value || '').trim();
+                const ref = (document.getElementById('bar-debit-ref')?.value || '').trim();
+                if (!cardName || !/^\d{16}$/.test(cardNumberRaw) || !/^(0[1-9]|1[0-2])\/\d{2}$/.test(expiry) || !/^\d{3,4}$/.test(cvv) || !/^[A-Za-z0-9-]{6,}$/.test(ref)) {
+                    alert('Enter full valid debit card details and transaction reference.');
+                    return;
+                }
+            }
+
+            const profile = getAdminPaymentProfile();
+            const paymentRef =
+                method === 'upi' ? (document.getElementById('bar-upi-ref')?.value || '').trim() :
+                method === 'qr' ? (document.getElementById('bar-qr-ref')?.value || '').trim() :
+                (document.getElementById('bar-debit-ref')?.value || '').trim();
+            if (!/^[A-Za-z0-9-]{6,}$/.test(paymentRef)) {
+                alert('Please enter a valid transaction reference (min 6 characters).');
+                return;
+            }
+
+            const paidBooking = { ...pendingBarBooking };
+            const bookings = JSON.parse(localStorage.getItem('barBookings') || '[]');
+            const bookingToSave = {
+                ...paidBooking,
+                payment: {
+                    method,
+                    status: 'paid',
+                    amountInr: paidBooking.total,
+                    transactionId: generateBarTxn('BARPAY'),
+                    paymentReference: paymentRef,
+                    debitCard: method === 'debit' ? {
+                        cardHolder: (document.getElementById('bar-card-name')?.value || '').trim(),
+                        cardNumberMasked: maskAccount((document.getElementById('bar-card-number')?.value || '').replace(/\s+/g, '')),
+                        expiry: (document.getElementById('bar-card-expiry')?.value || '').trim()
+                    } : null,
+                    paidTo: {
+                        accountHolder: profile.accountHolder,
+                        upiId: profile.upiId,
+                        bankName: profile.bankName,
+                        accountNumberMasked: maskAccount(profile.accountNumber),
+                        ifsc: profile.ifsc
+                    },
+                    paidAt: new Date().toISOString()
+                }
+            };
+
+            await window.HMS_API.post('/bar-bookings', {
+                name: bookingToSave.name,
+                customer_email: bookingToSave.customerEmail || '',
+                phone: bookingToSave.phone,
+                date: bookingToSave.date,
+                time: bookingToSave.time,
+                guests: bookingToSave.guests,
+                package_name: bookingToSave.packageName,
+                package_price: bookingToSave.packagePrice,
+                total: bookingToSave.total,
+                payment_method: bookingToSave.payment?.method || null,
+                payment_txn_id: bookingToSave.payment?.transactionId || null,
+                payment_reference: bookingToSave.payment?.paymentReference || null,
+                payment: bookingToSave.payment || null,
+                status: 'booked'
+            });
+            closeBarPaymentModal();
+
+            const confirm = document.getElementById('bar-booking-confirm');
+            confirm.style.display = 'block';
+            confirm.textContent = `Payment successful. Booked ${paidBooking.packageName} on ${paidBooking.date} at ${paidBooking.time}. Total: INR ${paidBooking.total}`;
+
+            if (barBookingForm) {
+                barBookingForm.reset();
+                const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+                const nameInput = document.getElementById('bar-name');
+                const phoneInput = document.getElementById('bar-phone');
+                if (nameInput && currentUser.name) nameInput.value = currentUser.name;
+                if (phoneInput && currentUser.phone) phoneInput.value = currentUser.phone;
+                barTotalDisplay.textContent = '';
+            }
+
+            setTimeout(() => {
+                if (confirm) confirm.style.display = 'none';
+                const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+                if (currentUser.type === 'customer') {
+                    window.location.href = 'customer_dashboard.html';
+                }
+            }, 2500);
+        }
+
+        if (barBookingForm) {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            const nameInput = document.getElementById('bar-name');
+            const phoneInput = document.getElementById('bar-phone');
+            if (nameInput && currentUser.name) nameInput.value = currentUser.name;
+            if (phoneInput && currentUser.phone) phoneInput.value = currentUser.phone;
+
+            barBookingForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const name = document.getElementById('bar-name').value.trim();
+                const phone = document.getElementById('bar-phone').value.trim();
+                const date = document.getElementById('bar-date').value;
+                const time = document.getElementById('bar-time').value;
+                const guests = Number(document.getElementById('bar-guests').value || 1);
+                const pkgOpt = barPackageSelect.options[barPackageSelect.selectedIndex];
+                const packageName = pkgOpt.value;
+                const packagePrice = Number(pkgOpt.getAttribute('data-price') || 0);
+
+                if (!name || !phone || !date || !time || !packageName) {
+                    alert('Please fill all bar booking details.');
+                    return;
+                }
+
+                let total = packagePrice;
+                if (packageName === 'Classic Entry') total = packagePrice * guests;
+
+                const bookingDraft = {
+                    name,
+                    customerEmail: currentUser.email || '',
+                    phone,
+                    date,
+                    time,
+                    guests,
+                    packageName,
+                    packagePrice,
+                    total,
+                    status: 'booked',
+                    timestamp: new Date().toISOString()
+                };
+
+                openBarPaymentModal(total, bookingDraft);
+            });
+        }
+
+        barPaymentModal.addEventListener('click', function(e) {
+            if (e.target === barPaymentModal) closeBarPaymentModal();
+        });
+
+        const BAR_GALLERY_VERSION = '1';
+        const barGalleryDefaults = [
+            'https://images.unsplash.com/photo-1514361892635-eae31ec99f7f?w=1200&h=600&fit=crop',
+            'https://images.unsplash.com/photo-1470337458703-46ad1756a187?w=1200&h=600&fit=crop',
+            'https://images.unsplash.com/photo-1566417713940-fe7c737a9ef2?w=1200&h=600&fit=crop',
+            'https://images.unsplash.com/photo-1575444758702-4a6b9222336e?w=1200&h=600&fit=crop',
+            'https://images.unsplash.com/photo-1551024709-8f23befc6cf7?w=1200&h=600&fit=crop',
+            'https://images.unsplash.com/photo-1471421298428-1513ab720a8e?w=1200&h=600&fit=crop',
+            'https://images.unsplash.com/photo-1536935338788-846bb9981813?w=1200&h=600&fit=crop',
+            'https://images.unsplash.com/photo-1562059390-a761a084768e?w=1200&h=600&fit=crop',
+            'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=1200&h=600&fit=crop',
+            'https://images.unsplash.com/photo-1471421298428-1513ab720a8e?w=1200&h=600&fit=crop'
+        ];
+        let barGalleryImages = [];
+        let barGalleryIndex = 0;
+        let barGalleryTimer = null;
+        let barGalleryEditIndex = -1;
+        const modalCropStates = {
+            rooms: { image: null, scale: 1, offsetX: 0, offsetY: 0, dragging: false, dragStartX: 0, dragStartY: 0, canvasId: 'roomsGalleryCropCanvas', previewId: 'roomsGalleryPreview', zoomId: 'roomsGalleryZoomRange', outW: 1200, outH: 500 },
+            bar: { image: null, scale: 1, offsetX: 0, offsetY: 0, dragging: false, dragStartX: 0, dragStartY: 0, canvasId: 'barGalleryCropCanvas', previewId: 'barGalleryPreview', zoomId: 'barGalleryZoomRange', outW: 1200, outH: 600 }
+        };
+
+        function getModalCropState(type) {
+            return modalCropStates[type];
+        }
+
+        function resetModalCrop(type) {
+            const state = getModalCropState(type);
+            state.image = null;
+            state.scale = 1;
+            state.offsetX = 0;
+            state.offsetY = 0;
+            const zoom = document.getElementById(state.zoomId);
+            if (zoom) zoom.value = '1';
+            const preview = document.getElementById(state.previewId);
+            if (preview) {
+                preview.style.display = 'none';
+                preview.src = '';
+            }
+            drawModalCropCanvas(type);
+        }
+
+        function drawModalCropCanvas(type) {
+            const state = getModalCropState(type);
+            const canvas = document.getElementById(state.canvasId);
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#f3f4f6';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            if (!state.image) {
+                ctx.fillStyle = '#6b7280';
+                ctx.font = '16px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('Select image, then drag/zoom to crop', canvas.width / 2, canvas.height / 2);
+                return;
+            }
+
+            const baseScale = Math.max(canvas.width / state.image.width, canvas.height / state.image.height);
+            const scale = baseScale * state.scale;
+            const drawW = state.image.width * scale;
+            const drawH = state.image.height * scale;
+            const x = (canvas.width - drawW) / 2 + state.offsetX;
+            const y = (canvas.height - drawH) / 2 + state.offsetY;
+            ctx.drawImage(state.image, x, y, drawW, drawH);
+            ctx.strokeStyle = '#f59e0b';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(1, 1, canvas.width - 2, canvas.height - 2);
+        }
+
+        function loadModalImageForCrop(type, file) {
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                const img = new Image();
+                img.onload = function() {
+                    const state = getModalCropState(type);
+                    state.image = img;
+                    state.scale = 1;
+                    state.offsetX = 0;
+                    state.offsetY = 0;
+                    drawModalCropCanvas(type);
+                    previewModalCrop(type);
+                };
+                img.src = ev.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function getModalCroppedData(type, maxBytes) {
+            const state = getModalCropState(type);
+            if (!state.image) return null;
+            const canvas = document.getElementById(state.canvasId);
+            if (!canvas) return null;
+
+            const baseScale = Math.max(canvas.width / state.image.width, canvas.height / state.image.height);
+            const scale = baseScale * state.scale;
+            const drawW = state.image.width * scale;
+            const drawH = state.image.height * scale;
+            const x = (canvas.width - drawW) / 2 + state.offsetX;
+            const y = (canvas.height - drawH) / 2 + state.offsetY;
+            const out = document.createElement('canvas');
+            out.width = state.outW;
+            out.height = state.outH;
+            const octx = out.getContext('2d');
+            const sx = (-x) / canvas.width * state.outW;
+            const sy = (-y) / canvas.height * state.outH;
+            const sW = (drawW / canvas.width) * state.outW;
+            const sH = (drawH / canvas.height) * state.outH;
+            octx.fillStyle = '#f3f4f6';
+            octx.fillRect(0, 0, state.outW, state.outH);
+            octx.drawImage(state.image, sx, sy, sW, sH);
+
+            let quality = 0.92;
+            let dataUrl = out.toDataURL('image/jpeg', quality);
+            while (dataUrl.length > maxBytes && quality > 0.45) {
+                quality -= 0.07;
+                dataUrl = out.toDataURL('image/jpeg', quality);
+            }
+            return dataUrl;
+        }
+
+        function previewModalCrop(type) {
+            const preview = document.getElementById(getModalCropState(type).previewId);
+            const data = getModalCroppedData(type, 3000000);
+            if (!data || !preview) return;
+            preview.src = data;
+            preview.style.display = 'block';
+        }
+
+        function previewRoomsGalleryCrop() { previewModalCrop('rooms'); }
+        function previewBarGalleryCrop() { previewModalCrop('bar'); }
+
+        function loadBarGalleryImages() {
+            const version = localStorage.getItem('barGalleryVersion');
+            const stored = JSON.parse(localStorage.getItem('barGalleryImages') || 'null');
+            if (version !== BAR_GALLERY_VERSION) {
+                barGalleryImages = [...barGalleryDefaults];
+                localStorage.setItem('barGalleryImages', JSON.stringify(barGalleryImages));
+                localStorage.setItem('barGalleryVersion', BAR_GALLERY_VERSION);
+                return;
+            }
+            barGalleryImages = Array.isArray(stored) && stored.length > 0 ? stored : [...barGalleryDefaults];
+        }
+
+        function persistBarGalleryImages() {
+            localStorage.setItem('barGalleryImages', JSON.stringify(barGalleryImages));
+        }
+
+        function renderBarGallery() {
+            const track = document.getElementById('barGalleryTrack');
+            if (!track) return;
+            const admin = isAdmin();
+            track.innerHTML = barGalleryImages.map((src, idx) => {
+                const changeBtn = admin
+                    ? `<button class="gallery-admin-btn bar-gallery-change-btn" style="display:block;" onclick="openBarGalleryModal(${idx})">Change</button>`
+                    : '';
+                return `
+                    <div class="bar-gallery-slide">
+                        <img src="${src}" alt="Luxury Bar ${idx + 1}">
+                        ${changeBtn}
+                    </div>
+                `;
+            }).join('');
+
+            const adminBar = document.getElementById('barGalleryAdminBar');
+            if (adminBar) adminBar.style.display = admin ? 'block' : 'none';
+
+            barGalleryIndex = Math.min(barGalleryIndex, Math.max(barGalleryImages.length - 1, 0));
+            updateBarGalleryTransform();
+        }
+
+        function updateBarGalleryTransform() {
+            const track = document.getElementById('barGalleryTrack');
+            if (!track) return;
+            track.style.transform = `translateX(${-barGalleryIndex * 100}%)`;
+        }
+
+        function startBarGalleryAutoScroll() {
+            if (barGalleryTimer) clearInterval(barGalleryTimer);
+            if (barGalleryImages.length <= 1) return;
+            barGalleryTimer = setInterval(() => {
+                barGalleryIndex = (barGalleryIndex + 1) % barGalleryImages.length;
+                updateBarGalleryTransform();
+            }, 3800);
+        }
+
+        function openBarGalleryModal(index) {
+            if (!isAdmin()) return;
+            barGalleryEditIndex = index;
+            document.getElementById('barGalleryModalTitle').textContent = index >= 0
+                ? `Change Bar Photo #${index + 1}`
+                : 'Add Bar Gallery Photo';
+            document.getElementById('barGalleryFileInput').value = '';
+            resetModalCrop('bar');
+            document.getElementById('barGalleryModal').style.display = 'flex';
+        }
+
+        function closeBarGalleryModal() {
+            document.getElementById('barGalleryModal').style.display = 'none';
+        }
+
+        function saveBarGalleryPhoto() {
+            if (!isAdmin()) return;
+            const imageData = getModalCroppedData('bar', 900000);
+            if (!imageData) {
+                alert('Please select and crop an image.');
+                return;
+            }
+
+            if (barGalleryEditIndex >= 0) {
+                barGalleryImages[barGalleryEditIndex] = imageData;
+            } else {
+                barGalleryImages.push(imageData);
+            }
+            persistBarGalleryImages();
+            renderBarGallery();
+            startBarGalleryAutoScroll();
+            closeBarGalleryModal();
+        }
+
+        // Update navigation on page load
+        updateNavigation();
+
+        const barInput = document.getElementById('barGalleryFileInput');
+        if (barInput) {
+            barInput.addEventListener('change', function(evt) {
+                const file = evt.target.files[0];
+                if (!file) return;
+                loadModalImageForCrop('bar', file);
+            });
+        }
+
+        const barModal = document.getElementById('barGalleryModal');
+        if (barModal) {
+            barModal.addEventListener('click', function(e) {
+                if (e.target === barModal) closeBarGalleryModal();
+            });
+        }
+
+        loadBarGalleryImages();
+        renderBarGallery();
+        startBarGalleryAutoScroll();
+    </script>
+</body>
+</html>

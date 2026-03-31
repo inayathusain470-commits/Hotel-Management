@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gym - Royal Plaza Hotel</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <span class="logo-crown">&#x2756;</span>
+                <div class="logo-brand">
+                    <span class="logo-name">Royal Plaza</span>
+                    <span class="logo-tagline">&#10022; Hotel &#10022;</span>
+                </div>
+            </div>
+            <ul class="nav-links">
+                <li><a href="home.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="rooms.html">Rooms & Bar</a></li>
+                <li><a href="food_menu.html">Food Menu</a></li>
+                <li><a href="booking.html">Booking</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="my_cart.html">My Cart</a></li>
+                <li><a href="#" onclick="logout()">Logout</a></li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </nav>
+    </header>
+
+    <section class="gym-feature">
+        <div class="container">
+            <div class="gym-header">
+                <div class="gym-logo" aria-label="Gym Logo">GYM</div>
+                <h2>Hotel Gym Equipment</h2>
+            </div>
+            <p>All gym equipment photos are shown below. Only admin can add/change photos.</p>
+            <a href="home.html" class="cta-button" style="display:inline-block;margin-bottom:1.25rem;">Exit to Home</a>
+
+            <div class="gym-gallery">
+                <div class="gym-admin-actions">
+                    <button id="gym-add-photo-btn" class="gallery-admin-btn" style="display:none;" onclick="openGymPhotoModal(-1)">Add Gym Photo</button>
+                </div>
+                <div id="gym-grid" class="gym-grid"></div>
+            </div>
+        </div>
+    </section>
+
+    <div id="gymPhotoModal" class="gallery-modal">
+        <div class="gallery-modal-content">
+            <h3 id="gymPhotoModalTitle">Upload Gym Photo</h3>
+            <input type="file" id="gymPhotoInput" accept="image/*">
+            <div class="gym-crop-tools">
+                <label for="gymZoomRange">Zoom</label>
+                <input type="range" id="gymZoomRange" min="1" max="3" step="0.01" value="1">
+            </div>
+            <p class="gym-crop-hint">Drag image inside crop box to adjust.</p>
+            <div class="gym-crop-wrap">
+                <canvas id="gymCropCanvas" width="400" height="250"></canvas>
+            </div>
+            <div style="margin-top:10px;">
+                <img id="gymPhotoPreview" src="" alt="Gym Preview" style="display:none;max-width:100%;max-height:200px;border-radius:8px;">
+            </div>
+            <div class="gallery-modal-actions">
+                <button type="button" class="submit-btn" style="background:#374151;" onclick="applyGymCrop()">Crop</button>
+                <button id="gym-save-photo-btn" type="button" class="submit-btn" onclick="saveGymPhoto()">Save</button>
+                <button type="button" class="submit-btn" style="background:#e74c3c;" onclick="closeGymPhotoModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Contact Us</h3>
+                    <p>Axis Knowledge City, Hathipur,<br>Rooma, NH-2, Milestone - 478,<br>Kanpur - 209402,<br>Uttar Pradesh, India</p>
+                    <p>Phone: (123) 456-7890</p>
+                    <p>Email: info@luxuryhotel.com</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Follow Us</h3>
+                    <div class="social-links">
+                        <a href="#">Facebook</a>
+                        <a href="https://youtu.be/ZJsjGBiH3P8" target="_blank" rel="noopener noreferrer">YouTube</a>
+                        <a href="#">Twitter</a>
+                        <a href="#">Instagram</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/script.js"></script>
+    <script>
+        checkLogin();
+
+        function updateNavigation() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            const navLinks = document.querySelector('.nav-links');
+
+            if (!navLinks) return;
+
+            const oldDashboardLink = Array.from(navLinks.querySelectorAll('li')).find(li =>
+                li.textContent.includes('Dashboard') || li.textContent.includes('My Dashboard')
+            );
+            if (oldDashboardLink) oldDashboardLink.remove();
+
+            let dashboardLink = '';
+            if (currentUser.type === 'customer') {
+                dashboardLink = '<li><a href="customer_dashboard.html">My Dashboard</a></li>';
+            } else if (currentUser.type === 'admin' || currentUser.type === 'staff') {
+                dashboardLink = '<li><a href="admin_dashboard.html">Dashboard</a></li>';
+            }
+
+            if (dashboardLink) {
+                const logoutLink = navLinks.querySelector('li:last-child');
+                if (logoutLink) logoutLink.insertAdjacentHTML('beforebegin', dashboardLink);
+            }
+        }
+
+        const GYM_GALLERY_DEFAULTS = [
+            { src: 'https://images.unsplash.com/photo-1584466977773-e625c37cdd50?w=600&h=400&fit=crop', title: 'Treadmill Area' },
+            { src: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&h=400&fit=crop', title: 'Dumbbells Section' },
+            { src: 'https://images.unsplash.com/photo-1593079831268-3381b0db4a77?w=600&h=400&fit=crop', title: 'Bench Press' },
+            { src: 'https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=600&h=400&fit=crop', title: 'Cardio Bikes' },
+            { src: 'https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=600&h=400&fit=crop', title: 'Strength Machines' },
+            { src: 'https://images.unsplash.com/photo-1549576490-b0b4831ef60a?w=600&h=400&fit=crop', title: 'Yoga & Stretching Corner' },
+            { src: 'https://images.unsplash.com/photo-1576678927484-cc907957088c?w=600&h=400&fit=crop', title: 'Rowing Machine' },
+            { src: 'https://images.unsplash.com/photo-1534258936925-c58bed479fcb?w=600&h=400&fit=crop', title: 'Barbell Rack' },
+            { src: 'https://images.unsplash.com/photo-1603287681836-b174ce5074c2?w=600&h=400&fit=crop', title: 'Cable Crossover' },
+            { src: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600&h=400&fit=crop', title: 'Cross Trainer' },
+            { src: 'https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=600&h=400&fit=crop', title: 'Functional Training Zone' },
+            { src: 'https://images.unsplash.com/photo-1579758629938-03607ccdbaba?w=600&h=400&fit=crop', title: 'Leg Press' },
+            { src: 'https://images.unsplash.com/photo-1571732154690-f6d1c3f6d7b7?w=600&h=400&fit=crop', title: 'Lat Pulldown' },
+            { src: 'https://images.unsplash.com/photo-1486218119243-13883505764c?w=600&h=400&fit=crop', title: 'Kettlebell Section' },
+            { src: 'https://images.unsplash.com/photo-1507398941214-572c25f4b1dc?w=600&h=400&fit=crop', title: 'Battle Ropes' },
+            { src: 'https://images.unsplash.com/photo-1596357395104-2e7f3f04db5a?w=600&h=400&fit=crop', title: 'Medicine Balls' },
+            { src: 'https://images.unsplash.com/photo-1598266663439-2056e6900339?w=600&h=400&fit=crop', title: 'Punching Bag' },
+            { src: 'https://images.unsplash.com/photo-1532029837206-abbe2b7620e3?w=600&h=400&fit=crop', title: 'Core Workout Station' },
+            { src: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&h=400&fit=crop', title: 'Stretching Mats' },
+            { src: 'https://images.unsplash.com/photo-1526401485004-46910ecc8e51?w=600&h=400&fit=crop', title: 'Mirrors & Lighting' }
+        ];
+        const GYM_DB_NAME = 'RoyalPlazaMediaDB';
+        const GYM_STORE_NAME = 'gymGalleryPhotos';
+
+        let gymGalleryPhotos = [];
+        let gymEditIndex = -1;
+        let gymSaveInProgress = false;
+        let cropImg = null;
+        let cropScale = 1;
+        let cropOffsetX = 0;
+        let cropOffsetY = 0;
+        let isDraggingCrop = false;
+        let dragStartX = 0;
+        let dragStartY = 0;
+        let gymCroppedData = null;
+        const CROPPED_W = 600;
+        const CROPPED_H = 400;
+
+        function isAdminUser() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            return currentUser.type === 'admin';
+        }
+
+        function openGymGalleryDb() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(GYM_DB_NAME, 1);
+                request.onupgradeneeded = function() {
+                    const db = request.result;
+                    if (!db.objectStoreNames.contains(GYM_STORE_NAME)) {
+                        db.createObjectStore(GYM_STORE_NAME);
+                    }
+                };
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        async function getGymPhotosFromDb() {
+            const db = await openGymGalleryDb();
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(GYM_STORE_NAME, 'readonly');
+                const store = tx.objectStore(GYM_STORE_NAME);
+                const request = store.get('photos');
+                request.onsuccess = () => resolve(request.result || null);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        async function saveGymPhotos() {
+            const db = await openGymGalleryDb();
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(GYM_STORE_NAME, 'readwrite');
+                const store = tx.objectStore(GYM_STORE_NAME);
+                store.put(gymGalleryPhotos, 'photos');
+                tx.oncomplete = () => resolve(true);
+                tx.onerror = () => reject(tx.error);
+            });
+        }
+
+        async function loadGymPhotos() {
+            const dbPhotos = await getGymPhotosFromDb().catch(() => null);
+            if (Array.isArray(dbPhotos) && dbPhotos.length > 0) {
+                gymGalleryPhotos = [...dbPhotos];
+                return;
+            }
+
+            const stored = JSON.parse(localStorage.getItem('gymGalleryPhotos') || 'null');
+            gymGalleryPhotos = Array.isArray(stored) && stored.length > 0 ? [...stored] : [...GYM_GALLERY_DEFAULTS];
+            await saveGymPhotos();
+        }
+
+        function renderGymGallery() {
+            const grid = document.getElementById('gym-grid');
+            if (!grid) return;
+
+            const admin = isAdminUser();
+            grid.innerHTML = gymGalleryPhotos.map((photo, index) => {
+                const controls = admin ? `<div style="display:flex;gap:8px;justify-content:center;position:absolute;left:10px;right:10px;bottom:10px;"><button class="gallery-admin-btn gym-change-btn" onclick="openGymPhotoModal(${index})">Change</button><button class="gallery-admin-btn" style="background:#b91c1c;" onclick="deleteGymPhoto(${index})">Delete</button></div>` : '';
+                return `
+                    <div class="gym-card">
+                        <div class="gym-card-image-wrap">
+                            <img src="${photo.src}" alt="${photo.title}">
+                            ${controls}
+                        </div>
+                        <p>${photo.title}</p>
+                    </div>
+                `;
+            }).join('');
+
+            const addBtn = document.getElementById('gym-add-photo-btn');
+            if (addBtn) addBtn.style.display = admin ? 'inline-block' : 'none';
+        }
+
+        function openGymPhotoModal(index) {
+            if (!isAdminUser()) return;
+            gymEditIndex = index;
+            document.getElementById('gymPhotoModalTitle').textContent = index >= 0 ? `Change Gym Photo #${index + 1}` : 'Add Gym Photo';
+            document.getElementById('gymPhotoInput').value = '';
+            const zoomRange = document.getElementById('gymZoomRange');
+            if (zoomRange) zoomRange.value = '1';
+            const preview = document.getElementById('gymPhotoPreview');
+            preview.style.display = 'none';
+            preview.src = '';
+            gymCroppedData = null;
+            cropImg = null;
+            cropScale = 1;
+            cropOffsetX = 0;
+            cropOffsetY = 0;
+            drawCropCanvas();
+            document.getElementById('gymPhotoModal').style.display = 'flex';
+        }
+
+        function closeGymPhotoModal() {
+            document.getElementById('gymPhotoModal').style.display = 'none';
+        }
+
+        async function deleteGymPhoto(index) {
+            if (!isAdminUser()) return;
+            if (!confirm(`Delete gym photo #${index + 1}?`)) return;
+            gymGalleryPhotos.splice(index, 1);
+            await saveGymPhotos();
+            renderGymGallery();
+        }
+
+        function getCropCanvas() {
+            return document.getElementById('gymCropCanvas');
+        }
+
+        function drawCropCanvas() {
+            const canvas = getCropCanvas();
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // placeholder background
+            ctx.fillStyle = '#f3f4f6';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            if (!cropImg) {
+                ctx.fillStyle = '#6b7280';
+                ctx.font = '16px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('Select image, then drag/zoom to crop', canvas.width / 2, canvas.height / 2);
+                return;
+            }
+
+            const baseScale = Math.max(canvas.width / cropImg.width, canvas.height / cropImg.height);
+            const scale = baseScale * cropScale;
+            const drawW = cropImg.width * scale;
+            const drawH = cropImg.height * scale;
+            const x = (canvas.width - drawW) / 2 + cropOffsetX;
+            const y = (canvas.height - drawH) / 2 + cropOffsetY;
+
+            ctx.drawImage(cropImg, x, y, drawW, drawH);
+
+            // subtle crop border
+            ctx.strokeStyle = '#f59e0b';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(1, 1, canvas.width - 2, canvas.height - 2);
+        }
+
+        function loadImageForCrop(file) {
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                const img = new Image();
+                img.onload = function() {
+                    cropImg = img;
+                    cropScale = 1;
+                    cropOffsetX = 0;
+                    cropOffsetY = 0;
+                    gymCroppedData = null;
+                    drawCropCanvas();
+                    previewGymCrop();
+                };
+                img.src = ev.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function getCroppedImageData(maxBytes) {
+            if (!cropImg) return null;
+
+            const canvas = getCropCanvas();
+            if (!canvas) return null;
+
+            const baseScale = Math.max(canvas.width / cropImg.width, canvas.height / cropImg.height);
+            const scale = baseScale * cropScale;
+            const drawW = cropImg.width * scale;
+            const drawH = cropImg.height * scale;
+            const x = (canvas.width - drawW) / 2 + cropOffsetX;
+            const y = (canvas.height - drawH) / 2 + cropOffsetY;
+
+            const out = document.createElement('canvas');
+            out.width = CROPPED_W;
+            out.height = CROPPED_H;
+            const octx = out.getContext('2d');
+
+            const sx = (-x) / canvas.width * CROPPED_W;
+            const sy = (-y) / canvas.height * CROPPED_H;
+            const sW = (drawW / canvas.width) * CROPPED_W;
+            const sH = (drawH / canvas.height) * CROPPED_H;
+
+            // Draw by mapping visual crop canvas composition to fixed output size
+            octx.fillStyle = '#f3f4f6';
+            octx.fillRect(0, 0, CROPPED_W, CROPPED_H);
+            octx.drawImage(cropImg, sx, sy, sW, sH);
+
+            // compress progressively until under target bytes
+            let quality = 0.92;
+            let dataUrl = out.toDataURL('image/jpeg', quality);
+            while (dataUrl.length > maxBytes && quality > 0.2) {
+                quality -= 0.08;
+                dataUrl = out.toDataURL('image/jpeg', quality);
+            }
+
+            // If still large, downscale canvas and recompress to avoid save failures.
+            let workCanvas = out;
+            while (dataUrl.length > maxBytes && workCanvas.width > 420 && workCanvas.height > 210) {
+                const scaled = document.createElement('canvas');
+                scaled.width = Math.round(workCanvas.width * 0.85);
+                scaled.height = Math.round(workCanvas.height * 0.85);
+                const sctx = scaled.getContext('2d');
+                sctx.fillStyle = '#f3f4f6';
+                sctx.fillRect(0, 0, scaled.width, scaled.height);
+                sctx.drawImage(workCanvas, 0, 0, scaled.width, scaled.height);
+                workCanvas = scaled;
+                quality = Math.min(0.8, quality);
+                dataUrl = workCanvas.toDataURL('image/jpeg', quality);
+            }
+
+            return dataUrl;
+        }
+
+        function previewGymCrop() {
+            const data = getCroppedImageData(3_000_000);
+            const preview = document.getElementById('gymPhotoPreview');
+            if (!data || !preview) return;
+            preview.src = data;
+            preview.style.display = 'block';
+            gymCroppedData = data;
+        }
+
+        function applyGymCrop() {
+            previewGymCrop();
+        }
+
+        async function saveGymPhoto() {
+            if (!isAdminUser()) {
+                alert('Only admin can save gym photos.');
+                return;
+            }
+            if (gymSaveInProgress) return;
+
+            const file = document.getElementById('gymPhotoInput').files[0];
+            if (!file && !cropImg) {
+                alert('Please select an image first.');
+                return;
+            }
+
+            gymSaveInProgress = true;
+            const saveBtn = document.getElementById('gym-save-photo-btn');
+            if (saveBtn) {
+                saveBtn.disabled = true;
+                saveBtn.textContent = 'Saving...';
+            }
+
+            try {
+                const imageData = gymCroppedData || getCroppedImageData(220000);
+                if (!imageData) throw new Error('Crop image not ready');
+
+                if (gymEditIndex >= 0) {
+                    const existingTitle = gymGalleryPhotos[gymEditIndex]?.title || `Gym Equipment ${gymEditIndex + 1}`;
+                    gymGalleryPhotos[gymEditIndex] = { src: imageData, title: existingTitle };
+                } else {
+                    gymGalleryPhotos.push({ src: imageData, title: `Gym Equipment ${gymGalleryPhotos.length + 1}` });
+                }
+                await saveGymPhotos();
+                renderGymGallery();
+                closeGymPhotoModal();
+                alert('Gym photo saved successfully!');
+            } catch (err) {
+                alert('Photo save failed. Try crop/zoom again or choose a clearer image.');
+            } finally {
+                gymSaveInProgress = false;
+                if (saveBtn) {
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = 'Save';
+                }
+            }
+        }
+
+        updateNavigation();
+        (async function initGymGallery() {
+            await loadGymPhotos();
+            renderGymGallery();
+        })();
+
+        const gymPhotoInput = document.getElementById('gymPhotoInput');
+        if (gymPhotoInput) {
+            gymPhotoInput.addEventListener('change', function(evt) {
+                const file = evt.target.files[0];
+                if (!file) return;
+                loadImageForCrop(file);
+            });
+        }
+
+        const gymZoomRange = document.getElementById('gymZoomRange');
+        if (gymZoomRange) {
+            gymZoomRange.addEventListener('input', function() {
+                cropScale = parseFloat(this.value) || 1;
+                drawCropCanvas();
+            });
+        }
+
+        const gymCropCanvas = getCropCanvas();
+        if (gymCropCanvas) {
+            gymCropCanvas.addEventListener('mousedown', function(e) {
+                isDraggingCrop = true;
+                dragStartX = e.clientX;
+                dragStartY = e.clientY;
+                gymCropCanvas.classList.add('dragging');
+            });
+
+            window.addEventListener('mousemove', function(e) {
+                if (!isDraggingCrop) return;
+                const dx = e.clientX - dragStartX;
+                const dy = e.clientY - dragStartY;
+                cropOffsetX += dx;
+                cropOffsetY += dy;
+                dragStartX = e.clientX;
+                dragStartY = e.clientY;
+                drawCropCanvas();
+            });
+
+            window.addEventListener('mouseup', function() {
+                isDraggingCrop = false;
+                gymCropCanvas.classList.remove('dragging');
+            });
+        }
+
+        const gymModal = document.getElementById('gymPhotoModal');
+        if (gymModal) {
+            gymModal.addEventListener('click', function(e) {
+                if (e.target === gymModal) closeGymPhotoModal();
+            });
+        }
+
+        const gymSaveBtn = document.getElementById('gym-save-photo-btn');
+        if (gymSaveBtn) {
+            gymSaveBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                saveGymPhoto();
+            });
+        }
+    </script>
+</body>
+</html>
