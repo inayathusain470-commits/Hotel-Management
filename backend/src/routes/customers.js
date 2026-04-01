@@ -1,5 +1,6 @@
 const express = require('express');
 const supabase = require('../db');
+const { sendWelcomeEmail, sendWelcomeSMS } = require('../services/notificationService');
 
 const router = express.Router();
 
@@ -29,7 +30,17 @@ router.post('/register', async (req, res) => {
       throw error;
     }
 
-    return res.status(201).json({ id: data[0].id, message: 'Customer registered' });
+    const customer = data[0];
+
+    // Send welcome notifications (asynchronously - don't wait)
+    if (customer.email) {
+      sendWelcomeEmail(customer).catch(err => console.error('Failed to send email:', err));
+    }
+    if (customer.phone) {
+      sendWelcomeSMS(customer).catch(err => console.error('Failed to send SMS:', err));
+    }
+
+    return res.status(201).json({ id: customer.id, message: 'Customer registered successfully. Check your email and SMS!' });
   } catch (err) {
     console.error('Register error:', err);
     return res.status(500).json({ error: 'Unable to register customer' });
