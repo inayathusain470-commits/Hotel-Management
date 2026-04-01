@@ -245,12 +245,12 @@
         const roomPaymentAmount = document.getElementById('room-payment-amount');
         let pendingRoomBooking = null;
         const DEFAULT_ADMIN_PAYMENT = {
-            accountHolder: 'Royal Plaza Hotel',
-            upiId: 'royalplaza@upi',
-            bankName: 'State Bank of India',
-            accountNumber: '123456789012',
-            ifsc: 'SBIN0001234',
-            supportPhone: '1234567890',
+            accountHolder: 'INAYAT HUSAIN',
+            upiId: '9044089140@kotak811',
+            bankName: 'Kotak Bank',
+            accountNumber: '5450882039',
+            ifsc: 'KKBK0005633',
+            supportPhone: '+91-9044089140',
             customQrImage: ''
         };
         const ROOM_INVENTORY = {
@@ -259,7 +259,29 @@
             deluxe: Array.from({ length: 100 }, (_, index) => index + 1)
         };
 
-        function getAdminPaymentProfile() {
+        async function getAdminPaymentProfile() {
+            try {
+                // Try to fetch from backend API
+                const response = await fetch('http://localhost:5000/api/payment-profile');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data) {
+                        // Convert snake_case from API to camelCase for UI
+                        return {
+                            accountHolder: data.account_holder || DEFAULT_ADMIN_PAYMENT.accountHolder,
+                            upiId: data.upi_id || DEFAULT_ADMIN_PAYMENT.upiId,
+                            bankName: data.bank_name || DEFAULT_ADMIN_PAYMENT.bankName,
+                            accountNumber: data.account_number || DEFAULT_ADMIN_PAYMENT.accountNumber,
+                            ifsc: data.ifsc || DEFAULT_ADMIN_PAYMENT.ifsc,
+                            supportPhone: data.support_phone || DEFAULT_ADMIN_PAYMENT.supportPhone,
+                            customQrImage: data.custom_qr_image || ''
+                        };
+                    }
+                }
+            } catch (err) {
+                console.log('ℹ️  API not available, using localStorage:', err.message);
+            }
+            // Fallback to localStorage
             return JSON.parse(localStorage.getItem('adminPaymentProfile') || 'null') || { ...DEFAULT_ADMIN_PAYMENT };
         }
 
@@ -343,8 +365,10 @@
         document.getElementById('checkin').addEventListener('change', updateAvailableRoomNumbers);
         document.getElementById('checkout').addEventListener('change', updateAvailableRoomNumbers);
 
-        function buildRoomPaymentFields(method, amount) {
-            const profile = getAdminPaymentProfile();
+        function buildRoomPaymentFields(method, amount, profile = null) {
+            if (!profile) {
+                profile = DEFAULT_ADMIN_PAYMENT;
+            }
             if (method === 'upi') {
                 roomPaymentFields.innerHTML = `
                     <p style="margin-bottom:8px;color:#3d2e18;"><strong>Pay To:</strong> ${profile.accountHolder}</p>
@@ -419,9 +443,10 @@
             return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
         }
 
-        roomPaymentMethod.addEventListener('change', function() {
+        roomPaymentMethod.addEventListener('change', async function() {
             const amount = pendingRoomBooking ? pendingRoomBooking.totalAmountInr : 0;
-            buildRoomPaymentFields(this.value, amount);
+            const profile = await getAdminPaymentProfile();
+            buildRoomPaymentFields(this.value, amount, profile);
         });
 
         async function completeRoomPayment() {
@@ -458,7 +483,7 @@
                 }
             }
 
-            const profile = getAdminPaymentProfile();
+            const profile = await getAdminPaymentProfile();
             const paymentRef =
                 method === 'upi' ? (document.getElementById('room-upi-ref')?.value || '').trim() :
                 method === 'qr' ? (document.getElementById('room-qr-ref')?.value || '').trim() :

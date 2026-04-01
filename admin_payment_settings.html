@@ -142,12 +142,12 @@
         checkLogin();
 
         const DEFAULT_PAYMENT_PROFILE = {
-            accountHolder: 'Royal Plaza Hotel',
-            upiId: 'royalplaza@upi',
-            bankName: 'State Bank of India',
-            accountNumber: '123456789012',
-            ifsc: 'SBIN0001234',
-            supportPhone: '1234567890',
+            accountHolder: 'INAYAT HUSAIN',
+            upiId: '9044089140@kotak811',
+            bankName: 'Kotak Bank',
+            accountNumber: '5450882039',
+            ifsc: 'KKBK0005633',
+            supportPhone: '+91-9044089140',
             customQrImage: ''
         };
 
@@ -158,12 +158,57 @@
             }
         }
 
-        function getPaymentProfile() {
+        async function getPaymentProfile() {
+            try {
+                // Try to fetch from backend API
+                const response = await fetch('http://localhost:5000/api/payment-profile');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data) {
+                        // Convert snake_case from API to camelCase for UI
+                        return {
+                            accountHolder: data.account_holder,
+                            upiId: data.upi_id,
+                            bankName: data.bank_name,
+                            accountNumber: data.account_number,
+                            ifsc: data.ifsc,
+                            supportPhone: data.support_phone || '',
+                            customQrImage: data.custom_qr_image || ''
+                        };
+                    }
+                }
+            } catch (err) {
+                console.log('API not available, using localStorage');
+            }
+            // Fallback to localStorage
             return JSON.parse(localStorage.getItem('adminPaymentProfile') || 'null') || { ...DEFAULT_PAYMENT_PROFILE };
         }
 
-        function savePaymentProfile(profile) {
-            localStorage.setItem('adminPaymentProfile', JSON.stringify(profile));
+        async function savePaymentProfile(profile) {
+            try {
+                // Try to save to backend API
+                const response = await fetch('http://localhost:5000/api/payment-profile', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        accountHolder: profile.accountHolder,
+                        upiId: profile.upiId,
+                        bankName: profile.bankName,
+                        accountNumber: profile.accountNumber,
+                        ifsc: profile.ifsc,
+                        supportPhone: profile.supportPhone || ''
+                    })
+                });
+                if (response.ok) {
+                    console.log('✅ Payment profile saved to backend');
+                } else {
+                    console.log('⚠️  Backend save failed, saving to localStorage');
+                    localStorage.setItem('adminPaymentProfile', JSON.stringify(profile));
+                }
+            } catch (err) {
+                console.log('API not available, saving to localStorage');
+                localStorage.setItem('adminPaymentProfile', JSON.stringify(profile));
+            }
         }
 
         function buildUpiQrUrl(profile) {
@@ -199,13 +244,13 @@
         const qrInput = document.getElementById('custom-qr');
         let tempCustomQr = '';
 
-        qrInput.addEventListener('change', function(e) {
+        qrInput.addEventListener('change', async function(e) {
             const file = e.target.files[0];
             if (!file) return;
             const reader = new FileReader();
-            reader.onload = function(ev) {
+            reader.onload = async function(ev) {
                 tempCustomQr = ev.target.result;
-                const profile = getPaymentProfile();
+                const profile = await getPaymentProfile();
                 profile.customQrImage = tempCustomQr;
                 renderQrPreview(profile);
             };
@@ -230,9 +275,9 @@
             renderQrPreview(profile);
         });
 
-        form.addEventListener('submit', function(e) {
+        form.addEventListener('submit', async function(e) {
             e.preventDefault();
-            const oldProfile = getPaymentProfile();
+            const oldProfile = await getPaymentProfile();
             const profile = {
                 accountHolder: document.getElementById('account-holder').value.trim(),
                 upiId: document.getElementById('upi-id').value.trim(),
@@ -248,7 +293,7 @@
                 return;
             }
 
-            savePaymentProfile(profile);
+            await savePaymentProfile(profile);
             fillForm(profile);
             const status = document.getElementById('settings-status');
             status.classList.remove('hidden');
@@ -257,7 +302,7 @@
         });
 
         ensureAdmin();
-        fillForm(getPaymentProfile());
+        getPaymentProfile().then(profile => fillForm(profile));
     </script>
 </body>
 </html>

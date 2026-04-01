@@ -244,7 +244,7 @@
 
             <div class="rooms-grid">
                 <div class="room-card">
-                    <img id="single-room-img" src="https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=400" alt="Single Room">
+                    <img id="single-room-img" src="images/Gemini_Generated_Image_e4ntu7e4ntu7e4nt.png" alt="Single Room">
                     <button id="edit-single-room-img" class="edit-img-btn" style="display:none;margin-bottom:8px;" onclick="openRoomImageModal('single')">Edit/Add Photo</button>
                     <h3>Single Room</h3>
                     <p>Comfortable single room with all modern amenities including free Wi-Fi, air conditioning, and a work desk. Perfect for business travelers or solo adventurers.</p>
@@ -252,7 +252,7 @@
                     <a href="booking.html" class="book-btn" data-room="Single Room" data-price="1">Book Now</a>
                 </div>
                 <div class="room-card">
-                    <img id="double-room-img" src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400" alt="Double Room">
+                    <img id="double-room-img" src="images/Gemini_Generated_Image_hezikrhezikrhezi.png" alt="Double Room">
                     <button id="edit-double-room-img" class="edit-img-btn" style="display:none;margin-bottom:8px;" onclick="openRoomImageModal('double')">Edit/Add Photo</button>
                     <h3>Double Room</h3>
                     <p>Spacious double room ideal for couples or small families. Features a king-size bed, balcony with city views, and en-suite bathroom with premium toiletries.</p>
@@ -260,7 +260,7 @@
                     <a href="booking.html" class="book-btn" data-room="Double Room" data-price="1">Book Now</a>
                 </div>
                 <div class="room-card">
-                    <img id="deluxe-room-img" src="https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=400" alt="Deluxe Room">
+                    <img id="deluxe-room-img" src="images/Gemini_Generated_Image_j1pj33j1pj33j1pj.png" alt="Deluxe Room">
                     <button id="edit-deluxe-room-img" class="edit-img-btn" style="display:none;margin-bottom:8px;" onclick="openRoomImageModal('deluxe')">Edit/Add Photo</button>
                     <h3>Deluxe Room</h3>
                     <p>Our premium deluxe room offers luxury living with separate living area, mini-bar, and stunning panoramic views. Includes complimentary breakfast and concierge service.</p>
@@ -456,12 +456,9 @@
 
         const ROOMS_GALLERY_VERSION = '2';
         const roomsGalleryDefaults = [
-            'https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=1200&h=500&fit=crop',
-            'https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=1200&h=500&fit=crop',
-            'https://images.unsplash.com/photo-1591088398332-8a7791972843?w=1200&h=500&fit=crop',
-            'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=1200&h=500&fit=crop',
-            'https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=1200&h=500&fit=crop',
-            'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=1200&h=500&fit=crop'
+            'images/Gemini_Generated_Image_e4ntu7e4ntu7e4nt.png',
+            'images/Gemini_Generated_Image_hezikrhezikrhezi.png',
+            'images/Gemini_Generated_Image_j1pj33j1pj33j1pj.png'
         ];
         let roomsGalleryImages = [];
         let roomsGalleryIndex = 0;
@@ -681,16 +678,38 @@
         const barPaymentFields = document.getElementById('bar-payment-fields');
         let pendingBarBooking = null;
         const DEFAULT_ADMIN_PAYMENT = {
-            accountHolder: 'Royal Plaza Hotel',
-            upiId: 'royalplaza@upi',
-            bankName: 'State Bank of India',
-            accountNumber: '123456789012',
-            ifsc: 'SBIN0001234',
-            supportPhone: '1234567890',
+            accountHolder: 'INAYAT HUSAIN',
+            upiId: '9044089140@kotak811',
+            bankName: 'Kotak Bank',
+            accountNumber: '5450882039',
+            ifsc: 'KKBK0005633',
+            supportPhone: '+91-9044089140',
             customQrImage: ''
         };
 
-        function getAdminPaymentProfile() {
+        async function getAdminPaymentProfile() {
+            try {
+                // Try to fetch from backend API
+                const response = await fetch('http://localhost:5000/api/payment-profile');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data) {
+                        // Convert snake_case from API to camelCase for UI
+                        return {
+                            accountHolder: data.account_holder || DEFAULT_ADMIN_PAYMENT.accountHolder,
+                            upiId: data.upi_id || DEFAULT_ADMIN_PAYMENT.upiId,
+                            bankName: data.bank_name || DEFAULT_ADMIN_PAYMENT.bankName,
+                            accountNumber: data.account_number || DEFAULT_ADMIN_PAYMENT.accountNumber,
+                            ifsc: data.ifsc || DEFAULT_ADMIN_PAYMENT.ifsc,
+                            supportPhone: data.support_phone || DEFAULT_ADMIN_PAYMENT.supportPhone,
+                            customQrImage: data.custom_qr_image || ''
+                        };
+                    }
+                }
+            } catch (err) {
+                console.log('ℹ️  API not available, using localStorage:', err.message);
+            }
+            // Fallback to localStorage
             return JSON.parse(localStorage.getItem('adminPaymentProfile') || 'null') || { ...DEFAULT_ADMIN_PAYMENT };
         }
 
@@ -738,8 +757,10 @@
         if (barPackageSelect) barPackageSelect.addEventListener('change', updateBarTotal);
         if (barGuestsInput) barGuestsInput.addEventListener('input', updateBarTotal);
 
-        function buildBarPaymentFields(method, amount) {
-            const profile = getAdminPaymentProfile();
+        function buildBarPaymentFields(method, amount, profile = null) {
+            if (!profile) {
+                profile = DEFAULT_ADMIN_PAYMENT;
+            }
             if (method === 'upi') {
                 barPaymentFields.innerHTML = `
                     <p style="margin-bottom:8px;color:#3d2e18;"><strong>Pay To:</strong> ${profile.accountHolder}</p>
@@ -814,9 +835,10 @@
             return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
         }
 
-        barPaymentMethod.addEventListener('change', function() {
+        barPaymentMethod.addEventListener('change', async function() {
             const amount = pendingBarBooking ? pendingBarBooking.total : 0;
-            buildBarPaymentFields(this.value, amount);
+            const profile = await getAdminPaymentProfile();
+            buildBarPaymentFields(this.value, amount, profile);
         });
 
         async function completeBarPayment() {
@@ -853,7 +875,7 @@
                 }
             }
 
-            const profile = getAdminPaymentProfile();
+            const profile = await getAdminPaymentProfile();
             const paymentRef =
                 method === 'upi' ? (document.getElementById('bar-upi-ref')?.value || '').trim() :
                 method === 'qr' ? (document.getElementById('bar-qr-ref')?.value || '').trim() :
@@ -980,16 +1002,7 @@
 
         const BAR_GALLERY_VERSION = '1';
         const barGalleryDefaults = [
-            'https://images.unsplash.com/photo-1514361892635-eae31ec99f7f?w=1200&h=600&fit=crop',
-            'https://images.unsplash.com/photo-1470337458703-46ad1756a187?w=1200&h=600&fit=crop',
-            'https://images.unsplash.com/photo-1566417713940-fe7c737a9ef2?w=1200&h=600&fit=crop',
-            'https://images.unsplash.com/photo-1575444758702-4a6b9222336e?w=1200&h=600&fit=crop',
-            'https://images.unsplash.com/photo-1551024709-8f23befc6cf7?w=1200&h=600&fit=crop',
-            'https://images.unsplash.com/photo-1471421298428-1513ab720a8e?w=1200&h=600&fit=crop',
-            'https://images.unsplash.com/photo-1536935338788-846bb9981813?w=1200&h=600&fit=crop',
-            'https://images.unsplash.com/photo-1562059390-a761a084768e?w=1200&h=600&fit=crop',
-            'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=1200&h=600&fit=crop',
-            'https://images.unsplash.com/photo-1471421298428-1513ab720a8e?w=1200&h=600&fit=crop'
+            'images/WhatsApp Image 2026-04-01 at 2.21.02 PM.jpeg'
         ];
         let barGalleryImages = [];
         let barGalleryIndex = 0;
