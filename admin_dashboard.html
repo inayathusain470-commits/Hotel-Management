@@ -515,20 +515,36 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     <script src="js/script.js"></script>
     <script>
+        // Helper function for USD to INR conversion
+        function usdToInr(usd) {
+            return Math.round(usd * 83); // Approximate USD to INR rate
+        }
+
         checkLogin();
         
         let autoRefreshInterval = null;
         let currentAdminFoodOrders = [];
 
         async function fetchDashboardData() {
-            const [bookings, barBookings, foodOrders, contacts, customers] = await Promise.all([
-                window.HMS_API.get('/bookings'),
-                window.HMS_API.get('/bar-bookings'),
-                window.HMS_API.get('/food-orders'),
-                window.HMS_API.get('/contacts'),
-                window.HMS_API.get('/customers')
-            ]);
-            return { bookings, barBookings, foodOrders, contacts, customers };
+            try {
+                const [bookings, barBookings, foodOrders, contacts, customers] = await Promise.all([
+                    window.HMS_API.get('/bookings').catch(e => { console.error('Bookings error:', e); return []; }),
+                    window.HMS_API.get('/bar-bookings').catch(e => { console.error('Bar bookings error:', e); return []; }),
+                    window.HMS_API.get('/food-orders').catch(e => { console.error('Food orders error:', e); return []; }),
+                    window.HMS_API.get('/contacts').catch(e => { console.error('Contacts error:', e); return []; }),
+                    window.HMS_API.get('/customers').catch(e => { console.error('Customers error:', e); return []; })
+                ]);
+                return { 
+                    bookings: Array.isArray(bookings) ? bookings : [],
+                    barBookings: Array.isArray(barBookings) ? barBookings : [],
+                    foodOrders: Array.isArray(foodOrders) ? foodOrders : [],
+                    contacts: Array.isArray(contacts) ? contacts : [],
+                    customers: Array.isArray(customers) ? customers : []
+                };
+            } catch(error) {
+                console.error('fetchDashboardData error:', error);
+                return { bookings: [], barBookings: [], foodOrders: [], contacts: [], customers: [] };
+            }
         }
 
         async function updateDashboard() {
@@ -537,174 +553,181 @@
             
             // Only allow admin and staff
             if (currentUser.type !== 'admin' && currentUser.type !== 'staff') {
+                console.log('Not admin/staff, redirecting...');
                 window.location.href = 'customer_dashboard.html';
                 return;
             }
 
-            const { bookings, barBookings, foodOrders, contacts, customers } = await fetchDashboardData();
-            currentAdminFoodOrders = Array.isArray(foodOrders) ? [...foodOrders] : [];
-            
-            // Debug: Log for troubleshooting
-            console.log('Admin viewing - Bookings:', bookings);
-            console.log('Admin viewing - Food Orders:', foodOrders);
-            console.log('Admin viewing - Contacts:', contacts);
+            try {
+                const { bookings, barBookings, foodOrders, contacts, customers } = await fetchDashboardData();
+                currentAdminFoodOrders = Array.isArray(foodOrders) ? [...foodOrders] : [];
+                
+                // Debug: Log for troubleshooting
+                console.log('Admin Dashboard - Bookings:', bookings?.length || 0);
+                console.log('Admin Dashboard - Food Orders:', foodOrders?.length || 0);
+                console.log('Admin Dashboard - Contacts:', contacts?.length || 0);
+                console.log('Admin Dashboard - Customers:', customers?.length || 0);
 
-            // Update stats
-            document.getElementById('totalBookings').textContent = bookings.length;
-            document.getElementById('totalBarBookings').textContent = barBookings.length;
-            document.getElementById('totalFoodOrders').textContent = foodOrders.length;
-            document.getElementById('totalContacts').textContent = contacts.length;
-            document.getElementById('totalRegisteredUsers').textContent = customers.length;
-            
-            // Update last update time
-            const now = new Date();
-            const timeString = now.toLocaleTimeString();
-            document.getElementById('lastUpdate').textContent = timeString;
+                // Update stats with safe defaults
+                document.getElementById('totalBookings').textContent = (bookings?.length || 0);
+                document.getElementById('totalBarBookings').textContent = (barBookings?.length || 0);
+                document.getElementById('totalFoodOrders').textContent = (foodOrders?.length || 0);
+                document.getElementById('totalContacts').textContent = (contacts?.length || 0);
+                document.getElementById('totalRegisteredUsers').textContent = (customers?.length || 0);
+                
+                // Update last update time
+                const now = new Date();
+                const timeString = now.toLocaleTimeString();
+                document.getElementById('lastUpdate').textContent = timeString;
 
-            // Display Room Bookings
-            const bookingsDisplay = document.getElementById('bookings-display');
-            if (bookings.length === 0) {
-                bookingsDisplay.innerHTML = '<div class="empty-state">No bookings yet</div>';
-            } else {
-                let html = '';
-                bookings.forEach((booking, index) => {
-                    const nights = calculateNights(booking.checkin, booking.checkout);
-                    const roomQuantity = booking.roomQuantity || 1;
-                    const pricePerNightUsd = Number(booking.pricePerNight || booking.priceInr || 0);
-                    const totalPriceUsd = booking.totalPrice ? Number(booking.totalPrice) * nights : (pricePerNightUsd * roomQuantity * nights);
-                    const pricePerNightInr = usdToInr(pricePerNightUsd);
-                    const totalPriceInr = booking.totalAmountInr ? Number(booking.totalAmountInr) : usdToInr(totalPriceUsd);
-                    const payMethod = booking.payment?.method ? booking.payment.method.toUpperCase() : 'N/A';
-                    const txn = booking.payment?.transactionId || 'N/A';
-                    const ref = booking.payment?.paymentReference || 'N/A';
-                    const paidAt = booking.payment?.paidAt ? new Date(booking.payment.paidAt).toLocaleString() : 'N/A';
-                    const paidTo = booking.payment?.paidTo || {};
-                    
-                    html += `<div class="booking-item">
-                        <h4>Booking #${index + 1} <span class="status-badge status-active">${booking.payment?.status === 'paid' ? 'Paid' : 'Pending'}</span></h4>
-                        <p><strong>Guest Name:</strong> ${booking.name}</p>
-                        <p><strong>Email:</strong> ${booking.email}</p>
-                        <p><strong>Phone:</strong> ${booking.phone}</p>
-                        <p><strong>Room Type:</strong> ${booking.roomType} (${roomQuantity} room${roomQuantity > 1 ? 's' : ''})</p>
-                        <p><strong>Room Numbers:</strong> ${Array.isArray(booking.roomNumbers) ? booking.roomNumbers.join(', ') : 'N/A'}</p>
-                        <p><strong>Check-in:</strong> ${booking.checkin}</p>
-                        <p><strong>Check-out:</strong> ${booking.checkout}</p>
-                        <p><strong>Price per night:</strong> ₹${pricePerNightInr} per room</p>
-                        <p><strong>Duration:</strong> ${nights} nights</p>
-                        <p><strong>Total Amount:</strong> ₹${totalPriceInr}</p>
-                        <p><strong>Payment:</strong> ${payMethod}</p>
-                        <p><strong>Transaction ID:</strong> ${txn}</p>
-                        <p><strong>Payment Ref:</strong> ${ref}</p>
-                        <p><strong>Paid To:</strong> ${paidTo.accountHolder || 'N/A'} | ${paidTo.upiId || 'N/A'} | A/C ${paidTo.accountNumberMasked || 'N/A'} | IFSC ${paidTo.ifsc || 'N/A'}</p>
-                        <p><strong>Paid At:</strong> ${paidAt}</p>
-                    </div>`;
-                });
-                bookingsDisplay.innerHTML = html;
+                // Display Room Bookings
+                const bookingsDisplay = document.getElementById('bookings-display');
+                if (!bookings || bookings.length === 0) {
+                    bookingsDisplay.innerHTML = '<div class="empty-state">No bookings yet</div>';
+                } else {
+                    let html = '';
+                    bookings.forEach((booking, index) => {
+                        const nights = calculateNights(booking.checkin || booking.check_in_date, booking.checkout || booking.check_out_date);
+                        const roomQuantity = booking.roomQuantity || 1;
+                        const pricePerNightUsd = Number(booking.pricePerNight || booking.priceInr || 0);
+                        const totalPriceUsd = booking.totalPrice ? Number(booking.totalPrice) * nights : (pricePerNightUsd * roomQuantity * nights);
+                        const pricePerNightInr = usdToInr(pricePerNightUsd);
+                        const totalPriceInr = booking.totalAmountInr ? Number(booking.totalAmountInr) : usdToInr(totalPriceUsd);
+                        const payMethod = booking.payment?.method ? booking.payment.method.toUpperCase() : 'N/A';
+                        const txn = booking.payment?.transactionId || 'N/A';
+                        const ref = booking.payment?.paymentReference || 'N/A';
+                        const paidAt = booking.payment?.paidAt ? new Date(booking.payment.paidAt).toLocaleString() : 'N/A';
+                        const paidTo = booking.payment?.paidTo || {};
+                        
+                        html += `<div class="booking-item">
+                            <h4>Booking #${index + 1} <span class="status-badge status-active">${booking.payment?.status === 'paid' ? 'Paid' : 'Pending'}</span></h4>
+                            <p><strong>Guest Name:</strong> ${booking.name}</p>
+                            <p><strong>Email:</strong> ${booking.email}</p>
+                            <p><strong>Phone:</strong> ${booking.phone}</p>
+                            <p><strong>Room Type:</strong> ${booking.roomType} (${roomQuantity} room${roomQuantity > 1 ? 's' : ''})</p>
+                            <p><strong>Room Numbers:</strong> ${Array.isArray(booking.roomNumbers) ? booking.roomNumbers.join(', ') : 'N/A'}</p>
+                            <p><strong>Check-in:</strong> ${booking.checkin || booking.check_in_date}</p>
+                            <p><strong>Check-out:</strong> ${booking.checkout || booking.check_out_date}</p>
+                            <p><strong>Price per night:</strong> ₹${pricePerNightInr} per room</p>
+                            <p><strong>Duration:</strong> ${nights} nights</p>
+                            <p><strong>Total Amount:</strong> ₹${totalPriceInr}</p>
+                            <p><strong>Payment:</strong> ${payMethod}</p>
+                            <p><strong>Transaction ID:</strong> ${txn}</p>
+                            <p><strong>Payment Ref:</strong> ${ref}</p>
+                            <p><strong>Paid To:</strong> ${paidTo.accountHolder || 'N/A'} | ${paidTo.upiId || 'N/A'} | A/C ${paidTo.accountNumberMasked || 'N/A'} | IFSC ${paidTo.ifsc || 'N/A'}</p>
+                            <p><strong>Paid At:</strong> ${paidAt}</p>
+                        </div>`;
+                    });
+                    bookingsDisplay.innerHTML = html;
+                }
+
+                const barBookingsDisplay = document.getElementById('bar-bookings-display');
+                if (!barBookings || barBookings.length === 0) {
+                    barBookingsDisplay.innerHTML = '<div class="empty-state">No bar bookings yet</div>';
+                } else {
+                    let html = '';
+                    barBookings.forEach((booking, index) => {
+                        const payMethod = booking.payment?.method ? booking.payment.method.toUpperCase() : 'N/A';
+                        const txn = booking.payment?.transactionId || 'N/A';
+                        const ref = booking.payment?.paymentReference || 'N/A';
+                        const paidAt = booking.payment?.paidAt ? new Date(booking.payment.paidAt).toLocaleString() : 'N/A';
+                        const paidTo = booking.payment?.paidTo || {};
+                        html += `<div class="booking-item">
+                            <h4>Bar Booking #${index + 1} <span class="status-badge status-active">${booking.payment?.status === 'paid' ? 'Paid' : 'Pending'}</span></h4>
+                            <p><strong>Guest Name:</strong> ${booking.name}</p>
+                            <p><strong>Phone:</strong> ${booking.phone}</p>
+                            <p><strong>Package:</strong> ${booking.packageName}</p>
+                            <p><strong>Date:</strong> ${booking.date}</p>
+                            <p><strong>Time:</strong> ${booking.time}</p>
+                            <p><strong>Guests:</strong> ${booking.guests}</p>
+                            <p><strong>Total Amount:</strong> ₹${booking.total}</p>
+                            <p><strong>Payment:</strong> ${payMethod}</p>
+                            <p><strong>Transaction ID:</strong> ${txn}</p>
+                            <p><strong>Payment Ref:</strong> ${ref}</p>
+                            <p><strong>Paid To:</strong> ${paidTo.accountHolder || 'N/A'} | ${paidTo.upiId || 'N/A'} | A/C ${paidTo.accountNumberMasked || 'N/A'} | IFSC ${paidTo.ifsc || 'N/A'}</p>
+                            <p><strong>Paid At:</strong> ${paidAt}</p>
+                        </div>`;
+                    });
+                    barBookingsDisplay.innerHTML = html;
+                }
+
+                // Display Food Orders
+                const foodOrdersDisplay = document.getElementById('food-orders-display');
+                if (!foodOrders || foodOrders.length === 0) {
+                    foodOrdersDisplay.innerHTML = '<div class="empty-state">No food orders yet</div>';
+                } else {
+                    let html = '';
+                    foodOrders.forEach((order, index) => {
+                        const isDelivered = order.status === 'delivered';
+                        const badgeClass = isDelivered ? 'status-confirmed' : 'status-active';
+                        const badgeText = isDelivered ? '✅ Delivered' : '🕐 Pending';
+                        const payMethod = order.payment?.method ? order.payment.method.toUpperCase() : 'N/A';
+                        const txn = order.payment?.transactionId || 'N/A';
+                        const ref = order.payment?.paymentReference || 'N/A';
+                        const paidAt = order.payment?.paidAt ? new Date(order.payment.paidAt).toLocaleString() : 'N/A';
+                        const paidTo = order.payment?.paidTo || {};
+                        const btnHtml = isDelivered
+                            ? `<span style="color:#27ae60;font-weight:600;">Order Delivered</span>`
+                            : `<button onclick="markOrderDelivered(${index})" style="background:linear-gradient(90deg,#27ae60,#2ecc71);color:#fff;border:none;padding:8px 18px;border-radius:20px;font-weight:700;font-size:0.9rem;cursor:pointer;margin-top:8px;">🚚 Mark as Delivered</button>`;
+                        html += `<div class="booking-item">
+                            <h4>Order #${index + 1} <span class="status-badge ${badgeClass}">${badgeText}</span></h4>
+                            <p><strong>Guest Name:</strong> ${order.name}</p>
+                            <p><strong>Room Number:</strong> ${order.room}</p>
+                            <p><strong>Phone:</strong> ${order.phone}</p>
+                            <p><strong>Items:</strong> ${order.items?.map(item => `${item.item} (x${item.quantity})`).join(', ') || 'N/A'}</p>
+                            <p><strong>Total Amount:</strong> ₹${order.total}</p>
+                            <p><strong>Payment:</strong> ${payMethod}</p>
+                            <p><strong>Transaction ID:</strong> ${txn}</p>
+                            <p><strong>Payment Ref:</strong> ${ref}</p>
+                            <p><strong>Paid To:</strong> ${paidTo.accountHolder || 'N/A'} | ${paidTo.upiId || 'N/A'} | A/C ${paidTo.accountNumberMasked || 'N/A'} | IFSC ${paidTo.ifsc || 'N/A'}</p>
+                            <p><strong>Paid At:</strong> ${paidAt}</p>
+                            <p><strong>Order Time:</strong> ${new Date(order.timestamp).toLocaleString()}</p>
+                            <div>${btnHtml}</div>
+                        </div>`;
+                    });
+                    foodOrdersDisplay.innerHTML = html;
+                }
+
+                // Display Contact Requests
+                const contactsDisplay = document.getElementById('contacts-display');
+                if (!contacts || contacts.length === 0) {
+                    contactsDisplay.innerHTML = '<div class="empty-state">No contact requests yet</div>';
+                } else {
+                    let html = '';
+                    contacts.forEach((contact, index) => {
+                        html += `<div class="booking-item">
+                            <h4>Request #${index + 1}</h4>
+                            <p><strong>Name:</strong> ${contact.name}</p>
+                            <p><strong>Email:</strong> ${contact.email}</p>
+                            <p><strong>Message:</strong> ${contact.message}</p>
+                        </div>`;
+                    });
+                    contactsDisplay.innerHTML = html;
+                }
+
+                const registeredUsersDisplay = document.getElementById('registered-users-display');
+                if (!customers || customers.length === 0) {
+                    registeredUsersDisplay.innerHTML = '<div class="empty-state">No registered users yet</div>';
+                } else {
+                    let html = '';
+                    customers.forEach((customer, index) => {
+                        const registeredDate = customer.created_at ? new Date(customer.created_at).toLocaleString('en-IN') : 'N/A';
+                        html += `<div class="booking-item">
+                            <h4>#${index + 1} - ${customer.name}</h4>
+                            <p><strong>✉️ Email:</strong> <a href="mailto:${customer.email}">${customer.email}</a></p>
+                            <p><strong>📱 Phone:</strong> ${customer.phone || 'Not provided'}</p>
+                            <p><strong>📅 Registered:</strong> ${registeredDate}</p>
+                        </div>`;
+                    });
+                    registeredUsersDisplay.innerHTML = html;
+                }
+
+                // Load analytics
+                loadAnalytics();
+            } catch(error) {
+                console.error('updateDashboard error:', error);
+                alert('Error loading dashboard data. Check console for details.');
             }
-
-            const barBookingsDisplay = document.getElementById('bar-bookings-display');
-            if (barBookings.length === 0) {
-                barBookingsDisplay.innerHTML = '<div class="empty-state">No bar bookings yet</div>';
-            } else {
-                let html = '';
-                barBookings.forEach((booking, index) => {
-                    const payMethod = booking.payment?.method ? booking.payment.method.toUpperCase() : 'N/A';
-                    const txn = booking.payment?.transactionId || 'N/A';
-                    const ref = booking.payment?.paymentReference || 'N/A';
-                    const paidAt = booking.payment?.paidAt ? new Date(booking.payment.paidAt).toLocaleString() : 'N/A';
-                    const paidTo = booking.payment?.paidTo || {};
-                    html += `<div class="booking-item">
-                        <h4>Bar Booking #${index + 1} <span class="status-badge status-active">${booking.payment?.status === 'paid' ? 'Paid' : 'Pending'}</span></h4>
-                        <p><strong>Guest Name:</strong> ${booking.name}</p>
-                        <p><strong>Phone:</strong> ${booking.phone}</p>
-                        <p><strong>Package:</strong> ${booking.packageName}</p>
-                        <p><strong>Date:</strong> ${booking.date}</p>
-                        <p><strong>Time:</strong> ${booking.time}</p>
-                        <p><strong>Guests:</strong> ${booking.guests}</p>
-                        <p><strong>Total Amount:</strong> ₹${booking.total}</p>
-                        <p><strong>Payment:</strong> ${payMethod}</p>
-                        <p><strong>Transaction ID:</strong> ${txn}</p>
-                        <p><strong>Payment Ref:</strong> ${ref}</p>
-                        <p><strong>Paid To:</strong> ${paidTo.accountHolder || 'N/A'} | ${paidTo.upiId || 'N/A'} | A/C ${paidTo.accountNumberMasked || 'N/A'} | IFSC ${paidTo.ifsc || 'N/A'}</p>
-                        <p><strong>Paid At:</strong> ${paidAt}</p>
-                    </div>`;
-                });
-                barBookingsDisplay.innerHTML = html;
-            }
-
-            // Display Food Orders
-            const foodOrdersDisplay = document.getElementById('food-orders-display');
-            if (foodOrders.length === 0) {
-                foodOrdersDisplay.innerHTML = '<div class="empty-state">No food orders yet</div>';
-            } else {
-                let html = '';
-                foodOrders.forEach((order, index) => {
-                    const isDelivered = order.status === 'delivered';
-                    const badgeClass = isDelivered ? 'status-confirmed' : 'status-active';
-                    const badgeText = isDelivered ? '✅ Delivered' : '🕐 Pending';
-                    const payMethod = order.payment?.method ? order.payment.method.toUpperCase() : 'N/A';
-                    const txn = order.payment?.transactionId || 'N/A';
-                    const ref = order.payment?.paymentReference || 'N/A';
-                    const paidAt = order.payment?.paidAt ? new Date(order.payment.paidAt).toLocaleString() : 'N/A';
-                    const paidTo = order.payment?.paidTo || {};
-                    const btnHtml = isDelivered
-                        ? `<span style="color:#27ae60;font-weight:600;">Order Delivered</span>`
-                        : `<button onclick="markOrderDelivered(${index})" style="background:linear-gradient(90deg,#27ae60,#2ecc71);color:#fff;border:none;padding:8px 18px;border-radius:20px;font-weight:700;font-size:0.9rem;cursor:pointer;margin-top:8px;">🚚 Mark as Delivered</button>`;
-                    html += `<div class="booking-item">
-                        <h4>Order #${index + 1} <span class="status-badge ${badgeClass}">${badgeText}</span></h4>
-                        <p><strong>Guest Name:</strong> ${order.name}</p>
-                        <p><strong>Room Number:</strong> ${order.room}</p>
-                        <p><strong>Phone:</strong> ${order.phone}</p>
-                        <p><strong>Items:</strong> ${order.items.map(item => `${item.item} (x${item.quantity})`).join(', ')}</p>
-                        <p><strong>Total Amount:</strong> ₹${order.total}</p>
-                        <p><strong>Payment:</strong> ${payMethod}</p>
-                        <p><strong>Transaction ID:</strong> ${txn}</p>
-                        <p><strong>Payment Ref:</strong> ${ref}</p>
-                        <p><strong>Paid To:</strong> ${paidTo.accountHolder || 'N/A'} | ${paidTo.upiId || 'N/A'} | A/C ${paidTo.accountNumberMasked || 'N/A'} | IFSC ${paidTo.ifsc || 'N/A'}</p>
-                        <p><strong>Paid At:</strong> ${paidAt}</p>
-                        <p><strong>Order Time:</strong> ${new Date(order.timestamp).toLocaleString()}</p>
-                        <div>${btnHtml}</div>
-                    </div>`;
-                });
-                foodOrdersDisplay.innerHTML = html;
-            }
-
-            // Display Contact Requests
-            const contactsDisplay = document.getElementById('contacts-display');
-            if (contacts.length === 0) {
-                contactsDisplay.innerHTML = '<div class="empty-state">No contact requests yet</div>';
-            } else {
-                let html = '';
-                contacts.forEach((contact, index) => {
-                    html += `<div class="booking-item">
-                        <h4>Request #${index + 1}</h4>
-                        <p><strong>Name:</strong> ${contact.name}</p>
-                        <p><strong>Email:</strong> ${contact.email}</p>
-                        <p><strong>Message:</strong> ${contact.message}</p>
-                    </div>`;
-                });
-                contactsDisplay.innerHTML = html;
-            }
-
-            const registeredUsersDisplay = document.getElementById('registered-users-display');
-            if (customers.length === 0) {
-                registeredUsersDisplay.innerHTML = '<div class="empty-state">No registered users yet</div>';
-            } else {
-                let html = '';
-                customers.forEach((customer, index) => {
-                    const registeredDate = customer.created_at ? new Date(customer.created_at).toLocaleString('en-IN') : 'N/A';
-                    html += `<div class="booking-item">
-                        <h4>#${index + 1} - ${customer.name}</h4>
-                        <p><strong>✉️ Email:</strong> <a href="mailto:${customer.email}">${customer.email}</a></p>
-                        <p><strong>📱 Phone:</strong> ${customer.phone || 'Not provided'}</p>
-                        <p><strong>📅 Registered:</strong> ${registeredDate}</p>
-                    </div>`;
-                });
-                registeredUsersDisplay.innerHTML = html;
-            }
-
-            // Load analytics
-            loadAnalytics();
         }
 
         async function markOrderDelivered(index) {
@@ -731,19 +754,30 @@
 
         async function loadAnalytics() {
             try {
-                const response = await window.HMS_API.get('/analytics');
+                const response = await window.HMS_API.get('/analytics').catch(e => {
+                    console.error('Analytics error:', e);
+                    return null;
+                });
                 
-                // Update summary cards
-                document.getElementById('totalRevenue').textContent = `₹${Math.round(response.totalRevenue).toLocaleString()}`;
-                document.getElementById('avgBookingValue').textContent = `₹${Math.round(response.avgBookingValue).toLocaleString()}`;
-                document.getElementById('occupancyRate').textContent = `${response.occupancyRate}%`;
+                if (!response) {
+                    console.log('No analytics data available');
+                    return;
+                }
                 
-                // Most Booked Room
-                document.getElementById('roomTypeName').textContent = response.mostBookedRoom.type;
-                document.getElementById('roomTypeCount').textContent = `${response.mostBookedRoom.count} bookings`;
+                // Update summary cards with safe defaults
+                document.getElementById('totalRevenue').textContent = `₹${Math.round(response.totalRevenue || 0).toLocaleString()}`;
+                document.getElementById('avgBookingValue').textContent = `₹${Math.round(response.avgBookingValue || 0).toLocaleString()}`;
+                document.getElementById('occupancyRate').textContent = `${response.occupancyRate || 0}%`;
+                
+                // Most Booked Room with defaults
+                const mostBooked = response.mostBookedRoom || { type: 'N/A', count: 0 };
+                document.getElementById('roomTypeName').textContent = mostBooked.type;
+                document.getElementById('roomTypeCount').textContent = `${mostBooked.count} bookings`;
 
                 // Monthly Revenue Chart
-                drawMonthlyRevenueChart(response.monthlyRevenue);
+                if (response.monthlyRevenue) {
+                    drawMonthlyRevenueChart(response.monthlyRevenue);
+                }
             } catch (error) {
                 console.error('Error loading analytics:', error);
             }
