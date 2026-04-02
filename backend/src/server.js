@@ -54,4 +54,5 @@ app.use((err, req, res, next) => {
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`✅ HMS backend running on 0.0.0.0:${PORT}`);
   console.log(`📦 Database: Supabase PostgreSQL`);
-  console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);\n});
+  console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
+});
