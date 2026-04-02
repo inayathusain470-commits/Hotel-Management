@@ -722,8 +722,8 @@
                     registeredUsersDisplay.innerHTML = html;
                 }
 
-                // Load analytics asynchronously (don't wait)
-                loadAnalytics().catch(e => console.error('Analytics failed:', e));
+                // Load analytics
+                loadAnalytics();
             } catch(error) {
                 console.error('updateDashboard error:', error);
                 alert('Error loading dashboard data. Check console for details.');
@@ -754,48 +754,32 @@
 
         async function loadAnalytics() {
             try {
-                // Use fetch with timeout to prevent hanging
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
-                
-                const response = await fetch('http://localhost:5000/api/analytics', {
-                    method: 'GET',
-                    signal: controller.signal
+                const response = await window.HMS_API.get('/analytics').catch(e => {
+                    console.error('Analytics error:', e);
+                    return null;
                 });
-                clearTimeout(timeoutId);
                 
-                if (!response.ok) {
-                    console.error('Analytics API returned status:', response.status);
-                    return;
-                }
-                
-                const data = await response.json();
-                
-                if (!data) {
+                if (!response) {
                     console.log('No analytics data available');
                     return;
                 }
                 
                 // Update summary cards with safe defaults
-                document.getElementById('totalRevenue').textContent = `₹${Math.round(data.totalRevenue || 0).toLocaleString()}`;
-                document.getElementById('avgBookingValue').textContent = `₹${Math.round(data.avgBookingValue || 0).toLocaleString()}`;
-                document.getElementById('occupancyRate').textContent = `${data.occupancyRate || 0}%`;
+                document.getElementById('totalRevenue').textContent = `₹${Math.round(response.totalRevenue || 0).toLocaleString()}`;
+                document.getElementById('avgBookingValue').textContent = `₹${Math.round(response.avgBookingValue || 0).toLocaleString()}`;
+                document.getElementById('occupancyRate').textContent = `${response.occupancyRate || 0}%`;
                 
                 // Most Booked Room with defaults
-                const mostBooked = data.mostBookedRoom || { type: 'N/A', count: 0 };
+                const mostBooked = response.mostBookedRoom || { type: 'N/A', count: 0 };
                 document.getElementById('roomTypeName').textContent = mostBooked.type;
                 document.getElementById('roomTypeCount').textContent = `${mostBooked.count} bookings`;
 
                 // Monthly Revenue Chart
-                if (data.monthlyRevenue) {
-                    drawMonthlyRevenueChart(data.monthlyRevenue);
+                if (response.monthlyRevenue) {
+                    drawMonthlyRevenueChart(response.monthlyRevenue);
                 }
             } catch (error) {
-                if (error.name === 'AbortError') {
-                    console.error('Analytics request timed out');
-                } else {
-                    console.error('Error loading analytics:', error);
-                }
+                console.error('Error loading analytics:', error);
             }
         }
 
