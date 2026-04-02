@@ -1,0 +1,10 @@
+[build]
+builder = "nixpacks"
+nixpacksVersion = "latest"
+
+[build.nixpacksConfig]
+# Ensure npm is used
+packageManager = "npm"
+
+[start]
+cmd = "cd backend && npm start"
