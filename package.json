@@ -3,17 +3,16 @@
   "version": "1.0.0",
   "description": "Royal Plaza Hotel Management System",
   "main": "backend/src/server.js",
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=9.0.0"
+  },
   "scripts": {
     "start": "cd backend && npm start",
     "dev": "cd backend && npm run dev",
-    "postinstall": "cd backend && npm install",
-    "install-backend": "cd backend && npm install"
+    "postinstall": "cd backend && npm install"
   },
   "keywords": ["hotel", "management", "system"],
   "author": "",
-  "license": "ISC",
-  "engines": {
-    "node": "18.x",
-    "npm": "9.x"
-  }
+  "license": "ISC"
 }
