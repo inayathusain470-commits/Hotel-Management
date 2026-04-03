@@ -46,6 +46,7 @@
             <div class="gym-gallery">
                 <div class="gym-admin-actions">
                     <button id="gym-add-photo-btn" class="gallery-admin-btn" style="display:none;" onclick="openGymPhotoModal(-1)">Add Gym Photo</button>
+                    <button id="gym-reset-btn" class="gallery-admin-btn" style="display:none;background:#f59e0b;" onclick="resetGymPhotos()">Reset to Default</button>
                 </div>
                 <div id="gym-grid" class="gym-grid"></div>
             </div>
@@ -257,7 +258,9 @@
             }).join('');
 
             const addBtn = document.getElementById('gym-add-photo-btn');
+            const resetBtn = document.getElementById('gym-reset-btn');
             if (addBtn) addBtn.style.display = admin ? 'inline-block' : 'none';
+            if (resetBtn) resetBtn.style.display = admin ? 'inline-block' : 'none';
         }
 
         function openGymPhotoModal(index) {
@@ -289,6 +292,34 @@
             gymGalleryPhotos.splice(index, 1);
             await saveGymPhotos();
             renderGymGallery();
+        }
+
+        async function resetGymPhotos() {
+            if (!isAdminUser()) return;
+            if (!confirm('Reset all gym photos to default images? This cannot be undone.')) return;
+            
+            // Clear IndexedDB
+            try {
+                const db = await openGymGalleryDb();
+                const tx = db.transaction(GYM_STORE_NAME, 'readwrite');
+                const store = tx.objectStore(GYM_STORE_NAME);
+                store.delete('photos');
+                await new Promise((resolve, reject) => {
+                    tx.oncomplete = resolve;
+                    tx.onerror = () => reject(tx.error);
+                });
+            } catch (err) {
+                console.error('Failed to clear IndexedDB:', err);
+            }
+
+            // Clear localStorage
+            localStorage.removeItem('gymGalleryPhotos');
+
+            // Reset to defaults
+            gymGalleryPhotos = [...GYM_GALLERY_DEFAULTS];
+            await saveGymPhotos();
+            renderGymGallery();
+            alert('Gym photos reset to default images!');
         }
 
         function getCropCanvas() {
