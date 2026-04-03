@@ -46,7 +46,6 @@
             <div class="gym-gallery">
                 <div class="gym-admin-actions">
                     <button id="gym-add-photo-btn" class="gallery-admin-btn" style="display:none;" onclick="openGymPhotoModal(-1)">Add Gym Photo</button>
-                    <button id="gym-reset-btn" class="gallery-admin-btn" style="display:none;background:#f59e0b;" onclick="resetGymPhotos()">Reset to Default</button>
                 </div>
                 <div id="gym-grid" class="gym-grid"></div>
             </div>
@@ -73,29 +72,6 @@
                 <button id="gym-save-photo-btn" type="button" class="submit-btn" onclick="saveGymPhoto()">Save</button>
                 <button type="button" class="submit-btn" style="background:#e74c3c;" onclick="closeGymPhotoModal()">Cancel</button>
             </div>
-        </div>
-    </div>
-
-    <!-- Image Lightbox Viewer -->
-    <div id="imageLightbox" class="image-lightbox" style="display:none;">
-        <div class="lightbox-overlay" onclick="closeLightbox()"></div>
-        <div class="lightbox-container">
-            <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
-            <button class="lightbox-prev" onclick="prevLightboxImage()">&#10094;</button>
-            <button class="lightbox-next" onclick="nextLightboxImage()">&#10095;</button>
-            
-            <div class="lightbox-image-wrapper">
-                <img id="lightboxImage" src="" alt="Full view" class="lightbox-image">
-            </div>
-            
-            <div class="lightbox-controls">
-                <button class="lightbox-btn" onclick="zoomInLightbox()" title="Zoom In">🔍+</button>
-                <button class="lightbox-btn" onclick="zoomOutLightbox()" title="Zoom Out">🔍−</button>
-                <button class="lightbox-btn" onclick="resetLightboxZoom()" title="Reset Zoom">Reset</button>
-                <span class="lightbox-counter"><span id="currentImageNum">1</span>/<span id="totalImages">1</span></span>
-            </div>
-            
-            <p class="lightbox-hint">Drag to pan • Scroll to zoom • Click overlay to close</p>
         </div>
     </div>
 
@@ -229,7 +205,7 @@
                 const controls = admin ? `<div style="display:flex;gap:8px;justify-content:center;position:absolute;left:10px;right:10px;bottom:10px;"><button class="gallery-admin-btn gym-change-btn" onclick="openGymPhotoModal(${index})">Change</button><button class="gallery-admin-btn" style="background:#b91c1c;" onclick="deleteGymPhoto(${index})">Delete</button></div>` : '';
                 return `
                     <div class="gym-card">
-                        <div class="gym-card-image-wrap" style="cursor:pointer;" onclick="openLightbox('gym',${index})">
+                        <div class="gym-card-image-wrap">
                             <img src="${photo.src}" alt="${photo.title}">
                             ${controls}
                         </div>
@@ -239,9 +215,7 @@
             }).join('');
 
             const addBtn = document.getElementById('gym-add-photo-btn');
-            const resetBtn = document.getElementById('gym-reset-btn');
             if (addBtn) addBtn.style.display = admin ? 'inline-block' : 'none';
-            if (resetBtn) resetBtn.style.display = admin ? 'inline-block' : 'none';
         }
 
         function openGymPhotoModal(index) {
@@ -273,34 +247,6 @@
             gymGalleryPhotos.splice(index, 1);
             await saveGymPhotos();
             renderGymGallery();
-        }
-
-        async function resetGymPhotos() {
-            if (!isAdminUser()) return;
-            if (!confirm('Reset all gym photos to default images? This cannot be undone.')) return;
-            
-            // Clear IndexedDB
-            try {
-                const db = await openGymGalleryDb();
-                const tx = db.transaction(GYM_STORE_NAME, 'readwrite');
-                const store = tx.objectStore(GYM_STORE_NAME);
-                store.delete('photos');
-                await new Promise((resolve, reject) => {
-                    tx.oncomplete = resolve;
-                    tx.onerror = () => reject(tx.error);
-                });
-            } catch (err) {
-                console.error('Failed to clear IndexedDB:', err);
-            }
-
-            // Clear localStorage
-            localStorage.removeItem('gymGalleryPhotos');
-
-            // Reset to defaults
-            gymGalleryPhotos = [...GYM_GALLERY_DEFAULTS];
-            await saveGymPhotos();
-            renderGymGallery();
-            alert('Gym photos reset to default images!');
         }
 
         function getCropCanvas() {
@@ -533,208 +479,6 @@
                 saveGymPhoto();
             });
         }
-
-        // ============ LIGHTBOX FUNCTIONALITY ============
-        let lightboxState = {
-            currentGallery: '',
-            currentIndex: 0,
-            galleryData: [],
-            zoom: 1,
-            panX: 0,
-            panY: 0,
-            isPanning: false,
-            startX: 0,
-            startY: 0
-        };
-
-        function openLightbox(galleryType, index) {
-            const lightbox = document.getElementById('imageLightbox');
-            if (!lightbox) return;
-
-            lightboxState.currentGallery = galleryType;
-            lightboxState.currentIndex = index;
-            lightboxState.zoom = 1;
-            lightboxState.panX = 0;
-            lightboxState.panY = 0;
-
-            if (galleryType === 'gym') {
-                lightboxState.galleryData = gymGalleryPhotos;
-            }
-
-            updateLightboxImage();
-            lightbox.style.display = 'flex';
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeLightbox() {
-            const lightbox = document.getElementById('imageLightbox');
-            if (lightbox) lightbox.style.display = 'none';
-            document.body.style.overflow = 'auto';
-        }
-
-        function updateLightboxImage() {
-            const img = document.getElementById('lightboxImage');
-            const counter = document.getElementById('currentImageNum');
-            const total = document.getElementById('totalImages');
-
-            if (lightboxState.galleryData.length > 0) {
-                const photo = lightboxState.galleryData[lightboxState.currentIndex];
-                img.src = photo.src;
-                counter.textContent = lightboxState.currentIndex + 1;
-                total.textContent = lightboxState.galleryData.length;
-            }
-
-            applyLightboxTransform();
-        }
-
-        function nextLightboxImage() {
-            lightboxState.currentIndex = (lightboxState.currentIndex + 1) % lightboxState.galleryData.length;
-            lightboxState.zoom = 1;
-            lightboxState.panX = 0;
-            lightboxState.panY = 0;
-            updateLightboxImage();
-        }
-
-        function prevLightboxImage() {
-            lightboxState.currentIndex = (lightboxState.currentIndex - 1 + lightboxState.galleryData.length) % lightboxState.galleryData.length;
-            lightboxState.zoom = 1;
-            lightboxState.panX = 0;
-            lightboxState.panY = 0;
-            updateLightboxImage();
-        }
-
-        function zoomInLightbox() {
-            lightboxState.zoom = Math.min(lightboxState.zoom + 0.2, 3);
-            applyLightboxTransform();
-        }
-
-        function zoomOutLightbox() {
-            lightboxState.zoom = Math.max(lightboxState.zoom - 0.2, 1);
-            applyLightboxTransform();
-        }
-
-        function resetLightboxZoom() {
-            lightboxState.zoom = 1;
-            lightboxState.panX = 0;
-            lightboxState.panY = 0;
-            applyLightboxTransform();
-        }
-
-        function applyLightboxTransform() {
-            const img = document.getElementById('lightboxImage');
-            if (img) {
-                img.style.transform = `scale(${lightboxState.zoom}) translate(${lightboxState.panX}px, ${lightboxState.panY}px)`;
-            }
-        }
-
-        // Lightbox mouse wheel zoom
-        const lightbox = document.getElementById('imageLightbox');
-        if (lightbox) {
-            lightbox.addEventListener('wheel', function(e) {
-                if (e.target.closest('.lightbox-image-wrapper')) {
-                    e.preventDefault();
-                    const delta = e.deltaY > 0 ? -0.1 : 0.1;
-                    lightboxState.zoom = Math.max(1, Math.min(3, lightboxState.zoom + delta));
-                    applyLightboxTransform();
-                }
-            }, { passive: false });
-
-            // Lightbox pan (drag) - Mouse
-            const wrapper = lightbox.querySelector('.lightbox-image-wrapper');
-            if (wrapper) {
-                wrapper.addEventListener('mousedown', function(e) {
-                    if (lightboxState.zoom > 1) {
-                        lightboxState.isPanning = true;
-                        lightboxState.startX = e.clientX - lightboxState.panX;
-                        lightboxState.startY = e.clientY - lightboxState.panY;
-                        wrapper.style.cursor = 'grabbing';
-                    }
-                });
-
-                document.addEventListener('mousemove', function(e) {
-                    if (lightboxState.isPanning && lightboxState.zoom > 1) {
-                        lightboxState.panX = e.clientX - lightboxState.startX;
-                        lightboxState.panY = e.clientY - lightboxState.startY;
-                        applyLightboxTransform();
-                    }
-                });
-
-                document.addEventListener('mouseup', function() {
-                    lightboxState.isPanning = false;
-                    if (wrapper) wrapper.style.cursor = 'grab';
-                });
-
-                wrapper.addEventListener('mouseover', function() {
-                    if (lightboxState.zoom > 1) {
-                        wrapper.style.cursor = 'grab';
-                    }
-                });
-
-                wrapper.addEventListener('mouseout', function() {
-                    wrapper.style.cursor = 'auto';
-                });
-
-                // Touch support for mobile
-                let touchStartDistance = 0;
-                let touchStartX = 0;
-                let touchStartY = 0;
-
-                wrapper.addEventListener('touchstart', function(e) {
-                    if (e.touches.length === 2) {
-                        // Pinch zoom
-                        const touch1 = e.touches[0];
-                        const touch2 = e.touches[1];
-                        touchStartDistance = Math.sqrt(
-                            Math.pow(touch2.clientX - touch1.clientX, 2) +
-                            Math.pow(touch2.clientY - touch1.clientY, 2)
-                        );
-                    } else if (e.touches.length === 1 && lightboxState.zoom > 1) {
-                        // Single finger drag
-                        touchStartX = e.touches[0].clientX - lightboxState.panX;
-                        touchStartY = e.touches[0].clientY - lightboxState.panY;
-                        lightboxState.isPanning = true;
-                    }
-                }, { passive: true });
-
-                wrapper.addEventListener('touchmove', function(e) {
-                    if (e.touches.length === 2 && touchStartDistance > 0) {
-                        // Pinch zoom
-                        e.preventDefault();
-                        const touch1 = e.touches[0];
-                        const touch2 = e.touches[1];
-                        const currentDistance = Math.sqrt(
-                            Math.pow(touch2.clientX - touch1.clientX, 2) +
-                            Math.pow(touch2.clientY - touch1.clientY, 2)
-                        );
-                        const zoomDelta = (currentDistance - touchStartDistance) / 100;
-                        lightboxState.zoom = Math.max(1, Math.min(3, lightboxState.zoom + zoomDelta));
-                        touchStartDistance = currentDistance;
-                        applyLightboxTransform();
-                    } else if (e.touches.length === 1 && lightboxState.isPanning && lightboxState.zoom > 1) {
-                        // Single finger drag
-                        e.preventDefault();
-                        lightboxState.panX = e.touches[0].clientX - touchStartX;
-                        lightboxState.panY = e.touches[0].clientY - touchStartY;
-                        applyLightboxTransform();
-                    }
-                }, { passive: false });
-
-                wrapper.addEventListener('touchend', function() {
-                    lightboxState.isPanning = false;
-                    touchStartDistance = 0;
-                }, { passive: true });
-            }
-        }
-
-        // Keyboard navigation in lightbox
-        document.addEventListener('keydown', function(e) {
-            const lightbox = document.getElementById('imageLightbox');
-            if (lightbox && lightbox.style.display !== 'none') {
-                if (e.key === 'ArrowRight') nextLightboxImage();
-                else if (e.key === 'ArrowLeft') prevLightboxImage();
-                else if (e.key === 'Escape') closeLightbox();
-            }
-        });
     </script>
 </body>
 </html>
