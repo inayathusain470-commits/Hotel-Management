@@ -150,7 +150,7 @@
             <h2>Featured Rooms</h2>
             <div class="rooms-grid">
                 <div class="room-card">
-                    <img id="home-single-room-img" src="images/room.png" alt="Single Room" style="cursor:pointer;" onclick="openRoomImageLightbox(0)">
+                    <img id="home-single-room-img" src="images/room.png" alt="Single Room" loading="lazy" width="300" height="250" style="cursor:pointer;" onerror="this.src='images/room.png'" onclick="openRoomImageLightbox(0)">
                     <button id="home-edit-single-room-img" class="edit-img-btn" style="display:none;margin-bottom:8px;" onclick="openHomeRoomImagePicker('single')">Add/Change Photo</button>
                     <h3>Single Room</h3>
                     <p>Perfect for solo travelers</p>
@@ -163,7 +163,7 @@
                     <a href="booking.html" class="book-btn" data-room="Single Room" data-price="1" onclick="setRoomQuantity('single')">Book Now</a>
                 </div>
                 <div class="room-card">
-                    <img id="home-double-room-img" src="images/room (2).png" alt="Double Room" style="cursor:pointer;" onclick="openRoomImageLightbox(1)">
+                    <img id="home-double-room-img" src="images/room (2).png" alt="Double Room" loading="lazy" width="300" height="250" style="cursor:pointer;" onerror="this.src='images/room (2).png'" onclick="openRoomImageLightbox(1)">
                     <button id="home-edit-double-room-img" class="edit-img-btn" style="display:none;margin-bottom:8px;" onclick="openHomeRoomImagePicker('double')">Add/Change Photo</button>
                     <h3>Double Room</h3>
                     <p>Ideal for couples</p>
@@ -176,7 +176,7 @@
                     <a href="booking.html" class="book-btn" data-room="Double Room" data-price="1" onclick="setRoomQuantity('double')">Book Now</a>
                 </div>
                 <div class="room-card">
-                    <img id="home-deluxe-room-img" src="images/room (3).png" alt="Deluxe Room" style="cursor:pointer;" onclick="openRoomImageLightbox(2)">
+                    <img id="home-deluxe-room-img" src="images/room (3).png" alt="Deluxe Room" loading="lazy" width="300" height="250" style="cursor:pointer;" onerror="this.src='images/room (3).png'" onclick="openRoomImageLightbox(2)">
                     <button id="home-edit-deluxe-room-img" class="edit-img-btn" style="display:none;margin-bottom:8px;" onclick="openHomeRoomImagePicker('deluxe')">Add/Change Photo</button>
                     <h3>Deluxe Room</h3>
                     <p>Luxury with extra space</p>
@@ -405,9 +405,9 @@
         let carouselAutoTimer = null;
         let activeHomeRoomType = null;
         const HOME_ROOM_IMAGE_DEFAULTS = {
-            single: 'images/Gemini_Generated_Image_e4ntu7e4ntu7e4nt.png',
-            double: 'images/Gemini_Generated_Image_hezikrhezikrhezi.png',
-            deluxe: 'images/Gemini_Generated_Image_j1pj33j1pj33j1pj.png'
+            single: 'images/room.png',
+            double: 'images/room (2).png',
+            deluxe: 'images/room (3).png'
         };
 
         // Image Upload Functions

@@ -1,8 +1,8 @@
 // --- Admin Room Image Upload Logic ---
 const defaultRoomImages = {
-    single: "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=400",
-    double: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400",
-    deluxe: "https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=400"
+    single: "images/room.png",
+    double: "images/room (2).png",
+    deluxe: "images/room (3).png"
 };
 
 function showAdminRoomImageButtons() {
