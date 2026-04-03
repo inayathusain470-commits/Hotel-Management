@@ -244,7 +244,7 @@
 
             <div class="rooms-grid">
                 <div class="room-card">
-                    <img id="single-room-img" src="images/room.png" alt="Single Room" loading="lazy" width="300" height="250" style="cursor:pointer;" onerror="this.src='images/room.png'" onclick="openRoomsRoomImageLightbox(0)">
+                    <img id="single-room-img" src="images/Gemini_Generated_Image_e4ntu7e4ntu7e4nt.png" alt="Single Room">
                     <button id="edit-single-room-img" class="edit-img-btn" style="display:none;margin-bottom:8px;" onclick="openRoomImageModal('single')">Edit/Add Photo</button>
                     <h3>Single Room</h3>
                     <p>Comfortable single room with all modern amenities including free Wi-Fi, air conditioning, and a work desk. Perfect for business travelers or solo adventurers.</p>
@@ -252,7 +252,7 @@
                     <a href="booking.html" class="book-btn" data-room="Single Room" data-price="1">Book Now</a>
                 </div>
                 <div class="room-card">
-                    <img id="double-room-img" src="images/room (2).png" alt="Double Room" loading="lazy" width="300" height="250" style="cursor:pointer;" onerror="this.src='images/room (2).png'" onclick="openRoomsRoomImageLightbox(1)">
+                    <img id="double-room-img" src="images/Gemini_Generated_Image_hezikrhezikrhezi.png" alt="Double Room">
                     <button id="edit-double-room-img" class="edit-img-btn" style="display:none;margin-bottom:8px;" onclick="openRoomImageModal('double')">Edit/Add Photo</button>
                     <h3>Double Room</h3>
                     <p>Spacious double room ideal for couples or small families. Features a king-size bed, balcony with city views, and en-suite bathroom with premium toiletries.</p>
@@ -260,7 +260,7 @@
                     <a href="booking.html" class="book-btn" data-room="Double Room" data-price="1">Book Now</a>
                 </div>
                 <div class="room-card">
-                    <img id="deluxe-room-img" src="images/room (3).png" alt="Deluxe Room" loading="lazy" width="300" height="250" style="cursor:pointer;" onerror="this.src='images/room (3).png'" onclick="openRoomsRoomImageLightbox(2)">
+                    <img id="deluxe-room-img" src="images/Gemini_Generated_Image_j1pj33j1pj33j1pj.png" alt="Deluxe Room">
                     <button id="edit-deluxe-room-img" class="edit-img-btn" style="display:none;margin-bottom:8px;" onclick="openRoomImageModal('deluxe')">Edit/Add Photo</button>
                     <h3>Deluxe Room</h3>
                     <p>Our premium deluxe room offers luxury living with separate living area, mini-bar, and stunning panoramic views. Includes complimentary breakfast and concierge service.</p>
@@ -450,52 +450,6 @@
         </div>
     </div>
 
-    <!-- Image Lightbox Viewer -->
-    <div id="imageLightbox" class="image-lightbox" style="display:none;">
-        <div class="lightbox-overlay" onclick="closeLightbox()"></div>
-        <div class="lightbox-container">
-            <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
-            <button class="lightbox-prev" onclick="prevLightboxImage()">&#10094;</button>
-            <button class="lightbox-next" onclick="nextLightboxImage()">&#10095;</button>
-            
-            <div class="lightbox-image-wrapper">
-                <img id="lightboxImage" src="" alt="Full view" class="lightbox-image">
-            </div>
-            
-            <div class="lightbox-controls">
-                <button class="lightbox-btn" onclick="zoomInLightbox()" title="Zoom In">🔍+</button>
-                <button class="lightbox-btn" onclick="zoomOutLightbox()" title="Zoom Out">🔍−</button>
-                <button class="lightbox-btn" onclick="resetLightboxZoom()" title="Reset Zoom">Reset</button>
-                <span class="lightbox-counter"><span id="currentImageNum">1</span>/<span id="totalImages">1</span></span>
-            </div>
-            
-            <p class="lightbox-hint">Drag to pan • Scroll to zoom • Click overlay to close</p>
-        </div>
-    </div>
-
-    <!-- Room Card Image Lightbox Viewer -->
-    <div id="roomsCardImageLightbox" class="image-lightbox" style="display:none;">
-        <div class="lightbox-overlay" onclick="closeRoomsRoomImageLightbox()"></div>
-        <div class="lightbox-container">
-            <button class="lightbox-close" onclick="closeRoomsRoomImageLightbox()">&times;</button>
-            <button class="lightbox-prev" onclick="prevRoomsRoomImageLightbox()">&#10094;</button>
-            <button class="lightbox-next" onclick="nextRoomsRoomImageLightbox()">&#10095;</button>
-            
-            <div class="lightbox-image-wrapper">
-                <img id="roomsCardImageLightboxImg" src="" alt="Room preview" class="lightbox-image">
-            </div>
-            
-            <div class="lightbox-controls">
-                <button class="lightbox-btn" onclick="zoomInRoomsRoomImageLightbox()" title="Zoom In">🔍+</button>
-                <button class="lightbox-btn" onclick="zoomOutRoomsRoomImageLightbox()" title="Zoom Out">🔍−</button>
-                <button class="lightbox-btn" onclick="resetRoomsRoomImageLightboxZoom()" title="Reset Zoom">Reset</button>
-                <span class="lightbox-counter"><span id="roomsCardImageNum">1</span>/<span id="roomsCardImageTotal">3</span></span>
-            </div>
-            
-            <p class="lightbox-hint">Drag to pan • Scroll to zoom • Click overlay to close</p>
-        </div>
-    </div>
-
     <script src="js/script.js"></script>
     <script>
         checkLogin();
@@ -553,7 +507,7 @@
                     ? `<button class="gallery-admin-btn gallery-change-btn" style="display:block;" onclick="openRoomsGalleryModal(${idx})">Change Photo</button>`
                     : '';
                 return `
-                    <div class="rooms-gallery-slide" style="cursor:pointer;" onclick="openLightbox('rooms',${idx})">
+                    <div class="rooms-gallery-slide">
                         <img src="${src}" alt="Room Gallery ${idx + 1}">
                         ${changeBtn}
                     </div>
@@ -1050,7 +1004,7 @@
             if (e.target === barPaymentModal) closeBarPaymentModal();
         });
 
-        const BAR_GALLERY_VERSION = '3';
+        const BAR_GALLERY_VERSION = '2';
         const barGalleryDefaults = [
             'images/bar.png',
             'images/bar (2).png',
@@ -1059,8 +1013,7 @@
             'images/bar (5).png',
             'images/bar (6).png',
             'images/bar (7).png',
-            'images/bar (8).png',
-            'images/bar (9).png'
+            'images/bar (8).png'
         ];
         let barGalleryImages = [];
         let barGalleryIndex = 0;
@@ -1207,7 +1160,7 @@
                     ? `<button class="gallery-admin-btn bar-gallery-change-btn" style="display:block;" onclick="openBarGalleryModal(${idx})">Change</button>`
                     : '';
                 return `
-                    <div class="bar-gallery-slide" style="cursor:pointer;" onclick="openLightbox('bar',${idx})">
+                    <div class="bar-gallery-slide">
                         <img src="${src}" alt="Luxury Bar ${idx + 1}">
                         ${changeBtn}
                     </div>
@@ -1292,402 +1245,6 @@
         loadBarGalleryImages();
         renderBarGallery();
         startBarGalleryAutoScroll();
-
-        // ============ LIGHTBOX FUNCTIONALITY ============
-        let lightboxState = {
-            currentGallery: '',
-            currentIndex: 0,
-            galleryData: [],
-            zoom: 1,
-            panX: 0,
-            panY: 0,
-            isPanning: false,
-            startX: 0,
-            startY: 0
-        };
-
-        function openLightbox(galleryType, index) {
-            const lightbox = document.getElementById('imageLightbox');
-            if (!lightbox) return;
-
-            lightboxState.currentGallery = galleryType;
-            lightboxState.currentIndex = index;
-            lightboxState.zoom = 1;
-            lightboxState.panX = 0;
-            lightboxState.panY = 0;
-
-            if (galleryType === 'rooms') {
-                lightboxState.galleryData = roomsGalleryImages;
-            } else if (galleryType === 'bar') {
-                lightboxState.galleryData = barGalleryImages;
-            }
-
-            updateLightboxImage();
-            lightbox.style.display = 'flex';
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeLightbox() {
-            const lightbox = document.getElementById('imageLightbox');
-            if (lightbox) lightbox.style.display = 'none';
-            document.body.style.overflow = 'auto';
-        }
-
-        function updateLightboxImage() {
-            const img = document.getElementById('lightboxImage');
-            const counter = document.getElementById('currentImageNum');
-            const total = document.getElementById('totalImages');
-
-            if (lightboxState.galleryData.length > 0) {
-                img.src = lightboxState.galleryData[lightboxState.currentIndex];
-                counter.textContent = lightboxState.currentIndex + 1;
-                total.textContent = lightboxState.galleryData.length;
-            }
-
-            applyLightboxTransform();
-        }
-
-        function nextLightboxImage() {
-            lightboxState.currentIndex = (lightboxState.currentIndex + 1) % lightboxState.galleryData.length;
-            lightboxState.zoom = 1;
-            lightboxState.panX = 0;
-            lightboxState.panY = 0;
-            updateLightboxImage();
-        }
-
-        function prevLightboxImage() {
-            lightboxState.currentIndex = (lightboxState.currentIndex - 1 + lightboxState.galleryData.length) % lightboxState.galleryData.length;
-            lightboxState.zoom = 1;
-            lightboxState.panX = 0;
-            lightboxState.panY = 0;
-            updateLightboxImage();
-        }
-
-        function zoomInLightbox() {
-            lightboxState.zoom = Math.min(lightboxState.zoom + 0.2, 3);
-            applyLightboxTransform();
-        }
-
-        function zoomOutLightbox() {
-            lightboxState.zoom = Math.max(lightboxState.zoom - 0.2, 1);
-            applyLightboxTransform();
-        }
-
-        function resetLightboxZoom() {
-            lightboxState.zoom = 1;
-            lightboxState.panX = 0;
-            lightboxState.panY = 0;
-            applyLightboxTransform();
-        }
-
-        function applyLightboxTransform() {
-            const img = document.getElementById('lightboxImage');
-            if (img) {
-                img.style.transform = `scale(${lightboxState.zoom}) translate(${lightboxState.panX}px, ${lightboxState.panY}px)`;
-            }
-        }
-
-        // Lightbox mouse wheel zoom
-        const lightbox = document.getElementById('imageLightbox');
-        if (lightbox) {
-            lightbox.addEventListener('wheel', function(e) {
-                if (e.target.closest('.lightbox-image-wrapper')) {
-                    e.preventDefault();
-                    const delta = e.deltaY > 0 ? -0.1 : 0.1;
-                    lightboxState.zoom = Math.max(1, Math.min(3, lightboxState.zoom + delta));
-                    applyLightboxTransform();
-                }
-            }, { passive: false });
-
-            // Lightbox pan (drag) - Mouse
-            const wrapper = lightbox.querySelector('.lightbox-image-wrapper');
-            if (wrapper) {
-                wrapper.addEventListener('mousedown', function(e) {
-                    if (lightboxState.zoom > 1) {
-                        lightboxState.isPanning = true;
-                        lightboxState.startX = e.clientX - lightboxState.panX;
-                        lightboxState.startY = e.clientY - lightboxState.panY;
-                        wrapper.style.cursor = 'grabbing';
-                    }
-                });
-
-                document.addEventListener('mousemove', function(e) {
-                    if (lightboxState.isPanning && lightboxState.zoom > 1) {
-                        lightboxState.panX = e.clientX - lightboxState.startX;
-                        lightboxState.panY = e.clientY - lightboxState.startY;
-                        applyLightboxTransform();
-                    }
-                });
-
-                document.addEventListener('mouseup', function() {
-                    lightboxState.isPanning = false;
-                    if (wrapper) wrapper.style.cursor = 'grab';
-                });
-
-                wrapper.addEventListener('mouseover', function() {
-                    if (lightboxState.zoom > 1) {
-                        wrapper.style.cursor = 'grab';
-                    }
-                });
-
-                wrapper.addEventListener('mouseout', function() {
-                    wrapper.style.cursor = 'auto';
-                });
-
-                // Touch support for mobile
-                let touchStartDistance = 0;
-                let touchStartX = 0;
-                let touchStartY = 0;
-
-                wrapper.addEventListener('touchstart', function(e) {
-                    if (e.touches.length === 2) {
-                        // Pinch zoom
-                        const touch1 = e.touches[0];
-                        const touch2 = e.touches[1];
-                        touchStartDistance = Math.sqrt(
-                            Math.pow(touch2.clientX - touch1.clientX, 2) +
-                            Math.pow(touch2.clientY - touch1.clientY, 2)
-                        );
-                    } else if (e.touches.length === 1 && lightboxState.zoom > 1) {
-                        // Single finger drag
-                        touchStartX = e.touches[0].clientX - lightboxState.panX;
-                        touchStartY = e.touches[0].clientY - lightboxState.panY;
-                        lightboxState.isPanning = true;
-                    }
-                }, { passive: true });
-
-                wrapper.addEventListener('touchmove', function(e) {
-                    if (e.touches.length === 2 && touchStartDistance > 0) {
-                        // Pinch zoom
-                        e.preventDefault();
-                        const touch1 = e.touches[0];
-                        const touch2 = e.touches[1];
-                        const currentDistance = Math.sqrt(
-                            Math.pow(touch2.clientX - touch1.clientX, 2) +
-                            Math.pow(touch2.clientY - touch1.clientY, 2)
-                        );
-                        const zoomDelta = (currentDistance - touchStartDistance) / 100;
-                        lightboxState.zoom = Math.max(1, Math.min(3, lightboxState.zoom + zoomDelta));
-                        touchStartDistance = currentDistance;
-                        applyLightboxTransform();
-                    } else if (e.touches.length === 1 && lightboxState.isPanning && lightboxState.zoom > 1) {
-                        // Single finger drag
-                        e.preventDefault();
-                        lightboxState.panX = e.touches[0].clientX - touchStartX;
-                        lightboxState.panY = e.touches[0].clientY - touchStartY;
-                        applyLightboxTransform();
-                    }
-                }, { passive: false });
-
-                wrapper.addEventListener('touchend', function() {
-                    lightboxState.isPanning = false;
-                    touchStartDistance = 0;
-                }, { passive: true });
-            }
-        }
-
-        // Keyboard navigation in lightbox
-        document.addEventListener('keydown', function(e) {
-            const lightbox = document.getElementById('imageLightbox');
-            if (lightbox && lightbox.style.display !== 'none') {
-                if (e.key === 'ArrowRight') nextLightboxImage();
-                else if (e.key === 'ArrowLeft') prevLightboxImage();
-                else if (e.key === 'Escape') closeLightbox();
-            }
-        });
-
-        // ============ ROOMS CARD IMAGE LIGHTBOX FUNCTIONALITY ============
-        const roomsCardImages = ['images/room.png', 'images/room (2).png', 'images/room (3).png'];
-        let roomsCardImageLightboxState = {
-            currentIndex: 0,
-            zoom: 1,
-            panX: 0,
-            panY: 0,
-            isPanning: false,
-            startX: 0,
-            startY: 0
-        };
-
-        function openRoomsRoomImageLightbox(index) {
-            const lightbox = document.getElementById('roomsCardImageLightbox');
-            if (!lightbox) return;
-
-            roomsCardImageLightboxState.currentIndex = index;
-            roomsCardImageLightboxState.zoom = 1;
-            roomsCardImageLightboxState.panX = 0;
-            roomsCardImageLightboxState.panY = 0;
-
-            updateRoomsRoomImageLightbox();
-            lightbox.style.display = 'flex';
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeRoomsRoomImageLightbox() {
-            const lightbox = document.getElementById('roomsCardImageLightbox');
-            if (lightbox) lightbox.style.display = 'none';
-            document.body.style.overflow = 'auto';
-        }
-
-        function updateRoomsRoomImageLightbox() {
-            const img = document.getElementById('roomsCardImageLightboxImg');
-            const counter = document.getElementById('roomsCardImageNum');
-            const total = document.getElementById('roomsCardImageTotal');
-
-            img.src = roomsCardImages[roomsCardImageLightboxState.currentIndex];
-            counter.textContent = roomsCardImageLightboxState.currentIndex + 1;
-            total.textContent = roomsCardImages.length;
-
-            applyRoomsRoomImageLightboxTransform();
-        }
-
-        function nextRoomsRoomImageLightbox() {
-            roomsCardImageLightboxState.currentIndex = (roomsCardImageLightboxState.currentIndex + 1) % roomsCardImages.length;
-            roomsCardImageLightboxState.zoom = 1;
-            roomsCardImageLightboxState.panX = 0;
-            roomsCardImageLightboxState.panY = 0;
-            updateRoomsRoomImageLightbox();
-        }
-
-        function prevRoomsRoomImageLightbox() {
-            roomsCardImageLightboxState.currentIndex = (roomsCardImageLightboxState.currentIndex - 1 + roomsCardImages.length) % roomsCardImages.length;
-            roomsCardImageLightboxState.zoom = 1;
-            roomsCardImageLightboxState.panX = 0;
-            roomsCardImageLightboxState.panY = 0;
-            updateRoomsRoomImageLightbox();
-        }
-
-        function zoomInRoomsRoomImageLightbox() {
-            roomsCardImageLightboxState.zoom = Math.min(roomsCardImageLightboxState.zoom + 0.2, 3);
-            applyRoomsRoomImageLightboxTransform();
-        }
-
-        function zoomOutRoomsRoomImageLightbox() {
-            roomsCardImageLightboxState.zoom = Math.max(roomsCardImageLightboxState.zoom - 0.2, 1);
-            applyRoomsRoomImageLightboxTransform();
-        }
-
-        function resetRoomsRoomImageLightboxZoom() {
-            roomsCardImageLightboxState.zoom = 1;
-            roomsCardImageLightboxState.panX = 0;
-            roomsCardImageLightboxState.panY = 0;
-            applyRoomsRoomImageLightboxTransform();
-        }
-
-        function applyRoomsRoomImageLightboxTransform() {
-            const img = document.getElementById('roomsCardImageLightboxImg');
-            if (img) {
-                img.style.transform = `scale(${roomsCardImageLightboxState.zoom}) translate(${roomsCardImageLightboxState.panX}px, ${roomsCardImageLightboxState.panY}px)`;
-            }
-        }
-
-        // Rooms card image lightbox mouse wheel zoom
-        const roomsCardLightbox = document.getElementById('roomsCardImageLightbox');
-        if (roomsCardLightbox) {
-            roomsCardLightbox.addEventListener('wheel', function(e) {
-                if (e.target.closest('.lightbox-image-wrapper')) {
-                    e.preventDefault();
-                    const delta = e.deltaY > 0 ? -0.1 : 0.1;
-                    roomsCardImageLightboxState.zoom = Math.max(1, Math.min(3, roomsCardImageLightboxState.zoom + delta));
-                    applyRoomsRoomImageLightboxTransform();
-                }
-            }, { passive: false });
-
-            // Rooms card image lightbox pan (drag) - Mouse
-            const wrapper = roomsCardLightbox.querySelector('.lightbox-image-wrapper');
-            if (wrapper) {
-                wrapper.addEventListener('mousedown', function(e) {
-                    if (roomsCardImageLightboxState.zoom > 1) {
-                        roomsCardImageLightboxState.isPanning = true;
-                        roomsCardImageLightboxState.startX = e.clientX - roomsCardImageLightboxState.panX;
-                        roomsCardImageLightboxState.startY = e.clientY - roomsCardImageLightboxState.panY;
-                        wrapper.style.cursor = 'grabbing';
-                    }
-                });
-
-                document.addEventListener('mousemove', function(e) {
-                    if (roomsCardImageLightboxState.isPanning && roomsCardImageLightboxState.zoom > 1) {
-                        roomsCardImageLightboxState.panX = e.clientX - roomsCardImageLightboxState.startX;
-                        roomsCardImageLightboxState.panY = e.clientY - roomsCardImageLightboxState.startY;
-                        applyRoomsRoomImageLightboxTransform();
-                    }
-                });
-
-                document.addEventListener('mouseup', function() {
-                    roomsCardImageLightboxState.isPanning = false;
-                    if (wrapper) wrapper.style.cursor = 'grab';
-                });
-
-                wrapper.addEventListener('mouseover', function() {
-                    if (roomsCardImageLightboxState.zoom > 1) {
-                        wrapper.style.cursor = 'grab';
-                    }
-                });
-
-                wrapper.addEventListener('mouseout', function() {
-                    wrapper.style.cursor = 'auto';
-                });
-
-                // Touch support for mobile
-                let roomsCardTouchStartDistance = 0;
-                let roomsCardTouchStartX = 0;
-                let roomsCardTouchStartY = 0;
-
-                wrapper.addEventListener('touchstart', function(e) {
-                    if (e.touches.length === 2) {
-                        // Pinch zoom
-                        const touch1 = e.touches[0];
-                        const touch2 = e.touches[1];
-                        roomsCardTouchStartDistance = Math.sqrt(
-                            Math.pow(touch2.clientX - touch1.clientX, 2) +
-                            Math.pow(touch2.clientY - touch1.clientY, 2)
-                        );
-                    } else if (e.touches.length === 1 && roomsCardImageLightboxState.zoom > 1) {
-                        // Single finger drag
-                        roomsCardTouchStartX = e.touches[0].clientX - roomsCardImageLightboxState.panX;
-                        roomsCardTouchStartY = e.touches[0].clientY - roomsCardImageLightboxState.panY;
-                        roomsCardImageLightboxState.isPanning = true;
-                    }
-                }, { passive: true });
-
-                wrapper.addEventListener('touchmove', function(e) {
-                    if (e.touches.length === 2 && roomsCardTouchStartDistance > 0) {
-                        // Pinch zoom
-                        e.preventDefault();
-                        const touch1 = e.touches[0];
-                        const touch2 = e.touches[1];
-                        const currentDistance = Math.sqrt(
-                            Math.pow(touch2.clientX - touch1.clientX, 2) +
-                            Math.pow(touch2.clientY - touch1.clientY, 2)
-                        );
-                        const zoomDelta = (currentDistance - roomsCardTouchStartDistance) / 100;
-                        roomsCardImageLightboxState.zoom = Math.max(1, Math.min(3, roomsCardImageLightboxState.zoom + zoomDelta));
-                        roomsCardTouchStartDistance = currentDistance;
-                        applyRoomsRoomImageLightboxTransform();
-                    } else if (e.touches.length === 1 && roomsCardImageLightboxState.isPanning && roomsCardImageLightboxState.zoom > 1) {
-                        // Single finger drag
-                        e.preventDefault();
-                        roomsCardImageLightboxState.panX = e.touches[0].clientX - roomsCardTouchStartX;
-                        roomsCardImageLightboxState.panY = e.touches[0].clientY - roomsCardTouchStartY;
-                        applyRoomsRoomImageLightboxTransform();
-                    }
-                }, { passive: false });
-
-                wrapper.addEventListener('touchend', function() {
-                    roomsCardImageLightboxState.isPanning = false;
-                    roomsCardTouchStartDistance = 0;
-                }, { passive: true });
-            }
-        }
-
-        // Keyboard navigation in rooms card image lightbox
-        document.addEventListener('keydown', function(e) {
-            const lightbox = document.getElementById('roomsCardImageLightbox');
-            if (lightbox && lightbox.style.display !== 'none') {
-                if (e.key === 'ArrowRight') nextRoomsRoomImageLightbox();
-                else if (e.key === 'ArrowLeft') prevRoomsRoomImageLightbox();
-                else if (e.key === 'Escape') closeRoomsRoomImageLightbox();
-            }
-        });
     </script>
 </body>
 </html>
