@@ -1009,7 +1009,7 @@
                 }
             }, { passive: false });
 
-            // Room image lightbox pan (drag)
+            // Room image lightbox pan (drag) - Mouse
             const wrapper = roomLightbox.querySelector('.lightbox-image-wrapper');
             if (wrapper) {
                 wrapper.addEventListener('mousedown', function(e) {
@@ -1043,6 +1043,56 @@
                 wrapper.addEventListener('mouseout', function() {
                     wrapper.style.cursor = 'auto';
                 });
+
+                // Touch support for mobile
+                let roomTouchStartDistance = 0;
+                let roomTouchStartX = 0;
+                let roomTouchStartY = 0;
+
+                wrapper.addEventListener('touchstart', function(e) {
+                    if (e.touches.length === 2) {
+                        // Pinch zoom
+                        const touch1 = e.touches[0];
+                        const touch2 = e.touches[1];
+                        roomTouchStartDistance = Math.sqrt(
+                            Math.pow(touch2.clientX - touch1.clientX, 2) +
+                            Math.pow(touch2.clientY - touch1.clientY, 2)
+                        );
+                    } else if (e.touches.length === 1 && roomImageLightboxState.zoom > 1) {
+                        // Single finger drag
+                        roomTouchStartX = e.touches[0].clientX - roomImageLightboxState.panX;
+                        roomTouchStartY = e.touches[0].clientY - roomImageLightboxState.panY;
+                        roomImageLightboxState.isPanning = true;
+                    }
+                }, { passive: true });
+
+                wrapper.addEventListener('touchmove', function(e) {
+                    if (e.touches.length === 2 && roomTouchStartDistance > 0) {
+                        // Pinch zoom
+                        e.preventDefault();
+                        const touch1 = e.touches[0];
+                        const touch2 = e.touches[1];
+                        const currentDistance = Math.sqrt(
+                            Math.pow(touch2.clientX - touch1.clientX, 2) +
+                            Math.pow(touch2.clientY - touch1.clientY, 2)
+                        );
+                        const zoomDelta = (currentDistance - roomTouchStartDistance) / 100;
+                        roomImageLightboxState.zoom = Math.max(1, Math.min(3, roomImageLightboxState.zoom + zoomDelta));
+                        roomTouchStartDistance = currentDistance;
+                        applyRoomImageLightboxTransform();
+                    } else if (e.touches.length === 1 && roomImageLightboxState.isPanning && roomImageLightboxState.zoom > 1) {
+                        // Single finger drag
+                        e.preventDefault();
+                        roomImageLightboxState.panX = e.touches[0].clientX - roomTouchStartX;
+                        roomImageLightboxState.panY = e.touches[0].clientY - roomTouchStartY;
+                        applyRoomImageLightboxTransform();
+                    }
+                }, { passive: false });
+
+                wrapper.addEventListener('touchend', function() {
+                    roomImageLightboxState.isPanning = false;
+                    roomTouchStartDistance = 0;
+                }, { passive: true });
             }
         }
 

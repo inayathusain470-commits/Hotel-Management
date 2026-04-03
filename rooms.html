@@ -1399,7 +1399,7 @@
                 }
             }, { passive: false });
 
-            // Lightbox pan (drag)
+            // Lightbox pan (drag) - Mouse
             const wrapper = lightbox.querySelector('.lightbox-image-wrapper');
             if (wrapper) {
                 wrapper.addEventListener('mousedown', function(e) {
@@ -1433,6 +1433,56 @@
                 wrapper.addEventListener('mouseout', function() {
                     wrapper.style.cursor = 'auto';
                 });
+
+                // Touch support for mobile
+                let touchStartDistance = 0;
+                let touchStartX = 0;
+                let touchStartY = 0;
+
+                wrapper.addEventListener('touchstart', function(e) {
+                    if (e.touches.length === 2) {
+                        // Pinch zoom
+                        const touch1 = e.touches[0];
+                        const touch2 = e.touches[1];
+                        touchStartDistance = Math.sqrt(
+                            Math.pow(touch2.clientX - touch1.clientX, 2) +
+                            Math.pow(touch2.clientY - touch1.clientY, 2)
+                        );
+                    } else if (e.touches.length === 1 && lightboxState.zoom > 1) {
+                        // Single finger drag
+                        touchStartX = e.touches[0].clientX - lightboxState.panX;
+                        touchStartY = e.touches[0].clientY - lightboxState.panY;
+                        lightboxState.isPanning = true;
+                    }
+                }, { passive: true });
+
+                wrapper.addEventListener('touchmove', function(e) {
+                    if (e.touches.length === 2 && touchStartDistance > 0) {
+                        // Pinch zoom
+                        e.preventDefault();
+                        const touch1 = e.touches[0];
+                        const touch2 = e.touches[1];
+                        const currentDistance = Math.sqrt(
+                            Math.pow(touch2.clientX - touch1.clientX, 2) +
+                            Math.pow(touch2.clientY - touch1.clientY, 2)
+                        );
+                        const zoomDelta = (currentDistance - touchStartDistance) / 100;
+                        lightboxState.zoom = Math.max(1, Math.min(3, lightboxState.zoom + zoomDelta));
+                        touchStartDistance = currentDistance;
+                        applyLightboxTransform();
+                    } else if (e.touches.length === 1 && lightboxState.isPanning && lightboxState.zoom > 1) {
+                        // Single finger drag
+                        e.preventDefault();
+                        lightboxState.panX = e.touches[0].clientX - touchStartX;
+                        lightboxState.panY = e.touches[0].clientY - touchStartY;
+                        applyLightboxTransform();
+                    }
+                }, { passive: false });
+
+                wrapper.addEventListener('touchend', function() {
+                    lightboxState.isPanning = false;
+                    touchStartDistance = 0;
+                }, { passive: true });
             }
         }
 
@@ -1542,7 +1592,7 @@
                 }
             }, { passive: false });
 
-            // Rooms card image lightbox pan (drag)
+            // Rooms card image lightbox pan (drag) - Mouse
             const wrapper = roomsCardLightbox.querySelector('.lightbox-image-wrapper');
             if (wrapper) {
                 wrapper.addEventListener('mousedown', function(e) {
@@ -1576,6 +1626,56 @@
                 wrapper.addEventListener('mouseout', function() {
                     wrapper.style.cursor = 'auto';
                 });
+
+                // Touch support for mobile
+                let roomsCardTouchStartDistance = 0;
+                let roomsCardTouchStartX = 0;
+                let roomsCardTouchStartY = 0;
+
+                wrapper.addEventListener('touchstart', function(e) {
+                    if (e.touches.length === 2) {
+                        // Pinch zoom
+                        const touch1 = e.touches[0];
+                        const touch2 = e.touches[1];
+                        roomsCardTouchStartDistance = Math.sqrt(
+                            Math.pow(touch2.clientX - touch1.clientX, 2) +
+                            Math.pow(touch2.clientY - touch1.clientY, 2)
+                        );
+                    } else if (e.touches.length === 1 && roomsCardImageLightboxState.zoom > 1) {
+                        // Single finger drag
+                        roomsCardTouchStartX = e.touches[0].clientX - roomsCardImageLightboxState.panX;
+                        roomsCardTouchStartY = e.touches[0].clientY - roomsCardImageLightboxState.panY;
+                        roomsCardImageLightboxState.isPanning = true;
+                    }
+                }, { passive: true });
+
+                wrapper.addEventListener('touchmove', function(e) {
+                    if (e.touches.length === 2 && roomsCardTouchStartDistance > 0) {
+                        // Pinch zoom
+                        e.preventDefault();
+                        const touch1 = e.touches[0];
+                        const touch2 = e.touches[1];
+                        const currentDistance = Math.sqrt(
+                            Math.pow(touch2.clientX - touch1.clientX, 2) +
+                            Math.pow(touch2.clientY - touch1.clientY, 2)
+                        );
+                        const zoomDelta = (currentDistance - roomsCardTouchStartDistance) / 100;
+                        roomsCardImageLightboxState.zoom = Math.max(1, Math.min(3, roomsCardImageLightboxState.zoom + zoomDelta));
+                        roomsCardTouchStartDistance = currentDistance;
+                        applyRoomsRoomImageLightboxTransform();
+                    } else if (e.touches.length === 1 && roomsCardImageLightboxState.isPanning && roomsCardImageLightboxState.zoom > 1) {
+                        // Single finger drag
+                        e.preventDefault();
+                        roomsCardImageLightboxState.panX = e.touches[0].clientX - roomsCardTouchStartX;
+                        roomsCardImageLightboxState.panY = e.touches[0].clientY - roomsCardTouchStartY;
+                        applyRoomsRoomImageLightboxTransform();
+                    }
+                }, { passive: false });
+
+                wrapper.addEventListener('touchend', function() {
+                    roomsCardImageLightboxState.isPanning = false;
+                    roomsCardTouchStartDistance = 0;
+                }, { passive: true });
             }
         }
 

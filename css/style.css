@@ -475,8 +475,8 @@ h2::after {
 /* Room Cards */
 .rooms-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
 }
 
 .room-card {
@@ -854,8 +854,8 @@ footer {
 
 .gym-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 0.8rem;
 }
 
 .gym-card {
@@ -1048,8 +1048,8 @@ footer {
 
 .pool-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 0.8rem;
 }
 
 .pool-card {
@@ -1688,16 +1688,18 @@ body.dark-mode .dark-mode-toggle-wrap label {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    width: 90%;
-    height: 90vh;
+    width: 95%;
     max-width: 1200px;
+    height: auto;
+    max-height: 90vh;
+    padding: 20px 0;
 }
 
 .lightbox-close {
     position: absolute;
-    top: -50px;
-    right: 0;
-    background: none;
+    top: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.7);
     border: none;
     color: #fff;
     font-size: 40px;
@@ -1710,6 +1712,7 @@ body.dark-mode .dark-mode-toggle-wrap label {
     justify-content: center;
     z-index: 10002;
     transition: transform 0.2s;
+    border-radius: 50%;
 }
 
 .lightbox-close:hover {
@@ -1746,15 +1749,16 @@ body.dark-mode .dark-mode-toggle-wrap label {
 }
 
 .lightbox-image-wrapper {
-    flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
     width: 100%;
+    height: 400px;
     overflow: hidden;
     border-radius: 10px;
     background: #2a2a2a;
     cursor: grab;
+    position: relative;
 }
 
 .lightbox-image-wrapper.dragging {
@@ -1814,52 +1818,202 @@ body.dark-mode .dark-mode-toggle-wrap label {
 }
 
 /* Responsive lightbox */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
+    .lightbox-image-wrapper {
+        height: 350px;
+    }
+
     .lightbox-prev,
     .lightbox-next {
-        padding: 8px 12px;
-        font-size: 24px;
-        left: 10px;
-        right: 10px;
+        padding: 10px 14px;
+        font-size: 28px;
+    }
+}
+
+@media (max-width: 768px) {
+    .lightbox-container {
+        width: 98%;
+        padding: 15px 0;
+    }
+
+    .lightbox-image-wrapper {
+        height: 300px;
     }
 
     .lightbox-close {
-        top: -40px;
-        right: 0;
         font-size: 32px;
+        width: 36px;
+        height: 36px;
+    }
+
+    .lightbox-prev,
+    .lightbox-next {
+        padding: 8px 10px;
+        font-size: 22px;
+        left: 8px;
+        right: 8px;
     }
 
     .lightbox-controls {
-        gap: 10px;
+        gap: 8px;
+        margin-top: 15px;
+        width: 100%;
+        padding: 0 10px;
     }
 
     .lightbox-btn {
-        padding: 8px 15px;
+        padding: 8px 12px;
         font-size: 12px;
+        flex: 1;
+        min-width: 50px;
     }
 
     .lightbox-counter {
-        font-size: 14px;
-        padding: 6px 12px;
+        font-size: 12px;
+        padding: 6px 10px;
+        min-width: auto;
+    }
+
+    .lightbox-hint {
+        font-size: 12px;
+        margin-top: 8px;
+    }
+
+    .gym-grid {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 0.6rem;
+    }
+
+    .gym-card img {
+        height: 140px;
+    }
+
+    .pool-grid {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 0.6rem;
+    }
+
+    .rooms-grid {
+        grid-template-columns: 1fr;
+        gap: 1.2rem;
     }
 }
 
 @media (max-width: 480px) {
+    .lightbox-container {
+        width: 99%;
+        padding: 10px 0;
+    }
+
+    .lightbox-image-wrapper {
+        height: 250px;
+        border-radius: 8px;
+    }
+
+    .lightbox-close {
+        font-size: 28px;
+        width: 32px;
+        height: 32px;
+        top: 8px;
+        right: 8px;
+    }
+
     .lightbox-prev,
     .lightbox-next {
-        padding: 6px 10px;
-        font-size: 20px;
-        left: 5px;
-        right: 5px;
+        padding: 6px 8px;
+        font-size: 18px;
+        left: 4px;
+        right: 4px;
+    }
+
+    .lightbox-controls {
+        gap: 6px;
+        margin-top: 10px;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding: 0 8px;
+        width: 100%;
     }
 
     .lightbox-btn {
-        padding: 6px 12px;
+        padding: 6px 10px;
         font-size: 11px;
+        flex: 0 0 auto;
+        min-width: 45px;
+        white-space: nowrap;
+    }
+
+    .lightbox-counter {
+        font-size: 11px;
+        padding: 5px 8px;
+        flex: 0 0 auto;
     }
 
     .lightbox-hint {
         font-size: 11px;
+        margin-top: 6px;
+        padding: 0 8px;
+    }
+
+    .gym-grid {
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 0.5rem;
+    }
+
+    .gym-card img {
+        height: 120px;
+    }
+
+    .pool-grid {
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 0.5rem;
+    }
+
+    .pool-card img {
+        max-height: 200px;
+    }
+
+    .rooms-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .room-card img {
+        height: 180px;
+    }
+
+    .room-card h3 {
+        padding: 0.8rem;
+        font-size: 1.2rem;
+    }
+}
+
+@media (max-width: 380px) {
+    .lightbox-image-wrapper {
+        height: 220px;
+    }
+
+    .lightbox-controls {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .lightbox-btn {
+        width: 100%;
+        min-width: auto;
+    }
+
+    .gym-card img {
+        height: 110px;
+    }
+
+    .gym-card p {
+        font-size: 0.9rem;
+        padding: 0.5rem;
+    }
+
+    .room-card img {
+        height: 150px;
     }
 }
 }
