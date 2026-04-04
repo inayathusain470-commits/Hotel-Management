@@ -355,16 +355,16 @@
             localStorage.setItem('selectedRoomType', roomType);
         }
 
-        const HOME_CAROUSEL_VERSION = 'video-v8';
+        const HOME_CAROUSEL_VERSION = 'video-v9';
         const HOME_CAROUSEL_DEFAULTS = [
             'images/bar (8).png',
             'images/bar (7).png',
             'images/bar (6).png',
-            'images/room.png',
-            'images/room (2).png',
-            'images/room (3).png',
             'images/pool.png',
             'images/pool (2).png',
+            'images/pool (3).png',
+            'images/room (7).png',
+            'images/room (6).png',
             'images/gym.png',
             'images/gym (2).png'
         ];
@@ -508,8 +508,8 @@
             // Convert carousel images to gallery format for lightbox with proper titles
             const getTitleForIndex = (idx) => {
                 if (idx < 3) return `Bar Service ${idx + 1}`;
-                if (idx < 6) return `Royal Plaza Room ${idx - 2}`;
-                if (idx < 8) return `Swimming Pool ${idx - 5}`;
+                if (idx < 6) return `Swimming Pool ${idx - 2}`;
+                if (idx < 8) return `Royal Plaza Room ${idx - 5}`;
                 return `Gym Equipment ${idx - 7}`;
             };
 
