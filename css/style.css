@@ -1773,6 +1773,22 @@ body.dark-mode .dark-mode-toggle-wrap label {
     user-select: none;
 }
 
+.lightbox-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    margin-top: 15px;
+}
+
+.lightbox-title {
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    text-align: center;
+    min-height: 24px;
+}
+
 .lightbox-controls {
     display: flex;
     gap: 15px;
@@ -1813,7 +1829,7 @@ body.dark-mode .dark-mode-toggle-wrap label {
 .lightbox-hint {
     color: rgba(255, 255, 255, 0.7);
     font-size: 13px;
-    margin-top: 10px;
+    margin-top: 8px;
     text-align: center;
 }
 

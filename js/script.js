@@ -27,12 +27,15 @@ function showLightboxImage() {
                 <div class="lightbox-image-wrapper">
                     <img class="lightbox-image" alt="">
                 </div>
-                <div class="lightbox-controls">
-                    <button class="lightbox-btn" id="lightbox-zoom-in">🔍 Zoom In</button>
-                    <button class="lightbox-btn" id="lightbox-zoom-out">🔍 Zoom Out</button>
-                    <div class="lightbox-counter"><span id="lightbox-current">1</span>/<span id="lightbox-total">1</span></div>
+                <div class="lightbox-info">
+                    <div class="lightbox-title"></div>
+                    <div class="lightbox-controls">
+                        <button class="lightbox-btn" id="lightbox-zoom-in">🔍 Zoom In</button>
+                        <button class="lightbox-btn" id="lightbox-zoom-out">🔍 Zoom Out</button>
+                        <div class="lightbox-counter"><span id="lightbox-current">1</span>/<span id="lightbox-total">1</span></div>
+                    </div>
+                    <div class="lightbox-hint">Click close or press ESC to close</div>
                 </div>
-                <div class="lightbox-hint">Click close or press ESC to close</div>
             </div>
         `;
         document.body.appendChild(lightbox);
@@ -45,13 +48,9 @@ function showLightboxImage() {
     img.style.transform = 'scale(1)';
     img.dataset.scale = '1';
 
-    const titleElem = lightbox.querySelector('.lightbox-hint');
-    if (image.title) {
-        const titleDiv = document.createElement('div');
-        titleDiv.style.cssText = 'color: white; font-size: 16px; font-weight: 600; margin-top: 10px; text-align: center;';
-        titleDiv.textContent = image.title;
-        titleElem.parentNode.insertBefore(titleDiv, titleElem);
-    }
+    const titleDiv = lightbox.querySelector('.lightbox-title');
+    titleDiv.textContent = image.title || '';
+    titleDiv.style.cssText = 'color: white; font-size: 16px; font-weight: 600; margin-bottom: 10px; text-align: center;';
 
     document.getElementById('lightbox-current').textContent = lightboxCurrentIndex + 1;
     document.getElementById('lightbox-total').textContent = lightboxGallery.length;
