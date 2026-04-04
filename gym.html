@@ -225,7 +225,7 @@
                 return `
                     <div class="gym-card">
                         <div class="gym-card-image-wrap">
-                            <img src="${photo.src}" alt="${photo.title}">
+                            <img src="${photo.src}" alt="${photo.title}" style="cursor: pointer;" onclick="openLightbox('${photo.src}', '${photo.title.replace(/'/g, "\\'")}', gymGalleryPhotos)">
                             ${controls}
                         </div>
                         <p>${photo.title}</p>

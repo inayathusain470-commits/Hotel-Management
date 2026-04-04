@@ -1,3 +1,108 @@
+// ========== LIGHTBOX ZOOM FUNCTIONALITY ==========
+let currentLightboxImage = null;
+let lightboxGallery = [];
+let lightboxCurrentIndex = 0;
+
+function openLightbox(src, title, gallery = []) {
+    lightboxGallery = gallery.length > 0 ? gallery : [{src, title}];
+    lightboxCurrentIndex = lightboxGallery.findIndex(img => img.src === src) || 0;
+    showLightboxImage();
+}
+
+function showLightboxImage() {
+    const image = lightboxGallery[lightboxCurrentIndex];
+    if (!image) return;
+
+    let lightbox = document.getElementById('image-lightbox');
+    if (!lightbox) {
+        lightbox = document.createElement('div');
+        lightbox.id = 'image-lightbox';
+        lightbox.className = 'image-lightbox';
+        lightbox.innerHTML = `
+            <div class="lightbox-overlay"></div>
+            <div class="lightbox-container">
+                <button aria-label="Close lightbox" class="lightbox-close">&times;</button>
+                <button aria-label="Previous image" class="lightbox-prev">&lsaquo;</button>
+                <button aria-label="Next image" class="lightbox-next">&rsaquo;</button>
+                <div class="lightbox-image-wrapper">
+                    <img class="lightbox-image" alt="">
+                </div>
+                <div class="lightbox-controls">
+                    <button class="lightbox-btn" id="lightbox-zoom-in">🔍 Zoom In</button>
+                    <button class="lightbox-btn" id="lightbox-zoom-out">🔍 Zoom Out</button>
+                    <div class="lightbox-counter"><span id="lightbox-current">1</span>/<span id="lightbox-total">1</span></div>
+                </div>
+                <div class="lightbox-hint">Click close or press ESC to close</div>
+            </div>
+        `;
+        document.body.appendChild(lightbox);
+        setupLightboxListeners(lightbox);
+    }
+
+    const img = lightbox.querySelector('.lightbox-image');
+    img.src = image.src;
+    img.alt = image.title;
+    img.style.transform = 'scale(1)';
+    img.dataset.scale = '1';
+
+    const titleElem = lightbox.querySelector('.lightbox-hint');
+    if (image.title) {
+        const titleDiv = document.createElement('div');
+        titleDiv.style.cssText = 'color: white; font-size: 16px; font-weight: 600; margin-top: 10px; text-align: center;';
+        titleDiv.textContent = image.title;
+        titleElem.parentNode.insertBefore(titleDiv, titleElem);
+    }
+
+    document.getElementById('lightbox-current').textContent = lightboxCurrentIndex + 1;
+    document.getElementById('lightbox-total').textContent = lightboxGallery.length;
+    
+    lightbox.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox() {
+    const lightbox = document.getElementById('image-lightbox');
+    if (lightbox) {
+        lightbox.style.display = 'none';
+        document.body.style.overflow = '';
+    }
+}
+
+function nextLightboxImage() {
+    lightboxCurrentIndex = (lightboxCurrentIndex + 1) % lightboxGallery.length;
+    showLightboxImage();
+}
+
+function prevLightboxImage() {
+    lightboxCurrentIndex = (lightboxCurrentIndex - 1 + lightboxGallery.length) % lightboxGallery.length;
+    showLightboxImage();
+}
+
+function zoomLightboxImage(ratio) {
+    const img = document.querySelector('.lightbox-image');
+    if (!img) return;
+    let scale = parseFloat(img.dataset.scale) || 1;
+    scale = Math.max(0.5, Math.min(3, scale + ratio));
+    img.style.transform = `scale(${scale})`;
+    img.dataset.scale = scale;
+}
+
+function setupLightboxListeners(lightbox) {
+    lightbox.querySelector('.lightbox-close').onclick = closeLightbox;
+    lightbox.querySelector('.lightbox-overlay').onclick = closeLightbox;
+    lightbox.querySelector('.lightbox-prev').onclick = prevLightboxImage;
+    lightbox.querySelector('.lightbox-next').onclick = nextLightboxImage;
+    document.getElementById('lightbox-zoom-in').onclick = () => zoomLightboxImage(0.2);
+    document.getElementById('lightbox-zoom-out').onclick = () => zoomLightboxImage(-0.2);
+
+    document.addEventListener('keydown', (e) => {
+        if (lightbox.style.display !== 'flex') return;
+        if (e.key === 'Escape') closeLightbox();
+        if (e.key === 'ArrowRight') nextLightboxImage();
+        if (e.key === 'ArrowLeft') prevLightboxImage();
+    });
+}
+
 // --- Admin Room Image Upload Logic ---
 const defaultRoomImages = {
     single: "images/room.png",
@@ -925,195 +1030,4 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     `;
     document.head.appendChild(style);
-});
-
-// ===== LIGHTBOX/ZOOM FUNCTIONALITY FOR GALLERIES =====
-class GalleryLightbox {
-    constructor() {
-        this.currentIndex = 0;
-        this.images = [];
-        this.zoomLevel = 1;
-        this.createLightboxHTML();
-        this.setupEventListeners();
-    }
-
-    createLightboxHTML() {
-        // Create lightbox container if it doesn't exist
-        if (document.getElementById('lightbox-modal')) return;
-        
-        const lightboxHTML = `
-            <div id="lightbox-modal" style="display: none;">
-                <div class="lightbox-container">
-                    <button class="lightbox-close" onclick="window.galleryLightbox.closeLightbox()">&times;</button>
-                    
-                    <div class="lightbox-image-wrapper">
-                        <img id="lightbox-image" src="" alt="Gallery Image" class="lightbox-image">
-                    </div>
-                    
-                    <div class="lightbox-image-title" id="lightbox-title"></div>
-                    
-                    <div class="lightbox-controls">
-                        <button class="lightbox-btn lightbox-prev" onclick="window.galleryLightbox.prevImage()">← Prev</button>
-                        <div class="lightbox-counter">
-                            <span id="lightbox-current">1</span> / <span id="lightbox-total">1</span>
-                        </div>
-                        <button class="lightbox-btn lightbox-next" onclick="window.galleryLightbox.nextImage()">Next →</button>
-                    </div>
-                    
-                    <div class="lightbox-zoom-controls">
-                        <button class="lightbox-btn" onclick="window.galleryLightbox.zoomOut()">🔍 −</button>
-                        <button class="lightbox-btn" onclick="window.galleryLightbox.resetZoom()">Reset</button>
-                        <button class="lightbox-btn" onclick="window.galleryLightbox.zoomIn()">🔍 +</button>
-                    </div>
-                    
-                    <div class="lightbox-hint">💡 Click image to zoom | Keyboard: Arrow keys to navigate, ESC to close</div>
-                </div>
-            </div>
-        `;
-        
-        document.body.insertAdjacentHTML('beforeend', lightboxHTML);
-    }
-
-    setupEventListeners() {
-        // Close on ESC key
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') this.closeLightbox();
-            if (e.key === 'ArrowRight') this.nextImage();
-            if (e.key === 'ArrowLeft') this.prevImage();
-        });
-        
-        // Close on background click
-        const modal = document.getElementById('lightbox-modal');
-        if (modal) {
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) this.closeLightbox();
-            });
-        }
-    }
-
-    initializeGallery(images, startIndex = 0) {
-        this.images = images;
-        this.currentIndex = startIndex;
-        this.zoomLevel = 1;
-        this.displayImage();
-    }
-
-    displayImage() {
-        if (this.images.length === 0) return;
-        
-        const img = this.images[this.currentIndex];
-        const imgElement = document.getElementById('lightbox-image');
-        const titleElement = document.getElementById('lightbox-title');
-        const currentSpan = document.getElementById('lightbox-current');
-        const totalSpan = document.getElementById('lightbox-total');
-        
-        if (imgElement) {
-            imgElement.src = img.src;
-            imgElement.style.transform = `scale(${this.zoomLevel})`;
-            imgElement.style.cursor = this.zoomLevel > 1 ? 'grab' : 'pointer';
-        }
-        
-        if (titleElement && img.title) {
-            titleElement.textContent = img.title;
-        }
-        
-        if (currentSpan) currentSpan.textContent = this.currentIndex + 1;
-        if (totalSpan) totalSpan.textContent = this.images.length;
-    }
-
-    openLightbox() {
-        const modal = document.getElementById('lightbox-modal');
-        if (modal) {
-            modal.style.display = 'flex';
-            this.displayImage();
-        }
-    }
-
-    closeLightbox() {
-        const modal = document.getElementById('lightbox-modal');
-        if (modal) {
-            modal.style.display = 'none';
-        }
-    }
-
-    nextImage() {
-        if (this.images.length === 0) return;
-        this.currentIndex = (this.currentIndex + 1) % this.images.length;
-        this.zoomLevel = 1;
-        this.displayImage();
-    }
-
-    prevImage() {
-        if (this.images.length === 0) return;
-        this.currentIndex = (this.currentIndex - 1 + this.images.length) % this.images.length;
-        this.zoomLevel = 1;
-        this.displayImage();
-    }
-
-    zoomIn() {
-        this.zoomLevel = Math.min(this.zoomLevel + 0.2, 3);
-        this.displayImage();
-    }
-
-    zoomOut() {
-        this.zoomLevel = Math.max(this.zoomLevel - 0.2, 1);
-        this.displayImage();
-    }
-
-    resetZoom() {
-        this.zoomLevel = 1;
-        this.displayImage();
-    }
-}
-
-// Initialize global lightbox instance
-window.galleryLightbox = new GalleryLightbox();
-
-// Function to add click handlers to gallery images
-function setupGalleryClickHandlers(gallerySelector, imageDataArray) {
-    const gallery = document.querySelector(gallerySelector);
-    if (!gallery) return;
-    
-    const images = gallery.querySelectorAll('img');
-    images.forEach((imgElement, index) => {
-        imgElement.style.cursor = 'pointer';
-        imgElement.addEventListener('click', () => {
-            window.galleryLightbox.initializeGallery(imageDataArray, index);
-            window.galleryLightbox.openLightbox();
-        });
-    });
-}
-
-// Initialize galleries when DOM is ready
-document.addEventListener('DOMContentLoaded', function() {
-    // Gym gallery setup
-    if (window.GYM_GALLERY_DEFAULTS && document.querySelector('.gym-grid')) {
-        const gymImages = window.GYM_GALLERY_DEFAULTS.map((item, idx) => {
-            // Handle both objects with 'src' property and direct image strings
-            const src = (typeof item === 'object' && item.src) ? item.src : (typeof item === 'string' ? item : '');
-            const title = (typeof item === 'object' && item.title) ? item.title : `Gym Equipment ${idx + 1}`;
-            return { src, title };
-        });
-        setupGalleryClickHandlers('.gym-grid', gymImages);
-    }
-    
-    // Pool gallery setup
-    if (window.POOL_GALLERY_DEFAULTS && document.querySelector('.pool-grid')) {
-        const poolImages = window.POOL_GALLERY_DEFAULTS.map((item, idx) => {
-            const src = (typeof item === 'object' && item.src) ? item.src : (typeof item === 'string' ? item : '');
-            const title = (typeof item === 'object' && item.title) ? item.title : `Pool Area ${idx + 1}`;
-            return { src, title };
-        });
-        setupGalleryClickHandlers('.pool-grid', poolImages);
-    }
-    
-    // Rooms gallery setup
-    if (window.roomsGalleryImages && document.querySelector('.rooms-gallery-track')) {
-        // Use stored rooms gallery images if available
-        const roomsImages = window.roomsGalleryImages.map((src, idx) => ({
-            src: src,
-            title: `Room ${idx + 1}`
-        }));
-        setupGalleryClickHandlers('.rooms-gallery-track', roomsImages);
-    }
 });

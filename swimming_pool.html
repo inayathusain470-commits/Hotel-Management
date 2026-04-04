@@ -224,7 +224,7 @@
                 return `
                     <div class="pool-card">
                         <div class="pool-card-image-wrap">
-                            <img src="${photo.src}" alt="${photo.title}">
+                            <img src="${photo.src}" alt="${photo.title}" style="cursor: pointer;" onclick="openLightbox('${photo.src}', '${photo.title.replace(/'/g, "\\'")}', poolGalleryPhotos)">
                             ${controls}
                         </div>
                         <p>${photo.title}</p>

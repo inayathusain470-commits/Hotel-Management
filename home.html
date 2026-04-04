@@ -377,9 +377,9 @@
         let carouselAutoTimer = null;
         let activeHomeRoomType = null;
         const HOME_ROOM_IMAGE_DEFAULTS = {
-            single: 'images/room.png',
-            double: 'images/room (2).png',
-            deluxe: 'images/room (4).png'
+            single: 'images/Gemini_Generated_Image_e4ntu7e4ntu7e4nt.png',
+            double: 'images/Gemini_Generated_Image_hezikrhezikrhezi.png',
+            deluxe: 'images/Gemini_Generated_Image_j1pj33j1pj33j1pj.png'
         };
 
         // Image Upload Functions
@@ -501,6 +501,13 @@
             const track = document.getElementById('home-carousel-track');
             if (!track) return;
             const admin = isAdminUser();
+            
+            // Convert carousel images to gallery format for lightbox
+            const galleryArray = homeCarouselImages.map((src, idx) => ({
+                src: src,
+                title: `Royal Plaza Room ${idx + 1}`
+            }));
+
             const imageSlides = homeCarouselImages.map((src, index) => {
                 const actions = admin
                     ? `<div class="home-carousel-actions">
@@ -515,7 +522,7 @@
                         </div>` : '';
                 return `
                     <div class="carousel-slide">
-                        <img src="${src}" alt="Royal Plaza Slide ${index + 1}">
+                        <img src="${src}" alt="Royal Plaza Slide ${index + 1}" style="cursor: pointer;" onclick="openLightbox('${src}', 'Royal Plaza Room ${index + 1}', ${JSON.stringify(galleryArray).replace(/'/g, "&#39;")})">
                         ${overlay}
                         ${actions}
                     </div>

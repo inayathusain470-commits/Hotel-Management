@@ -502,13 +502,20 @@
             if (!track) return;
 
             const admin = isAdmin();
+            
+            // Convert image paths to gallery format for lightbox
+            const galleryArray = roomsGalleryImages.map((src, idx) => ({
+                src: src,
+                title: `Room ${idx + 1}`
+            }));
+
             track.innerHTML = roomsGalleryImages.map((src, idx) => {
                 const changeBtn = admin
                     ? `<button class="gallery-admin-btn gallery-change-btn" style="display:block;" onclick="openRoomsGalleryModal(${idx})">Change Photo</button>`
                     : '';
                 return `
                     <div class="rooms-gallery-slide">
-                        <img src="${src}" alt="Room Gallery ${idx + 1}">
+                        <img src="${src}" alt="Room Gallery ${idx + 1}" style="cursor: pointer;" onclick="openLightbox('${src}', 'Room ${idx + 1}', ${JSON.stringify(galleryArray).replace(/'/g, "&#39;")})">
                         ${changeBtn}
                     </div>
                 `;
