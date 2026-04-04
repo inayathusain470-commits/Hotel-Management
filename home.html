@@ -355,15 +355,18 @@
             localStorage.setItem('selectedRoomType', roomType);
         }
 
-        const HOME_CAROUSEL_VERSION = 'video-v6';
+        const HOME_CAROUSEL_VERSION = 'video-v7';
         const HOME_CAROUSEL_DEFAULTS = [
+            'images/bar.png',
+            'images/bar (2).png',
+            'images/bar (3).png',
             'images/room.png',
             'images/room (2).png',
             'images/room (3).png',
-            'images/room (4).png',
-            'images/room (5).png',
-            'images/room (6).png',
-            'images/room (7).png'
+            'images/pool.png',
+            'images/pool (2).png',
+            'images/gym.png',
+            'images/gym (2).png'
         ];
         let homeCarouselImages = [];
         let heroEditIndex = -1;
@@ -502,13 +505,21 @@
             if (!track) return;
             const admin = isAdminUser();
             
-            // Convert carousel images to gallery format for lightbox
+            // Convert carousel images to gallery format for lightbox with proper titles
+            const getTitleForIndex = (idx) => {
+                if (idx < 3) return `Bar Service ${idx + 1}`;
+                if (idx < 6) return `Royal Plaza Room ${idx - 2}`;
+                if (idx < 8) return `Swimming Pool ${idx - 5}`;
+                return `Gym Equipment ${idx - 7}`;
+            };
+
             const galleryArray = homeCarouselImages.map((src, idx) => ({
                 src: src,
-                title: `Royal Plaza Room ${idx + 1}`
+                title: getTitleForIndex(idx)
             }));
 
             const imageSlides = homeCarouselImages.map((src, index) => {
+                const title = getTitleForIndex(index);
                 const actions = admin
                     ? `<div class="home-carousel-actions">
                             <button class="gallery-admin-btn home-carousel-change-btn" onclick="openImageUploadModal(${index})">Change</button>
@@ -522,7 +533,7 @@
                         </div>` : '';
                 return `
                     <div class="carousel-slide">
-                        <img src="${src}" alt="Royal Plaza Slide ${index + 1}" style="cursor: pointer;" onclick="openLightbox('${src}', 'Royal Plaza Room ${index + 1}', ${JSON.stringify(galleryArray).replace(/'/g, "&#39;")})">
+                        <img src="${src}" alt="${title}" style="cursor: pointer;" onclick="openLightbox('${src}', '${title}', ${JSON.stringify(galleryArray).replace(/'/g, "&#39;")})">
                         ${overlay}
                         ${actions}
                     </div>
