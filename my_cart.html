@@ -177,8 +177,9 @@
                     <p style="margin-bottom:8px;color:#3d2e18;"><strong>Pay To:</strong> ${profile.accountHolder}</p>
                     <p style="margin-bottom:10px;color:#3d2e18;"><strong>UPI:</strong> ${profile.upiId}</p>
                     <div class="form-group">
-                        <label for="food-upi-ref">UPI Transaction Reference</label>
-                        <input id="food-upi-ref" type="text" placeholder="Enter UPI ref no.">
+                        <label for="food-upi-ref">UPI Transaction Reference <span style="color:red;">*</span></label>
+                        <input id="food-upi-ref" type="text" placeholder="Example: UPI123456 or TXN-12345" required>
+                        <small style="color:#7a6030;display:block;margin-top:4px;">✓ Must be 6+ characters (letters, numbers, hyphens)</small>
                     </div>
                 `;
                 return;
@@ -187,11 +188,12 @@
                 const upiLink = encodeURIComponent(`upi://pay?pa=${profile.upiId}&pn=${profile.accountHolder}&am=${amount}&cu=INR`);
                 const qrSrc = profile.customQrImage || `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${upiLink}`;
                 fields.innerHTML = `
-                    <p style="margin-bottom:8px;color:#3d2e18;">Scan this QR to pay</p>
+                    <p style="margin-bottom:8px;color:#3d2e18;">Scan this QR to pay ₹${amount}</p>
                     <img src="${qrSrc}" alt="QR Code" style="display:block;margin:0 auto 12px;border:1px solid #d4c48a;border-radius:8px;width:220px;height:220px;object-fit:contain;">
                     <div class="form-group" style="margin-top:8px;">
-                        <label for="food-qr-ref">QR Payment Reference</label>
-                        <input id="food-qr-ref" type="text" placeholder="Enter payment ref no.">
+                        <label for="food-qr-ref">QR Payment Reference <span style="color:red;">*</span></label>
+                        <input id="food-qr-ref" type="text" placeholder="Example: QR123456 or PAY-12345" required>
+                        <small style="color:#7a6030;display:block;margin-top:4px;">✓ Must be 6+ characters (letters, numbers, hyphens)</small>
                     </div>
                 `;
                 return;
@@ -201,26 +203,30 @@
                     <p style="margin-bottom:8px;color:#3d2e18;"><strong>Payee:</strong> ${profile.accountHolder}</p>
                     <p style="margin-bottom:8px;color:#3d2e18;"><strong>Bank:</strong> ${profile.bankName} | A/C ${maskAccount(profile.accountNumber)} | IFSC ${profile.ifsc}</p>
                     <div class="form-group">
-                        <label for="food-card-name">Card Holder Name</label>
-                        <input id="food-card-name" type="text" placeholder="Name on card">
+                        <label for="food-card-name">Card Holder Name <span style="color:red;">*</span></label>
+                        <input id="food-card-name" type="text" placeholder="Name on card" required>
                     </div>
                     <div class="form-group">
-                        <label for="food-card-number">Debit Card Number</label>
-                        <input id="food-card-number" type="text" maxlength="19" placeholder="1234 5678 9012 3456">
+                        <label for="food-card-number">Debit Card Number <span style="color:red;">*</span></label>
+                        <input id="food-card-number" type="text" maxlength="19" placeholder="1234 5678 9012 3456 (16 digits)" required>
+                        <small style="color:#7a6030;display:block;margin-top:4px;">✓ Must be exactly 16 digits</small>
                     </div>
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
                         <div class="form-group">
-                            <label for="food-card-expiry">Expiry (MM/YY)</label>
-                            <input id="food-card-expiry" type="text" maxlength="5" placeholder="MM/YY">
+                            <label for="food-card-expiry">Expiry (MM/YY) <span style="color:red;">*</span></label>
+                            <input id="food-card-expiry" type="text" maxlength="5" placeholder="03/26" required>
+                            <small style="color:#7a6030;display:block;margin-top:4px;">✓ Example: 03/26</small>
                         </div>
                         <div class="form-group">
-                            <label for="food-card-cvv">CVV</label>
-                            <input id="food-card-cvv" type="password" maxlength="4" placeholder="***">
+                            <label for="food-card-cvv">CVV <span style="color:red;">*</span></label>
+                            <input id="food-card-cvv" type="password" maxlength="4" placeholder="***" required>
+                            <small style="color:#7a6030;display:block;margin-top:4px;">✓ 3-4 digits</small>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="food-debit-ref">Debit Transaction Reference</label>
-                        <input id="food-debit-ref" type="text" placeholder="Enter bank/card txn ref (min 6 chars)">
+                        <label for="food-debit-ref">Debit Transaction Reference <span style="color:red;">*</span></label>
+                        <input id="food-debit-ref" type="text" placeholder="Example: TXN123456" required>
+                        <small style="color:#7a6030;display:block;margin-top:4px;">✓ Must be 6+ characters (letters, numbers, hyphens)</small>
                     </div>
                 `;
                 return;
@@ -252,82 +258,162 @@
         });
 
         async function completeFoodPayment() {
-            if (!pendingFoodOrder) return;
-            const method = document.getElementById('food-payment-method').value;
-            if (!method) {
-                alert('Please select payment method.');
-                return;
-            }
-
-            let paymentRef = '';
-            if (method === 'upi') {
-                paymentRef = (document.getElementById('food-upi-ref')?.value || '').trim();
-                if (!paymentRef) return alert('Enter UPI transaction reference.');
-            }
-            if (method === 'qr') {
-                paymentRef = (document.getElementById('food-qr-ref')?.value || '').trim();
-                if (!paymentRef) return alert('Enter QR payment reference.');
-            }
-            if (method === 'debit') {
-                const cardName = (document.getElementById('food-card-name')?.value || '').trim();
-                const cardNumberRaw = (document.getElementById('food-card-number')?.value || '').replace(/\s+/g, '');
-                const expiry = (document.getElementById('food-card-expiry')?.value || '').trim();
-                const cvv = (document.getElementById('food-card-cvv')?.value || '').trim();
-                paymentRef = (document.getElementById('food-debit-ref')?.value || '').trim();
-                if (!cardName || !/^\d{16}$/.test(cardNumberRaw) || !/^(0[1-9]|1[0-2])\/\d{2}$/.test(expiry) || !/^\d{3,4}$/.test(cvv) || !/^[A-Za-z0-9-]{6,}$/.test(paymentRef)) {
-                    return alert('Enter full valid debit card details and transaction reference.');
+            try {
+                if (!pendingFoodOrder) {
+                    alert('❌ Order data missing. Please try again.');
+                    return;
                 }
-            }
-
-            if (!/^[A-Za-z0-9-]{6,}$/.test(paymentRef)) {
-                return alert('Please enter a valid transaction reference (min 6 characters).');
-            }
-
-            const profile = await getAdminPaymentProfile();
-            const orderToSave = {
-                ...pendingFoodOrder,
-                payment: {
-                    method,
-                    status: 'paid',
-                    amountInr: pendingFoodOrder.total,
-                    transactionId: generateFoodTxn(),
-                    paymentReference: paymentRef,
-                    debitCard: method === 'debit' ? {
-                        cardHolder: (document.getElementById('food-card-name')?.value || '').trim(),
-                        cardNumberMasked: maskAccount((document.getElementById('food-card-number')?.value || '').replace(/\s+/g, '')),
-                        expiry: (document.getElementById('food-card-expiry')?.value || '').trim()
-                    } : null,
-                    paidTo: {
-                        accountHolder: profile.accountHolder,
-                        upiId: profile.upiId,
-                        bankName: profile.bankName,
-                        accountNumberMasked: maskAccount(profile.accountNumber),
-                        ifsc: profile.ifsc
-                    },
-                    paidAt: new Date().toISOString()
+                
+                const method = document.getElementById('food-payment-method').value;
+                if (!method) {
+                    alert('❌ Please select a payment method (UPI, QR Code, or Debit Card).');
+                    return;
                 }
-            };
 
-            await window.HMS_API.post('/food-orders', {
-                name: orderToSave.name,
-                customer_email: orderToSave.customerEmail || '',
-                room: orderToSave.room,
-                phone: orderToSave.phone || '',
-                items: orderToSave.items || [],
-                total: orderToSave.total,
-                payment_method: orderToSave.payment?.method || null,
-                payment_txn_id: orderToSave.payment?.transactionId || null,
-                payment_reference: orderToSave.payment?.paymentReference || null,
-                payment: orderToSave.payment || null,
-                status: orderToSave.status || 'pending'
-            });
+                let paymentRef = '';
+                const paymentRefRegex = /^[A-Za-z0-9-]{6,}$/;
 
-            closeFoodPaymentModal();
-            localStorage.removeItem('cart');
-            sessionStorage.removeItem('guestInfo');
-            document.getElementById('order-form').style.display = 'none';
-            document.getElementById('order-confirmation').style.display = 'block';
-            document.getElementById('order-confirmation').innerHTML = '<h3>Payment Successful & Order Placed!</h3><p>Your food order is confirmed and visible in dashboard.</p>';
+                // Validate based on payment method
+                if (method === 'upi') {
+                    paymentRef = (document.getElementById('food-upi-ref')?.value || '').trim();
+                    if (!paymentRef) {
+                        alert('❌ Please enter UPI transaction reference.\n\nExample: UPI123456 or TXN-12345');
+                        return;
+                    }
+                    if (!paymentRefRegex.test(paymentRef)) {
+                        alert('❌ Invalid UPI reference format!\n\n✓ Must be 6+ characters\n✓ Only letters, numbers, and hyphens allowed\n\nExample: UPI123456');
+                        return;
+                    }
+                }
+                
+                if (method === 'qr') {
+                    paymentRef = (document.getElementById('food-qr-ref')?.value || '').trim();
+                    if (!paymentRef) {
+                        alert('❌ Please enter QR payment reference.\n\nExample: QR123456 or PAY-12345');
+                        return;
+                    }
+                    if (!paymentRefRegex.test(paymentRef)) {
+                        alert('❌ Invalid QR reference format!\n\n✓ Must be 6+ characters\n✓ Only letters, numbers, and hyphens allowed\n\nExample: QR123456');
+                        return;
+                    }
+                }
+                
+                if (method === 'debit') {
+                    const cardName = (document.getElementById('food-card-name')?.value || '').trim();
+                    const cardNumberRaw = (document.getElementById('food-card-number')?.value || '').replace(/\s+/g, '');
+                    const expiry = (document.getElementById('food-card-expiry')?.value || '').trim();
+                    const cvv = (document.getElementById('food-card-cvv')?.value || '').trim();
+                    paymentRef = (document.getElementById('food-debit-ref')?.value || '').trim();
+                    
+                    // Validate card details
+                    if (!cardName) {
+                        alert('❌ Please enter cardholder name.');
+                        return;
+                    }
+                    if (!/^\d{16}$/.test(cardNumberRaw)) {
+                        alert('❌ Invalid debit card number!\n\n✓ Must be 16 digits\n\nExample: 1234567890123456');
+                        return;
+                    }
+                    if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(expiry)) {
+                        alert('❌ Invalid expiry date!\n\n✓ Format: MM/YY\n\nExample: 03/26');
+                        return;
+                    }
+                    if (!/^\d{3,4}$/.test(cvv)) {
+                        alert('❌ Invalid CVV!\n\n✓ Must be 3-4 digits');
+                        return;
+                    }
+                    if (!paymentRef) {
+                        alert('❌ Please enter debit card transaction reference.\n\nExample: TXN123456');
+                        return;
+                    }
+                    if (!paymentRefRegex.test(paymentRef)) {
+                        alert('❌ Invalid transaction reference format!\n\n✓ Must be 6+ characters\n✓ Only letters, numbers, and hyphens allowed\n\nExample: TXN123456');
+                        return;
+                    }
+                }
+
+                // Final validation for payment reference
+                if (!paymentRef || !paymentRefRegex.test(paymentRef)) {
+                    alert('❌ Invalid payment reference!\n\n✓ Must be at least 6 characters\n✓ Can only contain letters, numbers, and hyphens\n\nExample valid references:\n- UPI123456\n- QR-12345\n- TXN-9876543');
+                    return;
+                }
+
+                console.log('✅ Payment validation passed. Processing order...');
+                const profile = await getAdminPaymentProfile();
+                
+                const orderToSave = {
+                    ...pendingFoodOrder,
+                    payment: {
+                        method,
+                        status: 'paid',
+                        amountInr: pendingFoodOrder.total,
+                        transactionId: generateFoodTxn(),
+                        paymentReference: paymentRef,
+                        debitCard: method === 'debit' ? {
+                            cardHolder: (document.getElementById('food-card-name')?.value || '').trim(),
+                            cardNumberMasked: maskAccount((document.getElementById('food-card-number')?.value || '').replace(/\s+/g, '')),
+                            expiry: (document.getElementById('food-card-expiry')?.value || '').trim()
+                        } : null,
+                        paidTo: {
+                            accountHolder: profile.accountHolder,
+                            upiId: profile.upiId,
+                            bankName: profile.bankName,
+                            accountNumberMasked: maskAccount(profile.accountNumber),
+                            ifsc: profile.ifsc
+                        },
+                        paidAt: new Date().toISOString()
+                    }
+                };
+
+                // Save order to backend
+                console.log('📤 Sending order to server...');
+                const response = await window.HMS_API.post('/food-orders', {
+                    name: orderToSave.name,
+                    customer_email: orderToSave.customerEmail || '',
+                    room: orderToSave.room,
+                    phone: orderToSave.phone || '',
+                    items: orderToSave.items || [],
+                    total: orderToSave.total,
+                    payment_method: orderToSave.payment?.method || null,
+                    payment_txn_id: orderToSave.payment?.transactionId || null,
+                    payment_reference: orderToSave.payment?.paymentReference || null,
+                    payment: orderToSave.payment || null,
+                    status: 'pending'
+                });
+
+                console.log('✅ Order successfully saved:', response);
+
+                // Clear and close modal
+                closeFoodPaymentModal();
+                localStorage.removeItem('cart');
+                sessionStorage.removeItem('guestInfo');
+                document.getElementById('order-form').style.display = 'none';
+                document.getElementById('order-confirmation').style.display = 'block';
+                document.getElementById('order-confirmation').innerHTML = `
+                    <h3>✅ Payment Successful!</h3>
+                    <h4>🍔 Order Confirmed</h4>
+                    <p><strong>Your food order has been placed successfully!</strong></p>
+                    <p>Order Details:</p>
+                    <ul style="text-align:left;margin:10px auto;max-width:300px;">
+                        <li><strong>Room:</strong> ${orderToSave.room}</li>
+                        <li><strong>Items:</strong> ${orderToSave.items.length} item(s)</li>
+                        <li><strong>Total:</strong> ₹${orderToSave.total}</li>
+                        <li><strong>Status:</strong> Pending</li>
+                        <li><strong>Payment:</strong> ${method.toUpperCase()} - Paid</li>
+                    </ul>
+                    <p>✓ Your order is visible in the dashboard</p>
+                    <p>✓ Check "My Food Orders" for status updates</p>
+                `;
+
+                // Auto-redirect after 3 seconds
+                setTimeout(() => {
+                    window.location.href = 'customer_dashboard.html';
+                }, 3000);
+
+            } catch (error) {
+                console.error('❌ Error processing payment:', error);
+                alert(`❌ Error saving order: ${error.message}\n\nPlease try again or contact support.`);
+            }
         }
 
         function loadCart() {
