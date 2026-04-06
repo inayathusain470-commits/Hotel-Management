@@ -1,0 +1,84 @@
+# 🍔 Food Ordering System - Quick Setup
+
+## ✅ What's Ready:
+- Frontend: Cart page with payment
+- Backend: API endpoints
+- Payment: UPI, QR Code, Debit Card
+- Dashboard: Order tracking
+
+## ⚠️ One Step Needed: Create Database Table
+
+### Quick Fix (2 minutes):
+
+1. Open: https://app.supabase.com/ → Select HMS Project
+2. Go to: "SQL Editor" tab
+3. Click: "New Query"
+4. Copy this SQL:
+
+```sql
+CREATE TABLE IF NOT EXISTS public.food_orders (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    customer_email VARCHAR(255),
+    room INTEGER NOT NULL,
+    phone VARCHAR(20),
+    items JSONB DEFAULT '[]'::jsonb,
+    total NUMERIC DEFAULT 0,
+    special_requests TEXT,
+    payment_method VARCHAR(50),
+    payment_txn_id VARCHAR(255),
+    payment_reference VARCHAR(255),
+    payment JSONB,
+    status VARCHAR(50) DEFAULT 'pending',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_food_orders_email ON public.food_orders(customer_email);
+CREATE INDEX idx_food_orders_room ON public.food_orders(room);
+CREATE INDEX idx_food_orders_status ON public.food_orders(status);
+```
+
+5. Click: "Run"
+6. Wait for: ✅ Success message
+
+## 🎯 How It Works Then:
+
+**Customer:**
+1. Adds food to cart
+2. Goes to "My Cart"
+3. Enters name/room/phone
+4. Clicks "Place Order"
+5. Selects payment method (UPI/QR/Card)
+6. Enters payment details
+7. Clicks "Pay Now"
+8. ✅ Order created & visible in dashboard!
+
+**Admin:**
+- Sees all food orders in Dashboard
+- Can update order status
+
+## 📊 Files Created:
+- ✅ FOOD_ORDERING_SETUP.md - Complete guide
+- ✅ migrations/001-create-food-orders-table.sql - SQL migration
+
+## Current Architecture:
+
+```
+Food Menu (food_menu.html)
+    ↓ (add to cart)
+My Cart (my_cart.html)
+    ↓ (enter details + payment)
+Payment Modal
+    ↓ (pay)
+Food Orders API (/api/food-orders)
+    ↓ (save to DB)
+Supabase (food_orders table)
+    ↓ (retrieve)
+Dashboard (customer_dashboard.html)
+    ↓ (display)
+Customer sees order history
+```
+
+## Test It:
+After creating table, try adding something to cart on food_menu.html!
