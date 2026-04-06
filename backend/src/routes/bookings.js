@@ -12,22 +12,49 @@ router.get('/', async (req, res) => {
 
     if (error) throw error;
 
-    const parsed = data.map((r) => ({
-      id: r.id,
-      name: r.name,
-      email: r.email,
-      phone: r.phone,
-      checkin: r.checkin,
-      checkout: r.checkout,
-      roomType: r.room_type,
-      roomQuantity: r.room_quantity,
-      roomNumbers: r.room_numbers || [],
-      pricePerNight: r.price_per_night || 0,
-      totalAmountInr: r.total_amount_inr,
-      status: r.status,
-      timestamp: r.created_at,
-      payment: r.payment
-    }));
+    // Helper function to calculate nights
+    const calculateNights = (checkinStr, checkoutStr) => {
+      const checkin = new Date(checkinStr);
+      const checkout = new Date(checkoutStr);
+      return Math.ceil((checkout - checkin) / (1000 * 60 * 60 * 24));
+    };
+
+    const parsed = data.map((r) => {
+      const nights = calculateNights(r.checkin, r.checkout);
+      
+      // Parse roomNumbers - handle both array and string formats
+      let roomNumbers = r.room_numbers || [];
+      if (typeof roomNumbers === 'string') {
+        try {
+          roomNumbers = JSON.parse(roomNumbers);
+        } catch (e) {
+          roomNumbers = roomNumbers.split(',').map(n => Number(n.trim())).filter(n => !isNaN(n));
+        }
+      }
+      
+      // If price_per_night column doesn't exist (NULL), calculate from total_amount_inr
+      let pricePerNight = r.price_per_night || 0;
+      if (!pricePerNight && r.total_amount_inr && nights > 0) {
+        pricePerNight = Math.round(r.total_amount_inr / nights);
+      }
+      
+      return {
+        id: r.id,
+        name: r.name,
+        email: r.email,
+        phone: r.phone,
+        checkin: r.checkin,
+        checkout: r.checkout,
+        roomType: r.room_type,
+        roomQuantity: r.room_quantity,
+        roomNumbers: roomNumbers,
+        pricePerNight: pricePerNight,
+        totalAmountInr: r.total_amount_inr,
+        status: r.status,
+        timestamp: r.created_at,
+        payment: r.payment
+      };
+    });
     res.json(parsed);
   } catch (err) {
     console.error('Fetch error:', err);
