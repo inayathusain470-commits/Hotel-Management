@@ -284,11 +284,13 @@
                         const booking = bookings[parseInt(this.value)];
                         currentGuestInfo = {
                             name: booking.name,
-                            room: booking.roomType,
+                            room: booking.roomNumbers && booking.roomNumbers[0] 
+                                ? booking.roomNumbers[0].toString() 
+                                : booking.roomType,
                             isBooking: true
                         };
                         document.getElementById('selected-guest').textContent = 
-                            `✓ Logged in as: ${booking.name} (${booking.roomType})`;
+                            `✓ Logged in as: ${booking.name} (Room: ${currentGuestInfo.room})`;
                     } else {
                         currentGuestInfo = null;
                         document.getElementById('selected-guest').textContent = '';

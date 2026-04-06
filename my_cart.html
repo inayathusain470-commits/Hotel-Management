@@ -367,24 +367,52 @@
         }
 
         function loadGuestInfo() {
+            // Get current logged-in customer
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            const bookings = JSON.parse(localStorage.getItem('bookings') || '[]');
+            
             // First check sessionStorage for guest info
             const savedGuestInfo = sessionStorage.getItem('guestInfo');
             if (savedGuestInfo) {
                 guestInfo = JSON.parse(savedGuestInfo);
-                document.getElementById('order-name').value = guestInfo.name;
-                document.getElementById('order-room').value = guestInfo.room;
+                document.getElementById('order-name').value = guestInfo.name || '';
+                document.getElementById('order-room').value = guestInfo.room || '';
                 if (!guestInfo.isBooking) {
                     document.getElementById('order-phone').focus();
                 }
                 return;
             }
 
+            // If customer is logged in, find their bookings
+            if (currentUser && currentUser.email && bookings.length > 0) {
+                // Find booking for current customer
+                const customerBooking = bookings.find(booking => 
+                    booking.email === currentUser.email || 
+                    booking.name === currentUser.name
+                );
+                
+                if (customerBooking) {
+                    guestInfo = {
+                        name: customerBooking.name || currentUser.name || '',
+                        room: customerBooking.roomNumbers && customerBooking.roomNumbers[0] 
+                            ? customerBooking.roomNumbers[0].toString() 
+                            : (customerBooking.roomType || ''),
+                        isBooking: true
+                    };
+                    document.getElementById('order-name').value = guestInfo.name;
+                    document.getElementById('order-room').value = guestInfo.room;
+                    return;
+                }
+            }
+
             // Otherwise check if user has bookings and select first one
-            const bookings = JSON.parse(localStorage.getItem('bookings') || '[]');
             if (bookings.length > 0) {
+                const firstBooking = bookings[0];
                 guestInfo = {
-                    name: bookings[0].name,
-                    room: bookings[0].roomType,
+                    name: firstBooking.name || '',
+                    room: firstBooking.roomNumbers && firstBooking.roomNumbers[0]
+                        ? firstBooking.roomNumbers[0].toString()
+                        : (firstBooking.roomType || ''),
                     isBooking: true
                 };
                 document.getElementById('order-name').value = guestInfo.name;
