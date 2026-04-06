@@ -71,25 +71,22 @@ function calculateWeeklyRevenue(bookings, barBookings) {
     const weeklyData = {};
     const weekLabels = [];
     
-    // Generate last 7 days
+    // Generate last 12 weeks with proper date ranges
     const today = new Date();
-    for (let i = 6; i >= 0; i--) {
-        const dayDate = new Date(today);
-        dayDate.setDate(dayDate.getDate() - i);
+    for (let i = 11; i >= 0; i--) {
+        const weekEnd = new Date(today);
+        weekEnd.setDate(weekEnd.getDate() - (i * 7));
+        const weekStart = new Date(weekEnd);
+        weekStart.setDate(weekStart.getDate() - 6);
         
-        // Format: "Apr 1" (just date without month abbreviation suffix, showing 7 days)
-        const dateStr = dayDate.getDate();
-        const monthAbbr = dayDate.toLocaleDateString('en-US', { month: 'short' });
-        const dayName = dayDate.toLocaleDateString('en-US', { weekday: 'short' });
-        const label = `${dayName}, ${dateStr}`;
+        // Format: "1-7 Apr" (showing date range with month)
+        const startDate = weekStart.getDate();
+        const endDate = weekEnd.getDate();
+        const monthAbbr = weekStart.toLocaleDateString('en-US', { month: 'short' });
+        const label = `${startDate}-${endDate} ${monthAbbr}`;
         
         weekLabels.push(label);
-        // Set time to start of day for accurate matching
-        const dayStart = new Date(dayDate);
-        dayStart.setHours(0, 0, 0, 0);
-        const dayEnd = new Date(dayDate);
-        dayEnd.setHours(23, 59, 59, 999);
-        weeklyData[label] = { start: dayStart, end: dayEnd, total: 0 };
+        weeklyData[label] = { start: new Date(weekStart), end: new Date(weekEnd), total: 0 };
     }
     
     // Add room booking revenues
