@@ -40,10 +40,11 @@ router.get('/', async (req, res) => {
         const peakTime = getPeakBookingTime(bookings);
 
         // Calculate total revenue
-        const totalRevenue = calculateTotalRevenue(bookings, barBookings);
+        const totalRevenue = calculateTotalRevenue(bookings, barBookings, foodOrders);
 
-        // Calculate average booking value
-        const avgBookingValue = bookings.length > 0 ? totalRevenue / bookings.length : 0;
+        // Calculate average booking value (total revenue / total transactions)
+        const totalTransactions = bookings.length + barBookings.length + foodOrders.length;
+        const avgBookingValue = totalTransactions > 0 ? totalRevenue / totalTransactions : 0;
 
         // Calculate occupancy rate (estimated)
         const occupancyRate = calculateOccupancyRate(bookings);
@@ -186,15 +187,22 @@ function getPeakBookingTime(bookings) {
     };
 }
 
-function calculateTotalRevenue(bookings, barBookings) {
+function calculateTotalRevenue(bookings, barBookings, foodOrders) {
     let total = 0;
     
+    // Add room booking revenues
     bookings.forEach(booking => {
         total += Number(booking.totalAmountInr || 0);
     });
 
+    // Add bar booking revenues
     barBookings.forEach(booking => {
         total += Number(booking.total || 0);
+    });
+
+    // Add food order revenues
+    foodOrders.forEach(order => {
+        total += Number(order.total || 0);
     });
 
     return total;
