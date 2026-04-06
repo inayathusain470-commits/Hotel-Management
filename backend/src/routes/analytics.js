@@ -78,9 +78,11 @@ function calculateWeeklyRevenue(bookings, barBookings) {
         const weekStart = new Date(weekEnd);
         weekStart.setDate(weekStart.getDate() - 6);
         
+        // Format: "1-7 Apr" (showing date range with month)
+        const startDate = weekStart.getDate();
+        const endDate = weekEnd.getDate();
         const monthAbbr = weekStart.toLocaleDateString('en-US', { month: 'short' });
-        const weekNum = Math.ceil((weekStart.getDate()) / 7);
-        const label = `W${weekNum} ${monthAbbr}`;
+        const label = `${startDate}-${endDate} ${monthAbbr}`;
         
         weekLabels.push(label);
         weeklyData[label] = { start: new Date(weekStart), end: new Date(weekEnd), total: 0 };
