@@ -464,10 +464,8 @@
                 myBookings.forEach((booking, index) => {
                     const nights = calculateNights(booking.checkin, booking.checkout);
                     const roomQuantity = booking.roomQuantity || 1;
-                    const pricePerNightUsd = Number(booking.pricePerNight || booking.priceInr || 0);
-                    const totalPriceUsd = booking.totalPrice ? Number(booking.totalPrice) * nights : (pricePerNightUsd * roomQuantity * nights);
-                    const pricePerNightInr = usdToInr(pricePerNightUsd);
-                    const totalPriceInr = usdToInr(totalPriceUsd);
+                    const pricePerNightInr = Number(booking.pricePerNight || 0);
+                    const totalPriceInr = Number(booking.totalAmountInr || 0);
                     
                     const canCancel = booking.status !== 'cancelled';
                     html += `<div class="booking-item detail-item" onclick="showBookingDetail(${index}, '${booking.id}', '${booking.roomType}', ${roomQuantity}, '${booking.checkin}', '${booking.checkout}', ${nights}, ${pricePerNightInr}, ${totalPriceInr}, '${Array.isArray(booking.roomNumbers) ? booking.roomNumbers.join(', ') : 'N/A'}', '${booking.status}')">
