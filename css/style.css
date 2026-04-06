@@ -938,6 +938,142 @@ footer {
     }
 }
 
+/* Food Image Zoom Modal */
+.food-image-zoom-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: 20px;
+}
+
+.food-image-zoom-content {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    max-width: 650px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+}
+
+.food-image-zoom-content h3 {
+    margin: 0 0 15px 0;
+    color: var(--primary-color);
+    font-family: 'Georgia', serif;
+    text-align: center;
+    font-size: 20px;
+}
+
+.food-zoom-close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 28px;
+    cursor: pointer;
+    color: #999;
+    transition: color 0.3s ease;
+}
+
+.food-zoom-close:hover {
+    color: #333;
+}
+
+.food-zoom-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 15px;
+    padding: 10px;
+    background: #f5f5f5;
+    border-radius: 6px;
+}
+
+.food-zoom-controls label {
+    font-weight: 600;
+    color: #2c2416;
+    white-space: nowrap;
+}
+
+.food-zoom-controls input[type="range"] {
+    flex: 1;
+    min-width: 150px;
+}
+
+#foodZoomPercent {
+    min-width: 50px;
+    text-align: right;
+    font-weight: 600;
+    color: var(--gold-dark);
+}
+
+.food-zoom-wrap {
+    border: 2px solid #d4c48a;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fffdf5;
+    margin: 15px 0;
+    overflow: hidden;
+}
+
+#foodZoomCanvas {
+    display: block;
+    cursor: grab;
+    max-width: 100%;
+    max-height: 400px;
+}
+
+#foodZoomCanvas:active {
+    cursor: grabbing;
+}
+
+.food-crop-hint {
+    text-align: center;
+    color: #666;
+    font-size: 13px;
+    margin: 10px 0;
+    font-style: italic;
+}
+
+.food-zoom-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 15px;
+}
+
+.submit-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.3s ease;
+}
+
+.submit-btn:hover {
+    opacity: 0.9;
+}
+
+/* Make zoom-image cursor pointer */
+.zoom-image {
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+.zoom-image:hover {
+    opacity: 0.8;
+}
+
 /* Gym Feature */
 .gym-feature {
     background: #faf0dc;
