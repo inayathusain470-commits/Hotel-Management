@@ -678,6 +678,25 @@ input:focus, select:focus, textarea:focus {
     text-align: center;
 }
 
+/* Forgot Password Button */
+.forgot-password-btn {
+    background: none;
+    border: none;
+    color: #c89b2a;
+    text-decoration: underline;
+    font-size: 14px;
+    cursor: pointer;
+    font-weight: 600;
+    padding: 0;
+    margin: 15px 0 0 0;
+    transition: color 0.3s;
+}
+
+.forgot-password-btn:hover {
+    color: #d9aa35;
+    text-decoration-thickness: 2px;
+}
+
 /* Confirmation */
 .confirmation {
     max-width: 600px;
