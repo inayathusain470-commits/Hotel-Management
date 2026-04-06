@@ -414,52 +414,6 @@
 
             <p style="text-align:center;margin:-10px 0 20px 0;color:#7a6030;font-size:0.95rem;">Click any total card to view its details.</p>
 
-            <!-- Analytics Section -->
-            <div style="background: white; padding: 25px; margin-bottom: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                <h2 style="color: #0d47a1; margin-top: 0; margin-bottom: 25px;">📊 Analytics Dashboard</h2>
-                
-                <!-- 7 Days Revenue Graph -->
-                <div style="margin-bottom: 40px; background: #f8f9fa; padding: 20px; border-radius: 8px; overflow-x: auto;">
-                    <h3 style="color: #0d47a1; margin-top: 0; font-size: 16px;">📈 7 Days Revenue</h3>
-                    <div style="min-height: 300px;">
-                        <canvas id="monthlyRevenueChart" height="80"></canvas>
-                    </div>
-                </div>
-
-                <!-- Analytics Grid -->
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
-                    <!-- Most Booked Room Type -->
-                    <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #ddd;">
-                        <h3 style="color: #0d47a1; margin-top: 0; font-size: 15px;">🏨 Most Booked Room</h3>
-                        <div id="mostBookedRoom" style="text-align: center; padding: 20px;">
-                            <div style="font-size: 24px; font-weight: bold; color: #27ae60; margin-bottom: 10px; word-break: break-word;" id="roomTypeName">-</div>
-                            <div style="font-size: 18px; color: #666;" id="roomTypeCount">0 bookings</div>
-                        </div>
-                    </div>
-
-                    <!-- Total Revenue Summary -->
-                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px;">
-                        <h3 style="margin-top: 0; font-size: 15px;">💰 Total Revenue</h3>
-                        <div style="font-size: 28px; font-weight: bold; margin: 15px 0; word-break: break-word;" id="totalRevenue">₹0</div>
-                        <small>Across all bookings</small>
-                    </div>
-
-                    <!-- Average Booking Value -->
-                    <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 20px; border-radius: 8px;">
-                        <h3 style="margin-top: 0; font-size: 15px;">💵 Avg Booking Value</h3>
-                        <div style="font-size: 28px; font-weight: bold; margin: 15px 0; word-break: break-word;" id="avgBookingValue">₹0</div>
-                        <small>Average per booking</small>
-                    </div>
-
-                    <!-- Occupancy Rate -->
-                    <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 20px; border-radius: 8px;">
-                        <h3 style="margin-top: 0; font-size: 15px;">📊 Occupancy Rate</h3>
-                        <div style="font-size: 28px; font-weight: bold; margin: 15px 0; word-break: break-word;" id="occupancyRate">0%</div>
-                        <small>Avg rooms occupied</small>
-                    </div>
-                </div>
-            </div>
-
             <!-- Room Bookings Section -->
             <div id="room-bookings-section" class="dashboard-section">
                 <h3>📋 Room Bookings</h3>
@@ -512,7 +466,6 @@
         </div>
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     <script src="js/script.js"></script>
     <script>
         // Helper function for USD to INR conversion
@@ -722,8 +675,7 @@
                     registeredUsersDisplay.innerHTML = html;
                 }
 
-                // Load analytics
-                loadAnalytics();
+
             } catch(error) {
                 console.error('updateDashboard error:', error);
                 alert('Error loading dashboard data. Check console for details.');
@@ -749,90 +701,7 @@
             updateDashboard();
         }
 
-        // Analytics Charts
-        let monthlyRevenueChart = null;
 
-        async function loadAnalytics() {
-            try {
-                const response = await window.HMS_API.get('/analytics').catch(e => {
-                    console.error('Analytics error:', e);
-                    return null;
-                });
-                
-                if (!response) {
-                    console.log('No analytics data available');
-                    return;
-                }
-                
-                // Update summary cards with safe defaults
-                document.getElementById('totalRevenue').textContent = `₹${Math.round(response.totalRevenue || 0).toLocaleString()}`;
-                document.getElementById('avgBookingValue').textContent = `₹${Math.round(response.avgBookingValue || 0).toLocaleString()}`;
-                document.getElementById('occupancyRate').textContent = `${response.occupancyRate || 0}%`;
-                
-                // Most Booked Room with defaults
-                const mostBooked = response.mostBookedRoom || { type: 'N/A', count: 0 };
-                document.getElementById('roomTypeName').textContent = mostBooked.type;
-                document.getElementById('roomTypeCount').textContent = `${mostBooked.count} bookings`;
-
-                // 7 Days Revenue Chart
-                if (response.monthlyRevenue) {
-                    drawMonthlyRevenueChart(response.monthlyRevenue);
-                }
-            } catch (error) {
-                console.error('Error loading analytics:', error);
-            }
-        }
-
-        function drawMonthlyRevenueChart(data) {
-            const ctx = document.getElementById('monthlyRevenueChart');
-            if (!ctx) return;
-
-            if (monthlyRevenueChart) {
-                monthlyRevenueChart.destroy();
-            }
-
-            monthlyRevenueChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: data.labels,
-                    datasets: [{
-                        label: '7 Days Revenue',
-                        data: data.data,
-                        borderColor: '#0d47a1',
-                        backgroundColor: 'rgba(13, 71, 161, 0.1)',
-                        borderWidth: 3,
-                        fill: true,
-                        tension: 0.4,
-                        pointRadius: 5,
-                        pointBackgroundColor: '#0d47a1',
-                        pointBorderColor: '#fff',
-                        pointBorderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                        legend: {
-                            display: true,
-                            labels: {
-                                font: { size: 12 }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: function(value) {
-                                    return '₹' + value.toLocaleString();
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
 
         function showDashboardSection(sectionId, cardEl) {
             document.querySelectorAll('.dashboard-section').forEach(section => {
