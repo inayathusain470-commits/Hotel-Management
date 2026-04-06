@@ -224,8 +224,67 @@ async function sendBookingConfirmationEmail(customer, booking) {
   }
 }
 
+// Send password reset email
+async function sendPasswordResetEmail(customer, resetCode) {
+  if (!process.env.EMAIL_USER) {
+    console.log('📧 Email not configured. Skipping password reset email.');
+    return false;
+  }
+
+  try {
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: customer.email,
+      subject: `Password Reset Code - ${process.env.HOTEL_NAME}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px; text-align: center;">
+            <h1>Password Reset</h1>
+            <p>Here's your code to reset your password</p>
+          </div>
+          
+          <div style="padding: 30px; background: #f9f9f9;">
+            <h2>Hello ${customer.name}! 👋</h2>
+            
+            <p>We received a request to reset your password for your ${process.env.HOTEL_NAME} account.</p>
+            
+            <p style="margin: 30px 0;"><strong>Your Password Reset Code:</strong></p>
+            <div style="background: white; padding: 20px; border: 2px dashed #667eea; text-align: center; border-radius: 5px;">
+              <h1 style="margin: 0; font-size: 36px; letter-spacing: 5px; color: #667eea;">${resetCode}</h1>
+            </div>
+            
+            <p style="margin-top: 20px; color: #666;">⏱️ This code will expire in <strong>15 minutes</strong></p>
+            
+            <p style="margin-top: 20px; color: #666;">
+              <strong>Note:</strong> If you didn't request this password reset, please ignore this email. Your account security has not been compromised.
+            </p>
+            
+            <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;">
+            
+            <p style="color: #666; font-size: 14px;">
+              Need help? Contact us at ${process.env.HOTEL_SUPPORT_EMAIL}
+            </p>
+          </div>
+          
+          <div style="padding: 20px; background: #333; color: white; text-align: center; font-size: 12px;">
+            <p>&copy; ${new Date().getFullYear()} ${process.env.HOTEL_NAME}. All rights reserved.</p>
+          </div>
+        </div>
+      `
+    };
+
+    const info = await emailTransporter.sendMail(mailOptions);
+    console.log('✅ Password reset email sent:', info.response);
+    return true;
+  } catch (error) {
+    console.error('❌ Password reset email error:', error.message);
+    return false;
+  }
+}
+
 module.exports = {
   sendWelcomeEmail,
   sendWelcomeSMS,
-  sendBookingConfirmationEmail
+  sendBookingConfirmationEmail,
+  sendPasswordResetEmail
 };

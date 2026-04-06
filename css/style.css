@@ -657,6 +657,27 @@ input:focus, select:focus, textarea:focus {
     box-shadow: 0 6px 20px rgba(212, 175, 55, 0.5);
 }
 
+/* Error and Success Messages */
+.error-msg {
+    padding: 10px 15px;
+    background: #fee;
+    color: #c33;
+    border: 1px solid #fcc;
+    border-radius: 4px;
+    font-size: 14px;
+    text-align: center;
+}
+
+.success-msg {
+    padding: 10px 15px;
+    background: #efe;
+    color: #3a3;
+    border: 1px solid #cfc;
+    border-radius: 4px;
+    font-size: 14px;
+    text-align: center;
+}
+
 /* Confirmation */
 .confirmation {
     max-width: 600px;
