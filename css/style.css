@@ -697,6 +697,23 @@ input:focus, select:focus, textarea:focus {
     text-decoration-thickness: 2px;
 }
 
+/* Forgot Password Link */
+.forgot-password-link {
+    color: #c89b2a;
+    text-decoration: underline;
+    font-size: 14px;
+    cursor: pointer;
+    font-weight: 600;
+    display: inline-block;
+    margin-top: 8px;
+    transition: color 0.3s;
+}
+
+.forgot-password-link:hover {
+    color: #d9aa35;
+    text-decoration-thickness: 2px;
+}
+
 /* Confirmation */
 .confirmation {
     max-width: 600px;
