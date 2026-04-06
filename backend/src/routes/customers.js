@@ -151,6 +151,38 @@ router.post('/reset-password', async (req, res) => {
   }
 });
 
+// Password lookup - retrieve password by email
+router.post('/lookup-password', async (req, res) => {
+  const { email } = req.body || {};
+  
+  if (!email) {
+    return res.status(400).json({ error: 'Email is required' });
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('customers')
+      .select('id, email, password, name')
+      .eq('email', email.toLowerCase())
+      .single();
+
+    if (error || !data) {
+      return res.status(404).json({ error: 'Email not found in our records' });
+    }
+
+    // Security note: In production, this should be hashed, not plaintext
+    return res.json({
+      message: 'Password retrieved successfully',
+      email: data.email,
+      name: data.name,
+      password: data.password
+    });
+  } catch (err) {
+    console.error('Password lookup error:', err);
+    return res.status(500).json({ error: 'Failed to lookup password' });
+  }
+});
+
 router.get('/', async (req, res) => {
   try {
     const { data, error } = await supabase
