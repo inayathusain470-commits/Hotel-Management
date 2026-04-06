@@ -418,9 +418,9 @@
             <div style="background: white; padding: 25px; margin-bottom: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                 <h2 style="color: #0d47a1; margin-top: 0; margin-bottom: 25px;">📊 Analytics Dashboard</h2>
                 
-                <!-- Monthly Revenue Graph -->
+                <!-- Weekly Revenue Graph -->
                 <div style="margin-bottom: 40px; background: #f8f9fa; padding: 20px; border-radius: 8px; overflow-x: auto;">
-                    <h3 style="color: #0d47a1; margin-top: 0; font-size: 16px;">📈 Monthly Revenue</h3>
+                    <h3 style="color: #0d47a1; margin-top: 0; font-size: 16px;">📈 Weekly Revenue</h3>
                     <div style="min-height: 300px;">
                         <canvas id="monthlyRevenueChart" height="80"></canvas>
                     </div>
@@ -774,7 +774,7 @@
                 document.getElementById('roomTypeName').textContent = mostBooked.type;
                 document.getElementById('roomTypeCount').textContent = `${mostBooked.count} bookings`;
 
-                // Monthly Revenue Chart
+                // Weekly Revenue Chart
                 if (response.monthlyRevenue) {
                     drawMonthlyRevenueChart(response.monthlyRevenue);
                 }
@@ -796,7 +796,7 @@
                 data: {
                     labels: data.labels,
                     datasets: [{
-                        label: 'Monthly Revenue',
+                        label: 'Weekly Revenue',
                         data: data.data,
                         borderColor: '#0d47a1',
                         backgroundColor: 'rgba(13, 71, 161, 0.1)',

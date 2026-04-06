@@ -27,8 +27,8 @@ router.get('/', async (req, res) => {
         
         if (foodError) throw foodError;
 
-        // Calculate monthly revenue (last 12 months)
-        const monthlyRevenue = calculateMonthlyRevenue(bookings, barBookings);
+        // Calculate weekly revenue (last 12 weeks)
+        const monthlyRevenue = calculateWeeklyRevenue(bookings, barBookings);
 
         // Calculate booking trends (last 30 days)
         const bookingTrends = calculateBookingTrends(bookings);
@@ -66,36 +66,55 @@ router.get('/', async (req, res) => {
     }
 });
 
-function calculateMonthlyRevenue(bookings, barBookings) {
-    const monthlyData = {};
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+function calculateWeeklyRevenue(bookings, barBookings) {
+    const weeklyData = {};
+    const weekLabels = [];
     
-    // Initialize all 12 months
-    months.forEach((month, idx) => {
-        monthlyData[month] = 0;
-    });
-
+    // Generate last 12 weeks with proper date ranges
+    const today = new Date();
+    for (let i = 11; i >= 0; i--) {
+        const weekEnd = new Date(today);
+        weekEnd.setDate(weekEnd.getDate() - (i * 7));
+        const weekStart = new Date(weekEnd);
+        weekStart.setDate(weekStart.getDate() - 6);
+        
+        const monthAbbr = weekStart.toLocaleDateString('en-US', { month: 'short' });
+        const weekNum = Math.ceil((weekStart.getDate()) / 7);
+        const label = `W${weekNum} ${monthAbbr}`;
+        
+        weekLabels.push(label);
+        weeklyData[label] = { start: new Date(weekStart), end: new Date(weekEnd), total: 0 };
+    }
+    
     // Add room booking revenues
     bookings.forEach(booking => {
         if (booking.totalAmountInr) {
-            const date = new Date(booking.created_at || new Date());
-            const month = months[date.getMonth()];
-            monthlyData[month] += Number(booking.totalAmountInr);
+            const bookingDate = new Date(booking.created_at || new Date());
+            for (const label in weeklyData) {
+                if (bookingDate >= weeklyData[label].start && bookingDate <= weeklyData[label].end) {
+                    weeklyData[label].total += Number(booking.totalAmountInr);
+                    break;
+                }
+            }
         }
     });
 
     // Add bar booking revenues
     barBookings.forEach(booking => {
         if (booking.total) {
-            const date = new Date(booking.created_at || new Date());
-            const month = months[date.getMonth()];
-            monthlyData[month] += Number(booking.total);
+            const bookingDate = new Date(booking.created_at || new Date());
+            for (const label in weeklyData) {
+                if (bookingDate >= weeklyData[label].start && bookingDate <= weeklyData[label].end) {
+                    weeklyData[label].total += Number(booking.total);
+                    break;
+                }
+            }
         }
     });
 
     return {
-        labels: months,
-        data: months.map(month => monthlyData[month])
+        labels: weekLabels,
+        data: weekLabels.map(label => weeklyData[label].total)
     };
 }
 
