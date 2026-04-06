@@ -496,12 +496,15 @@
                     const canCancelOrder = order.status === 'pending';
                     const itemsText = order.items.map(item => `${item.item} (x${item.quantity})`).join(', ');
                     const orderTime = new Date(order.timestamp).toLocaleString();
+                    
                     html += `<div class="booking-item detail-item" onclick="showFoodOrderDetail(${index}, ${order.room}, '${itemsText}', ${order.total}, '${orderTime}', '${order.status}')">
                         <h4>Order #${index + 1} <span class="status-badge ${badgeClass}">${badgeText}</span></h4>
                         <p><strong>Room Number:</strong> ${order.room}</p>
-                        <p><strong>Items:</strong> ${itemsText}</p>
-                        <p><strong>Total Amount:</strong> ₹${order.total}</p>
+                        <p><strong>Items Ordered:</strong> ${itemsText}</p>
+                        <p><strong>Order Quantity:</strong> ${order.items.length} item${order.items.length > 1 ? 's' : ''}</p>
                         <p><strong>Order Time:</strong> ${orderTime}</p>
+                        <p><strong>Total Amount:</strong> ₹${order.total}</p>
+                        ${order.specialRequests ? `<p><strong>Special Requests:</strong> ${order.specialRequests}</p>` : ''}
                         ${canCancelOrder ? `<button class="cancel-btn" onclick="event.stopPropagation(); cancelFoodOrder('${order.id}')">❌ Cancel Order</button>` : ''}
                     </div>`;
                 });
