@@ -515,7 +515,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     <script src="js/script.js"></script>
     <script>
-    <script>
         // Helper function for USD to INR conversion
         function usdToInr(usd) {
             return Math.round(usd * 83); // Approximate USD to INR rate
@@ -590,18 +589,17 @@
                     bookings.forEach((booking, index) => {
                         const nights = calculateNights(booking.checkin || booking.check_in_date, booking.checkout || booking.check_out_date);
                         const roomQuantity = booking.roomQuantity || 1;
-                        const pricePerNightUsd = Number(booking.pricePerNight || booking.priceInr || 0);
-                        const totalPriceUsd = booking.totalPrice ? Number(booking.totalPrice) * nights : (pricePerNightUsd * roomQuantity * nights);
-                        const pricePerNightInr = usdToInr(pricePerNightUsd);
-                        const totalPriceInr = booking.totalAmountInr ? Number(booking.totalAmountInr) : usdToInr(totalPriceUsd);
+                        const totalPriceInr = booking.totalAmountInr ? Number(booking.totalAmountInr) : 0;
+                        const pricePerNightInr = nights > 0 ? Math.round(totalPriceInr / nights / roomQuantity) : 0;
                         const payMethod = booking.payment?.method ? booking.payment.method.toUpperCase() : 'N/A';
                         const txn = booking.payment?.transactionId || 'N/A';
                         const ref = booking.payment?.paymentReference || 'N/A';
                         const paidAt = booking.payment?.paidAt ? new Date(booking.payment.paidAt).toLocaleString() : 'N/A';
                         const paidTo = booking.payment?.paidTo || {};
                         
+                        const bookingStatusBadge = booking.payment?.status === 'paid' ? `Paid via ${payMethod}` : 'Pending';
                         html += `<div class="booking-item">
-                            <h4>Booking #${index + 1} <span class="status-badge status-active">${booking.payment?.status === 'paid' ? 'Paid' : 'Pending'}</span></h4>
+                            <h4>Booking #${index + 1} <span class="status-badge status-active">${bookingStatusBadge}</span></h4>
                             <p><strong>Guest Name:</strong> ${booking.name}</p>
                             <p><strong>Email:</strong> ${booking.email}</p>
                             <p><strong>Phone:</strong> ${booking.phone}</p>
@@ -633,8 +631,9 @@
                         const ref = booking.payment?.paymentReference || 'N/A';
                         const paidAt = booking.payment?.paidAt ? new Date(booking.payment.paidAt).toLocaleString() : 'N/A';
                         const paidTo = booking.payment?.paidTo || {};
+                        const barStatusBadge = booking.payment?.status === 'paid' ? `Paid via ${payMethod}` : 'Pending';
                         html += `<div class="booking-item">
-                            <h4>Bar Booking #${index + 1} <span class="status-badge status-active">${booking.payment?.status === 'paid' ? 'Paid' : 'Pending'}</span></h4>
+                            <h4>Bar Booking #${index + 1} <span class="status-badge status-active">${barStatusBadge}</span></h4>
                             <p><strong>Guest Name:</strong> ${booking.name}</p>
                             <p><strong>Phone:</strong> ${booking.phone}</p>
                             <p><strong>Package:</strong> ${booking.packageName}</p>
@@ -670,8 +669,10 @@
                         const btnHtml = isDelivered
                             ? `<span style="color:#27ae60;font-weight:600;">Order Delivered</span>`
                             : `<button onclick="markOrderDelivered(${index})" style="background:linear-gradient(90deg,#27ae60,#2ecc71);color:#fff;border:none;padding:8px 18px;border-radius:20px;font-weight:700;font-size:0.9rem;cursor:pointer;margin-top:8px;">🚚 Mark as Delivered</button>`;
+                        const foodStatusBadge = isDelivered ? '✅ Delivered' : `Pending - ${payMethod}`;
+                        const foodBadgeClass = isDelivered ? 'status-confirmed' : 'status-active';
                         html += `<div class="booking-item">
-                            <h4>Order #${index + 1} <span class="status-badge ${badgeClass}">${badgeText}</span></h4>
+                            <h4>Order #${index + 1} <span class="status-badge ${foodBadgeClass}">${foodStatusBadge}</span></h4>
                             <p><strong>Guest Name:</strong> ${order.name}</p>
                             <p><strong>Room Number:</strong> ${order.room}</p>
                             <p><strong>Phone:</strong> ${order.phone}</p>
@@ -726,6 +727,10 @@
 
                 // Load analytics
                 loadAnalytics();
+            } catch(error) {
+                console.error('Error updating dashboard:', error);
+            }
+        }
 
         async function markOrderDelivered(index) {
             const order = currentAdminFoodOrders[index];
