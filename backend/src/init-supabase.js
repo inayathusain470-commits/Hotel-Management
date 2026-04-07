@@ -33,6 +33,7 @@ const initDatabase = async () => {
           room_type VARCHAR(50),
           room_quantity INT DEFAULT 1,
           room_numbers TEXT[],
+          price_per_night NUMERIC,
           total_amount_inr NUMERIC,
           payment_method VARCHAR(50),
           payment_txn_id VARCHAR(255),

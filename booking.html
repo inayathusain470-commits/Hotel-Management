@@ -517,37 +517,47 @@
                 }
             };
 
-            await window.HMS_API.post('/bookings', {
-                name: bookingToSave.name,
-                email: bookingToSave.email,
-                phone: bookingToSave.phone,
-                checkin: bookingToSave.checkin,
-                checkout: bookingToSave.checkout,
-                room_type: bookingToSave.roomType,
-                room_quantity: bookingToSave.roomQuantity,
-                room_numbers: bookingToSave.roomNumbers || [],
-                price_per_night: bookingToSave.pricePerNight || 0,
-                total_amount_inr: bookingToSave.totalAmountInr,
-                payment_method: bookingToSave.payment?.method || null,
-                payment_txn_id: bookingToSave.payment?.transactionId || null,
-                payment_reference: bookingToSave.payment?.paymentReference || null,
-                payment: bookingToSave.payment || null,
-                status: 'booked'
-            });
+            try {
+                // Ensure roomNumbers is an array of integers
+                const roomNumbersArray = Array.isArray(bookingToSave.roomNumbers) 
+                    ? bookingToSave.roomNumbers.map(n => Number(n))
+                    : [];
 
-            closeRoomPaymentModal();
+                const response = await window.HMS_API.post('/bookings', {
+                    name: bookingToSave.name,
+                    email: bookingToSave.email,
+                    phone: bookingToSave.phone,
+                    checkin: bookingToSave.checkin,
+                    checkout: bookingToSave.checkout,
+                    room_type: bookingToSave.roomType,
+                    room_quantity: bookingToSave.roomQuantity,
+                    room_numbers: roomNumbersArray,
+                    price_per_night: bookingToSave.pricePerNight || 0,
+                    total_amount_inr: bookingToSave.totalAmountInr,
+                    payment_method: bookingToSave.payment?.method || null,
+                    payment_txn_id: bookingToSave.payment?.transactionId || null,
+                    payment_reference: bookingToSave.payment?.paymentReference || null,
+                    payment: bookingToSave.payment || null,
+                    status: 'booked'
+                });
 
-            document.getElementById('confirmation-text').textContent =
-                `Payment successful. Booking confirmed for room number(s) ${bookingToSave.roomNumbers.join(', ')} from ${bookingToSave.checkin} to ${bookingToSave.checkout}.`;
-            confirmation.classList.remove('hidden');
-            bookingForm.reset();
-            priceDisplay.textContent = '';
-            availableRoomNumbersEl.textContent = 'Select room type and dates to see available room numbers.';
+                closeRoomPaymentModal();
 
-            setTimeout(() => {
-                confirmation.classList.add('hidden');
-                window.location.href = 'customer_dashboard.html';
-            }, 3000);
+                document.getElementById('confirmation-text').textContent =
+                    `Payment successful. Booking confirmed for room number(s) ${bookingToSave.roomNumbers.join(', ')} from ${bookingToSave.checkin} to ${bookingToSave.checkout}.`;
+                confirmation.classList.remove('hidden');
+                bookingForm.reset();
+                priceDisplay.textContent = '';
+                availableRoomNumbersEl.textContent = 'Select room type and dates to see available room numbers.';
+
+                setTimeout(() => {
+                    confirmation.classList.add('hidden');
+                    window.location.href = 'customer_dashboard.html';
+                }, 3000);
+            } catch (error) {
+                console.error('Booking error:', error);
+                alert('Error processing booking: ' + (error.message || 'Unknown error'));
+            }
         }
 
         // Handle booking form submission

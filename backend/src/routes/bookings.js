@@ -32,6 +32,16 @@ router.get('/', async (req, res) => {
         }
       }
       
+      // Parse payment object if it's stored as string
+      let payment = r.payment || null;
+      if (typeof payment === 'string') {
+        try {
+          payment = JSON.parse(payment);
+        } catch (e) {
+          console.log('Could not parse payment JSON:', e);
+        }
+      }
+      
       // If price_per_night column doesn't exist (NULL), calculate from total_amount_inr
       let pricePerNight = r.price_per_night || 0;
       if (!pricePerNight && r.total_amount_inr && nights > 0) {
@@ -52,7 +62,7 @@ router.get('/', async (req, res) => {
         totalAmountInr: r.total_amount_inr,
         status: r.status,
         timestamp: r.created_at,
-        payment: r.payment
+        payment: payment
       };
     });
     res.json(parsed);
@@ -71,34 +81,50 @@ router.post('/', async (req, res) => {
   }
 
   try {
+    // Ensure room_numbers is stored correctly
+    let roomNumbersData = payload.room_numbers || [];
+    // Don't stringify - send as array for room_numbers JSON array
+    if (typeof roomNumbersData === 'string') {
+      try {
+        roomNumbersData = JSON.parse(roomNumbersData);
+      } catch (e) {
+        roomNumbersData = [];
+      }
+    }
+
+    // For JSONB field, don't stringify - send object directly
+    let paymentData = payload.payment || null;
+    
+    const bookingData = {
+      name: payload.name,
+      email: String(payload.email).toLowerCase(),
+      phone: payload.phone,
+      checkin: payload.checkin,
+      checkout: payload.checkout,
+      room_type: payload.room_type,
+      room_quantity: Number(payload.room_quantity),
+      room_numbers: roomNumbersData,
+      total_amount_inr: Number(payload.total_amount_inr),
+      payment_method: payload.payment_method || null,
+      payment_txn_id: payload.payment_txn_id || null,
+      payment_reference: payload.payment_reference || null,
+      payment: paymentData,
+      status: payload.status || 'booked'
+    };
+
     const { data, error } = await supabase
       .from('bookings')
-      .insert([
-        {
-          name: payload.name,
-          email: String(payload.email).toLowerCase(),
-          phone: payload.phone,
-          checkin: payload.checkin,
-          checkout: payload.checkout,
-          room_type: payload.room_type,
-          room_quantity: Number(payload.room_quantity),
-          room_numbers: payload.room_numbers || [],
-          price_per_night: Number(payload.price_per_night) || 0,
-          total_amount_inr: Number(payload.total_amount_inr),
-          payment_method: payload.payment_method || null,
-          payment_txn_id: payload.payment_txn_id || null,
-          payment_reference: payload.payment_reference || null,
-          payment: payload.payment || null,
-          status: payload.status || 'booked'
-        }
-      ])
+      .insert([bookingData])
       .select();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Supabase insert error:', error.message || error);
+      throw error;
+    }
     res.status(201).json({ id: data[0].id, message: 'Booking saved' });
   } catch (err) {
-    console.error('Insert error:', err);
-    res.status(500).json({ error: 'Failed to create booking' });
+    console.error('Insert error:', err.message || err);
+    res.status(500).json({ error: 'Failed to create booking', details: err.message });
   }
 });
 
